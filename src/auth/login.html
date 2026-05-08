@@ -38,7 +38,7 @@
 <body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
 
     <div id="login-card"
-        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-8 flex flex-col gap-6">
+        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] p-8 flex flex-col gap-6">
         
         <div class="mt-1">
             <!-- Stylized Stack Icon matching the image -->
@@ -76,11 +76,13 @@
                 <input type="password" id="password" placeholder="password" required
                     onfocus="this.classList.add('btn-active-2')"
                     onblur="this.classList.remove('btn-active-2')"
+                    pattern="^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':&quot;\\|,.<>/?~` ]*$"
+                    title="Password must contain only English characters and special symbols."
                     class="w-full p-4 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold placeholder-[#1E1E1E]/50 transition-all focus:outline-none">
             </div>
             
             <button type="submit" 
-                class="w-full py-4 mt-2 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] text-[#1E1E1E] text-2xl font-black uppercase transition-all">
+                class="w-full py-4 mt-2 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-2xl font-black uppercase transition-all">
                 Confirm
             </button>
             <p id="msg" class="text-center font-bold"></p>
@@ -89,7 +91,7 @@
     </div>
     <div class="fade-in flex flex-row justify-end items-center w-full max-w-[450px] mt-6">
         <div class="w-full">
-            <button id="btn-back" class="flex flex-row justify-center items-center w-full p-4 h-15 bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] text-[#1E1E1E] text-2xl font-black uppercase transition-all">
+            <button id="btn-back" class="flex flex-row justify-center items-center w-full p-4 h-15 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-2xl font-black uppercase transition-all">
                 <span class="text-[#1E1E1E] text-xl font-black uppercase tracking-wider">Back</span></button>
         </div>
     </div>
