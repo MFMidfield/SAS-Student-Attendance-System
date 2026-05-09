@@ -6,6 +6,12 @@ export const showToast = (message, type = 'success') => {
         document.body.appendChild(container);
     }
 
+    // Limit to 3 toasts: remove the oldest one if limit reached
+    const activeToasts = container.getElementsByClassName('toast');
+    if (activeToasts.length >= 3) {
+        activeToasts[0].remove();
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type} toast-animate-in`;
     
