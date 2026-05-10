@@ -221,5 +221,44 @@ begin
 end $$;
 
 -- ========================================================
+-- 6. SCHOOL ACTIVITIES
+-- ========================================================
+
+create table if not exists public.school_activities (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,                -- ชื่อกิจกรรม
+  description text,                   -- คำอธิบาย (Note)
+  location text,                      -- สถานที่จัด
+  activity_date date not null,        -- วันที่จัดกิจกรรม
+  start_time time not null,           -- เวลาเริ่ม
+  end_time time not null,             -- เวลาสิ้นสุด
+  organizer text default 'โรงเรียน',   -- ผู้จัดกิจกรรม (สภานักเรียน, ชมรม, etc.)
+  created_at timestamptz default now(),
+  
+  constraint check_times check (start_time < end_time)
+);
+
+-- เปิดใช้งาน RLS
+alter table public.school_activities enable row level security;
+
+-- 1. ทุกคน (รวมนักเรียน) สามารถดูกิจกรรมได้
+drop policy if exists "Anyone can view activities" on public.school_activities;
+create policy "Anyone can view activities" 
+on public.school_activities for select 
+using (true);
+
+-- 2. เฉพาะ Admin และ Teacher เท่านั้นที่สร้าง/แก้ไข/ลบกิจกรรมได้
+drop policy if exists "Staff can manage activities" on public.school_activities;
+create policy "Staff can manage activities" 
+on public.school_activities for all
+using (
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid() 
+    and role in ('admin', 'teacher')
+  )
+);
+
+-- ========================================================
 -- SETUP COMPLETE
 -- ========================================================

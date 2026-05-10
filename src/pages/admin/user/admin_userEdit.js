@@ -1,7 +1,7 @@
 import { supabase } from "../../../lib/supabaseClient";
 import { showToast } from "../../../lib/ui";
 
-export function initAdminUserEdit(imageLogo, imageBander) {
+export function initAdminUserEdit(userAvatar, imageBander) {
     const backBtn = document.getElementById('btn-back');
     const studentImage = document.getElementById('student-image');
     const banderImage = document.getElementById('bander-image');
@@ -17,8 +17,8 @@ export function initAdminUserEdit(imageLogo, imageBander) {
     };
     fetchUserName();
 
-    if (studentImage && imageLogo) {
-        studentImage.src = imageLogo;
+    if (studentImage && userAvatar) {
+        studentImage.src = userAvatar;
     }
 
     if (banderImage && imageBander) {
