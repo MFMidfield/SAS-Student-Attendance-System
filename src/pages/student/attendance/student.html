@@ -12,6 +12,8 @@
         body {
             font-family: 'M PLUS Rounded 1c', sans-serif;
         }
+        .countdown-ring { transform: rotate(-90deg); }
+        .countdown-ring circle { transition: stroke-dashoffset 1s linear; }
     </style>
 </head>
 
@@ -212,16 +214,24 @@
             </div>
 
             <!-- Subject Select -->
-            <div class="relative">
-                <select id="subject-select"
+            <div class="relative mb-5">
+                <!-- <select id="subject-select"
                     class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all outline-none appearance-none cursor-pointer text-sm">
                     <option value="" disabled selected>Select Subject</option>
+                </select> -->
+                <select id="subject-select" disabled
+                    class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all outline-none appearance-none cursor-not-allowed text-sm opacity-60">
+                    <option value="homeroom" selected>Homeroom</option>
                 </select>
                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Reason</span>
             </div>
 
             <!-- Reason Box -->
@@ -271,14 +281,19 @@
                 </svg>
             </div>
 
-            <!-- Text -->
-            <div class="space-y-1">
-                <h2 class="text-2xl font-black uppercase tracking-tight text-[#1E1E1E]">Confirm Submit?</h2>
-                <p class="text-[#1E1E1E] text-sm font-bold opacity-60">
-                    <span id="timer-label">Auto-closing in</span>
-                    <span id="timer" class="text-[#E25C5C] font-black text-base">10</span>
-                    <span id="timer-unit">s</span>
-                </p>
+            <!-- Text & Countdown -->
+            <div class="flex flex-col items-center gap-2 w-full">
+                <h2 class="text-xl font-black uppercase tracking-tight text-[#1E1E1E]">Confirm Submit?</h2>
+                <div class="flex items-center gap-3">
+                    <div class="relative w-10 h-10">
+                        <svg class="countdown-ring w-10 h-10" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15"/>
+                            <circle id="countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square"/>
+                        </svg>
+                        <span id="countdown-number" class="absolute inset-0 flex items-center justify-center text-sm font-black">5</span>
+                    </div>
+                    <span id="countdown-label" class="text-xs font-bold opacity-50 uppercase">Please wait...</span>
+                </div>
             </div>
 
             <!-- Summary Information -->
@@ -300,9 +315,9 @@
 
             <!-- Buttons -->
             <div class="flex flex-row w-full gap-3">
-                <button id="btn-confirm"
-                    class="flex-1 py-3 bg-[#219653] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
-                    ✓ Confirm
+                <button id="btn-confirm" disabled
+                    class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed">
+                    Confirm
                 </button>
                 <button id="btn-cancel"
                     class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">

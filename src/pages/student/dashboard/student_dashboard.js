@@ -51,7 +51,7 @@ export function initStudentDashBoard(imageLogo, imageBander) {
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
         const { data: logs, error } = await supabase
-            .from('attendance_logs')
+            .from('attendance_verify')
             .select('status')
             .eq('student_id', user.id)
             .gte('created_at', startOfMonth)

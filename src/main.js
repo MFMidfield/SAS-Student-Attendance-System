@@ -7,8 +7,9 @@ import bander from './assets/bander/Blue-Archive-new-recruitment-system_News_FI-
 
 // import template
 import LandingPage from './main.html?raw'
-import LoginPage from './auth/login.html?raw'
-import RegisterPage from './auth/register.html?raw'
+import LoginPage from './auth/login/login.html?raw'
+import RegisterPage from './auth/register/register.html?raw'
+import ParentCheckPage from './auth/parent_check/parent_check.html?raw'
 
 import Student from './pages/student/attendance/student.html?raw'
 import StudentDashBoard from './pages/student/dashboard/student_dashboard.html?raw'
@@ -22,10 +23,12 @@ import AdminSchedule from './pages/admin/schedule/admin_schedule.html?raw'
 import AdminLogs from './pages/admin/admin_logs/admin_logs.html?raw'
 import AdminVerifyLogs from './pages/admin/attendance_verify_logs/admin_verify_logs.html?raw'
 import AdminApprove from './pages/admin/attendance_approve/admin_approve.html?raw'
+import AdminActivity from './pages/admin/activity/admin_activity.html?raw'
 
 // import function
-import { initRegister } from './auth/register.js'
-import { initLogin } from './auth/login.js'
+import { initRegister } from './auth/register/register.js'
+import { initLogin } from './auth/login/login.js'
+import { initParentCheck } from './auth/parent_check/parent_check.js'
 
 import { initStudent } from './pages/student/attendance/student.js'
 import { initStudentDashBoard } from './pages/student/dashboard/student_dashboard.js'
@@ -39,12 +42,14 @@ import { initAdminSchedule } from './pages/admin/schedule/admin_schedule.js'
 import { initAdminLogs } from './pages/admin/admin_logs/admin_logs.js'
 import { initAdminApprove } from './pages/admin/attendance_approve/admin_approve.js'
 import { initAdminVerifyLogs } from './pages/admin/attendance_verify_logs/admin_verify_logs.js'
+import { initAdminActivity } from './pages/admin/activity/admin_activity.js'
 
 // 3. กำหนด Route Map
 const ROUTES = {
     '':          { template: LandingPage,    init: null,           auth: false },
     '#login':    { template: LoginPage,      init: initLogin,      auth: false },
     '#register': { template: RegisterPage,   init: initRegister,   auth: false },
+    '#parent-check': { template: ParentCheckPage, init: initParentCheck, auth: false },
     '#student':  { template: Student, init: () => initStudent(logo, bander), auth: true, allowedRoles: ['student'] },
     '#student-dashboard': { template: StudentDashBoard, init: () => initStudentDashBoard(logo, bander), auth: true, allowedRoles: ['student'] },
     '#student-schedule': { template: StudentSchedule, init: () => initStudentSchedule(logo, bander), auth: true, allowedRoles: ['student'] },
@@ -56,6 +61,7 @@ const ROUTES = {
     '#admin-logs': { template: AdminLogs, init: () => initAdminLogs(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
     '#admin-verify-logs': { template: AdminVerifyLogs, init: () => initAdminVerifyLogs(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
     '#admin-approve': { template: AdminApprove, init: () => initAdminApprove(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-activity': { template: AdminActivity, init: () => initAdminActivity(logo, bander), auth: true, allowedRoles: ['admin'] },
 };
 async function render() {
     const app = document.querySelector('#app');

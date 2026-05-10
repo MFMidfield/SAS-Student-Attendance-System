@@ -7,16 +7,38 @@ export function initAdminSetting(imageLogo, imageBander) {
     const studentImage = document.getElementById('student-image');
     const banderImage = document.getElementById('bander-image');
     const studentNameElem = document.getElementById('student-name');
+    const studentRoleElem = document.getElementById('student-role');
+    const infoEmail = document.getElementById('info-email');
+    const infoRole = document.getElementById('info-role');
 
-    // Fetch user name from metadata
-    const fetchUserName = async () => {
+    // Fetch user name from metadata and profile info
+    const fetchUserInfo = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.user_metadata && studentNameElem) {
             const { firstname, lastname } = user.user_metadata;
             studentNameElem.textContent = `${firstname} ${lastname}`;
         }
+
+        // Populate email
+        if (user && infoEmail) {
+            infoEmail.textContent = user.email || '—';
+        }
+
+        // Fetch profile details
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                if (studentRoleElem) studentRoleElem.textContent = profile.role || 'Admin';
+                if (infoRole) infoRole.textContent = profile.role || 'Admin';
+            }
+        }
     };
-    fetchUserName();
+    fetchUserInfo();
 
     if (studentImage && imageLogo) {
         studentImage.src = imageLogo;
@@ -26,10 +48,10 @@ export function initAdminSetting(imageLogo, imageBander) {
         banderImage.src = imageBander;
     }
 
-    // Back to student dashboard
+    // Back to admin dashboard
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            window.location.hash = '#student-dashboard';
+            window.location.hash = '#admin-dashboard';
         });
     }
 
