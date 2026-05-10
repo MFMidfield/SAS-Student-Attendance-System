@@ -1,6 +1,7 @@
 -- ========================================================
 -- LUNAR PROJECT: SUPABASE DATABASE SETUP SCRIPT
 -- Consolidated from SQL History for a fresh setup.
+-- Last Updated: 2026-05-10
 -- ========================================================
 
 -- 1. EXTENSIONS
@@ -10,7 +11,7 @@ create extension if not exists "uuid-ossp";
 -- 2. TABLES
 
 -- 2.1 Profiles Table (Linked to auth.users)
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   email text unique,
   stu_id text unique,
@@ -25,7 +26,7 @@ create table public.profiles (
 );
 
 -- 2.2 Attendance Logs (Pending verification)
-create table public.attendance_logs (
+create table if not exists public.attendance_logs (
   id uuid default gen_random_uuid() primary key,
   student_id uuid references public.profiles(id) on delete cascade not null,
   stu_id_record text,
@@ -39,7 +40,7 @@ create table public.attendance_logs (
 );
 
 -- 2.3 Attendance Verify (Confirmed records)
-create table public.attendance_verify (
+create table if not exists public.attendance_verify (
   id uuid default gen_random_uuid() primary key,
   student_id uuid references public.profiles(id) on delete cascade not null,
   stu_id_record text,
@@ -56,7 +57,7 @@ create table public.attendance_verify (
 );
 
 -- 2.4 Schedule Table
-create table public.schedule (
+create table if not exists public.schedule (
   id uuid default gen_random_uuid() primary key,
   subject_name text not null,
   period int2,
@@ -91,6 +92,7 @@ begin
 end;
 $$;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
@@ -104,6 +106,7 @@ begin
 end;
 $$;
 
+drop trigger if exists on_auth_user_updated on auth.users;
 create trigger on_auth_user_updated
   after update of email on auth.users
   for each row execute procedure public.sync_user_email();
@@ -116,10 +119,12 @@ begin
   update auth.users
   set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) || jsonb_build_object('role', new.role)
   where id = new.id;
+  
   return new;
 end;
 $$;
 
+drop trigger if exists on_profile_role_update on public.profiles;
 create trigger on_profile_role_update
   after insert or update of role on public.profiles
   for each row execute procedure public.sync_role_to_auth();
@@ -138,10 +143,12 @@ begin
 end;
 $$;
 
+drop trigger if exists before_attendance_insert on public.attendance_logs;
 create trigger before_attendance_insert
   before insert on public.attendance_logs
   for each row execute procedure public.copy_student_info_to_log();
 
+drop trigger if exists before_verify_insert on public.attendance_verify;
 create trigger before_verify_insert
   before insert on public.attendance_verify
   for each row execute procedure public.copy_student_info_to_log();
@@ -155,25 +162,63 @@ alter table public.attendance_verify enable row level security;
 alter table public.schedule enable row level security;
 
 -- 4.1 Profiles Policies
+drop policy if exists "Users view own profile" on public.profiles;
 create policy "Users view own profile" on public.profiles for select using (auth.uid() = id);
+
+drop policy if exists "Users update own profile" on public.profiles;
 create policy "Users update own profile" on public.profiles for update using (auth.uid() = id);
+
+drop policy if exists "Admins view all profiles" on public.profiles;
 create policy "Admins view all profiles" on public.profiles for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin' );
+
+drop policy if exists "Admins update any profile" on public.profiles;
 create policy "Admins update any profile" on public.profiles for update using ( (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin' );
 
 -- 4.2 Attendance Logs Policies
+drop policy if exists "Students insert own logs" on public.attendance_logs;
 create policy "Students insert own logs" on public.attendance_logs for insert with check (auth.uid() = student_id);
+
+drop policy if exists "Students view own logs" on public.attendance_logs;
 create policy "Students view own logs" on public.attendance_logs for select using (auth.uid() = student_id);
+
+drop policy if exists "Staff view all logs" on public.attendance_logs;
 create policy "Staff view all logs" on public.attendance_logs for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
+
+drop policy if exists "Staff delete logs" on public.attendance_logs;
 create policy "Staff delete logs" on public.attendance_logs for delete using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
 
 -- 4.3 Attendance Verify Policies
+drop policy if exists "Students view own verify" on public.attendance_verify;
 create policy "Students view own verify" on public.attendance_verify for select using (auth.uid() = student_id);
+
+drop policy if exists "Staff view all verify" on public.attendance_verify;
 create policy "Staff view all verify" on public.attendance_verify for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
+
+drop policy if exists "Staff insert verify" on public.attendance_verify;
 create policy "Staff insert verify" on public.attendance_verify for insert with check ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
 
 -- 4.4 Schedule Policies
+drop policy if exists "Public view schedule" on public.schedule;
 create policy "Public view schedule" on public.schedule for select using (true);
+
+drop policy if exists "Admins manage schedule" on public.schedule;
 create policy "Admins manage schedule" on public.schedule for all using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher') );
+
+-- 5. INITIAL DATA (Optional)
+-- Insert Homeroom schedules for default rooms
+do $$ 
+declare 
+    day_idx int2;
+    target_rooms text[] := array['4/9', '5/9', '6/9'];
+    room_name text;
+begin
+    for day_idx in 1..5 loop
+        foreach room_name in array target_rooms loop
+            insert into public.schedule (subject_name, period, room, teacher_name, day_of_week, start_time, end_time)
+            values ('Homeroom', 0, room_name, 'Class Teacher', day_idx, '07:45:00', '08:20:00');
+        end loop;
+    end loop;
+end $$;
 
 -- ========================================================
 -- SETUP COMPLETE
