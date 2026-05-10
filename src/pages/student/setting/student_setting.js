@@ -67,22 +67,22 @@ export function initStudentSetting(imageLogo, imageBander) {
         if (modal) {
             const modalContent = modal.querySelector('.fade-in');
             const backdrop = document.getElementById('logout-backdrop');
-            
+
             if (modalContent && backdrop) {
                 // เริ่ม Fade-out ทั้งเนื้อหาและ Backdrop
                 modalContent.classList.remove('fade-in');
                 modalContent.classList.add('fade-out');
-                
+
                 backdrop.classList.remove('backdrop-fade-in');
                 backdrop.classList.add('backdrop-fade-out');
 
                 setTimeout(() => {
                     modal.classList.add('hidden');
-                    
+
                     // Reset classes สำหรับครั้งต่อไป
                     modalContent.classList.remove('fade-out');
                     modalContent.classList.add('fade-in');
-                    
+
                     backdrop.classList.remove('backdrop-fade-out');
                     backdrop.classList.add('backdrop-fade-in');
                 }, 400);
@@ -102,7 +102,7 @@ export function initStudentSetting(imageLogo, imageBander) {
                     backdrop.classList.remove('backdrop-fade-out');
                     backdrop.classList.add('backdrop-fade-in');
                 }
-                
+
                 modal.classList.remove('hidden');
                 let timeLeft = 10;
                 timerDisplay.textContent = timeLeft;
