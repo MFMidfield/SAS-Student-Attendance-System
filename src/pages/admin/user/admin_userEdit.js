@@ -1,11 +1,27 @@
 import { supabase } from "../../../lib/supabaseClient";
 import { showToast } from "../../../lib/ui";
 
-export function initAdminUserEdit(userAvatar, imageBander) {
+export function initAdminUserEdit(userAvatar, pfdefault) {
     const backBtn = document.getElementById('btn-back');
     const studentImage = document.getElementById('student-image');
     const banderImage = document.getElementById('bander-image');
     const studentNameElem = document.getElementById('student-name');
+    const avatarPreview = document.getElementById('user-edit-avatar-preview');
+    const btnEditAvatar = document.getElementById('btn-edit-avatar');
+
+    // Cropper Elements
+    const avatarModal = document.getElementById('avatar-modal');
+    const saveModal = document.getElementById('save-modal');
+    const cancelAvatarBtn = document.getElementById('btn-cancel-avatar');
+    const saveAvatarBtn = document.getElementById('btn-save-avatar');
+    const confirmSaveBtn = document.getElementById('btn-confirm-save');
+    const cancelSaveBtn = document.getElementById('btn-cancel-save');
+    const btnSelectImage = document.getElementById('btn-select-image');
+    const cropperInput = document.getElementById('avatar-input');
+    const cropImageElem = document.getElementById('avatar-crop-image');
+    const avatarPlaceholder = document.getElementById('avatar-placeholder');
+
+    let cropperInstance = null;
 
     // Fetch user name from metadata
     const fetchUserName = async () => {
@@ -148,7 +164,188 @@ export function initAdminUserEdit(userAvatar, imageBander) {
             // แสดงปุ่ม Delete เมื่ออยู่ในโหมด Edit
             if (deleteBtn) deleteBtn.classList.remove('hidden');
         }
+
+        if (data) {
+            const avatarData = data.user_assets?.find(a => a.asset_type === 'avatar');
+            avatarPreview.src = avatarData ? avatarData.url : pfdefault;
+        }
+
     };
+
+    const openAvatarModal = () => {
+        if (avatarModal) avatarModal.classList.remove('hidden');
+    };
+
+    const closeAvatarModal = () => {
+        if (avatarModal) avatarModal.classList.add('hidden');
+        if (cropperInstance) {
+            cropperInstance.destroy();
+            cropperInstance = null;
+        }
+        if (cropImageElem) {
+            cropImageElem.src = '';
+            cropImageElem.style.opacity = '0';
+        }
+        if (cropperInput) cropperInput.value = '';
+        if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
+    };
+
+    const openSaveModal = () => {
+        if (saveModal) saveModal.classList.remove('hidden');
+    };
+
+    const closeSaveModal = () => {
+        if (saveModal) saveModal.classList.add('hidden');
+    };
+
+    if (btnEditAvatar) {
+        btnEditAvatar.addEventListener('click', openAvatarModal);
+    }
+
+    if (btnSelectImage) {
+        btnSelectImage.addEventListener('click', () => {
+            if (cropperInput) cropperInput.click();
+        });
+    }
+
+    if (cropperInput) {
+        cropperInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file', 'error');
+                cropperInput.value = '';
+                return;
+            }
+
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+
+            const imageUrl = URL.createObjectURL(file);
+            cropImageElem.src = imageUrl;
+            cropImageElem.style.opacity = '1';
+
+            if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
+
+            cropperInstance = new Cropper(cropImageElem, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.85,
+                responsive: true,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        });
+    }
+
+    if (cancelAvatarBtn) {
+        cancelAvatarBtn.addEventListener('click', closeAvatarModal);
+    }
+
+    if (saveAvatarBtn) {
+        saveAvatarBtn.addEventListener('click', () => {
+            if (!cropperInstance) {
+                showToast('Please select an image first', 'error');
+                return;
+            }
+            openSaveModal();
+        });
+    }
+
+    if (cancelSaveBtn) {
+        cancelSaveBtn.addEventListener('click', closeSaveModal);
+    }
+
+    if (confirmSaveBtn) {
+        confirmSaveBtn.addEventListener('click', async () => {
+            if (!cropperInstance || !editIdInput.value) {
+                closeSaveModal();
+                return;
+            }
+
+            confirmSaveBtn.disabled = true;
+            confirmSaveBtn.textContent = 'Uploading...';
+            const targetUserId = editIdInput.value;
+
+            try {
+                const canvas = cropperInstance.getCroppedCanvas({
+                    width: 500,
+                    height: 500,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+
+                const blob = await new Promise((resolve) => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.9);
+                });
+
+                const fileName = `${targetUserId}_${Date.now()}.jpg`;
+                const filePath = `${targetUserId}/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('avatars')
+                    .upload(filePath, blob, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { data: publicUrlData } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(filePath);
+                const imageUrl = publicUrlData.publicUrl;
+
+                const { data: existingAsset } = await supabase
+                    .from('user_assets')
+                    .select('id')
+                    .eq('user_id', targetUserId)
+                    .eq('asset_type', 'avatar')
+                    .maybeSingle();
+
+                if (existingAsset) {
+                    const { error: updateError } = await supabase
+                        .from('user_assets')
+                        .update({ url: imageUrl })
+                        .eq('id', existingAsset.id);
+                    if (updateError) throw updateError;
+                } else {
+                    const { error: insertError } = await supabase
+                        .from('user_assets')
+                        .insert([{
+                            user_id: targetUserId,
+                            asset_type: 'avatar',
+                            url: imageUrl
+                        }]);
+                    if (insertError) throw insertError;
+                }
+
+                showToast('Avatar updated successfully!');
+                avatarPreview.src = imageUrl;
+                
+                closeSaveModal();
+                closeAvatarModal();
+                fetchUsers(); // Refresh the list
+
+            } catch (error) {
+                console.error(error);
+                showToast('Failed to upload avatar', 'error');
+            } finally {
+                confirmSaveBtn.disabled = false;
+                confirmSaveBtn.textContent = '✓ Confirm';
+            }
+        });
+    }
 
     const validateFields = () => {
         const fieldsToCheck = ['firstname', 'lastname', 'class_id', 'role'];
@@ -186,8 +383,6 @@ export function initAdminUserEdit(userAvatar, imageBander) {
 
     // --- Render Users (Apply Filters) ---
     const renderUsers = () => {
-        if (!scheduleList) return;
-
         const currentRole = roleFilter ? roleFilter.value : 'all';
         const currentClass = classFilter ? classFilter.value : 'all';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
@@ -220,6 +415,9 @@ export function initAdminUserEdit(userAvatar, imageBander) {
 
         scheduleList.innerHTML = '';
         filtered.forEach(item => {
+
+            const avatarData = item.user_assets?.find(a => a.asset_type === 'avatar');
+            const avatarUrl = avatarData ? avatarData.url : pfdefault;
             const row = document.createElement('div');
             row.className = "flex border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] bg-white overflow-hidden fade-in";
 
@@ -228,12 +426,12 @@ export function initAdminUserEdit(userAvatar, imageBander) {
             const classId = item.class_id || '-';
 
             row.innerHTML = `
-                <div class="w-14 shrink-0 flex flex-col items-center justify-center border-r-2 border-[#1E1E1E] bg-[#F2C00F] px-1">
-                    <span class="text-[8px] font-bold opacity-60 uppercase text-center">${item.role || 'N/A'}</span>
+                <div class="w-15 shrink-0 flex flex-col items-center justify-center border-r-2 border-[#1E1E1E] bg-[#F2C00F] overflow-hidden">
+                    <img src="${avatarUrl}" class="w-full h-full object-cover">
                 </div>
                 <div class="flex-1 flex flex-col min-w-0">
                     <div class="px-3 py-1 border-b-2 border-[#1E1E1E] bg-[#EEEDDE]/50 text-[10px] font-bold truncate">
-                        ID: ${stuId} &nbsp;|&nbsp; Class: ${classId}
+                        ID: ${stuId} &nbsp;|&nbsp; Class: ${classId} |&nbsp; Class: ${item.role || 'N/A'}
                     </div>
                     <div class="px-3 py-2 font-bold text-[13px] leading-tight truncate">
                         ${displayName}
@@ -251,12 +449,17 @@ export function initAdminUserEdit(userAvatar, imageBander) {
 
     // --- Fetch Users from Database ---
     const fetchUsers = async () => {
+
         if (!scheduleList) return;
         scheduleList.innerHTML = '<div class="text-center py-10 opacity-50 font-bold italic">Loading...</div>';
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: true });
+        const { data, error } = await supabase
+            .from('profiles')
+            .select(`*,
+                 user_assets(url, asset_type)`)
+            .order('created_at', { ascending: true });
 
         if (error) {
             scheduleList.innerHTML = '<div class="text-center py-10 text-red-500 font-bold">Error loading data</div>';

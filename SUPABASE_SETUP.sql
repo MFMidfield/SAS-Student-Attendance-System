@@ -1,16 +1,15 @@
 -- ========================================================
 -- LUNAR PROJECT: SUPABASE DATABASE SETUP SCRIPT
 -- Consolidated from SQL History for a fresh setup.
--- Last Updated: 2026-05-10
+-- Last Updated: 2026-05-11
 -- ========================================================
 
 -- 1. EXTENSIONS
--- Ensure uuid-ossp is available for gen_random_uuid()
 create extension if not exists "uuid-ossp";
 
 -- 2. TABLES
 
--- 2.1 Profiles Table (Linked to auth.users)
+-- 2.1 Profiles Table
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   email text unique,
@@ -25,21 +24,29 @@ create table if not exists public.profiles (
   constraint check_role_types check (role in ('admin', 'teacher', 'student', 'leader', 'New'))
 );
 
--- 2.2 Attendance Logs (Pending verification)
+-- 2.2 Attendance Logs (Unified Table)
 create table if not exists public.attendance_logs (
   id uuid default gen_random_uuid() primary key,
-  student_id uuid references public.profiles(id) on delete cascade not null,
+  student_id uuid references public.profiles(id) on delete cascade,
   stu_id_record text,
   firstname_record text,
   lastname_record text,
   class_id_record text,
-  status text,
-  note text default '-',
+  status text,                   -- ค่าแรกจากนักเรียน
+  note text default '-',         -- หมายเหตุจากนักเรียน
   subject text default 'homeroom' not null,
+  
+  -- Verification Fields (Added for Unified Logic)
+  final_status text,             -- ค่าที่ครูสรุป
+  verification_status text default 'pending', -- 'pending', 'approved', 'rejected'
+  teacher_note text,             -- หมายเหตุจากครู
+  verified_by uuid references public.profiles(id),
+  verified_at timestamptz,
+  
   created_at timestamptz default now() not null
 );
 
--- 2.3 Attendance Verify (Confirmed records)
+-- 2.3 Attendance Verify (Keep for legacy/archive if needed, but Unified Table is preferred)
 create table if not exists public.attendance_verify (
   id uuid default gen_random_uuid() primary key,
   student_id uuid references public.profiles(id) on delete cascade not null,
@@ -70,10 +77,32 @@ create table if not exists public.schedule (
   created_at timestamptz default now()
 );
 
+-- 2.5 User Assets
+create table if not exists public.user_assets (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  asset_type text check (asset_type in ('logo', 'banner', 'avatar')),
+  url text not null,
+  created_at timestamptz default now()
+);
+
+-- 2.6 School Activities
+create table if not exists public.school_activities (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,
+  description text,
+  location text,
+  activity_date date not null,
+  start_time time not null,
+  end_time time not null,
+  organizer text default 'โรงเรียน',
+  created_at timestamptz default now(),
+  constraint check_times check (start_time < end_time)
+);
+
 -- 3. FUNCTIONS & TRIGGERS
 
 -- 3.1 Handle New User Registration
--- Automatically creates a profile when someone signs up
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -112,14 +141,12 @@ create trigger on_auth_user_updated
   for each row execute procedure public.sync_user_email();
 
 -- 3.3 Sync Role from Profile to Auth Metadata
--- This allows checking roles via JWT without extra database queries
 create or replace function public.sync_role_to_auth()
 returns trigger language plpgsql security definer set search_path = auth, public as $$
 begin
   update auth.users
   set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) || jsonb_build_object('role', new.role)
   where id = new.id;
-  
   return new;
 end;
 $$;
@@ -130,7 +157,6 @@ create trigger on_profile_role_update
   for each row execute procedure public.sync_role_to_auth();
 
 -- 3.4 Snapshot Student Info on Attendance Log
--- Copies data from profiles to log tables at the moment of check-in
 create or replace function public.copy_student_info_to_log()
 returns trigger language plpgsql security definer as $$
 begin
@@ -155,11 +181,12 @@ create trigger before_verify_insert
 
 -- 4. ROW LEVEL SECURITY (RLS)
 
--- Enable RLS on all tables
 alter table public.profiles enable row level security;
 alter table public.attendance_logs enable row level security;
 alter table public.attendance_verify enable row level security;
 alter table public.schedule enable row level security;
+alter table public.user_assets enable row level security;
+alter table public.school_activities enable row level security;
 
 -- 4.1 Profiles Policies
 drop policy if exists "Users view own profile" on public.profiles;
@@ -184,6 +211,9 @@ create policy "Students view own logs" on public.attendance_logs for select usin
 drop policy if exists "Staff view all logs" on public.attendance_logs;
 create policy "Staff view all logs" on public.attendance_logs for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
 
+drop policy if exists "Staff update logs" on public.attendance_logs;
+create policy "Staff update logs" on public.attendance_logs for update using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
+
 drop policy if exists "Staff delete logs" on public.attendance_logs;
 create policy "Staff delete logs" on public.attendance_logs for delete using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
 
@@ -194,9 +224,6 @@ create policy "Students view own verify" on public.attendance_verify for select 
 drop policy if exists "Staff view all verify" on public.attendance_verify;
 create policy "Staff view all verify" on public.attendance_verify for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
 
-drop policy if exists "Staff insert verify" on public.attendance_verify;
-create policy "Staff insert verify" on public.attendance_verify for insert with check ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
-
 -- 4.4 Schedule Policies
 drop policy if exists "Public view schedule" on public.schedule;
 create policy "Public view schedule" on public.schedule for select using (true);
@@ -204,100 +231,22 @@ create policy "Public view schedule" on public.schedule for select using (true);
 drop policy if exists "Admins manage schedule" on public.schedule;
 create policy "Admins manage schedule" on public.schedule for all using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher') );
 
--- 5. INITIAL DATA (Optional)
--- Insert Homeroom schedules for default rooms
-do $$ 
-declare 
-    day_idx int2;
-    target_rooms text[] := array['4/9', '5/9', '6/9'];
-    room_name text;
-begin
-    for day_idx in 1..5 loop
-        foreach room_name in array target_rooms loop
-            insert into public.schedule (subject_name, period, room, teacher_name, day_of_week, start_time, end_time)
-            values ('Homeroom', 0, room_name, 'Class Teacher', day_idx, '07:45:00', '08:20:00');
-        end loop;
-    end loop;
-end $$;
-
--- ========================================================
--- 6. SCHOOL ACTIVITIES
--- ========================================================
-
-create table if not exists public.school_activities (
-  id uuid default gen_random_uuid() primary key,
-  title text not null,                -- ชื่อกิจกรรม
-  description text,                   -- คำอธิบาย (Note)
-  location text,                      -- สถานที่จัด
-  activity_date date not null,        -- วันที่จัดกิจกรรม
-  start_time time not null,           -- เวลาเริ่ม
-  end_time time not null,             -- เวลาสิ้นสุด
-  organizer text default 'โรงเรียน',   -- ผู้จัดกิจกรรม (สภานักเรียน, ชมรม, etc.)
-  created_at timestamptz default now(),
-  
-  constraint check_times check (start_time < end_time)
-);
-
--- เปิดใช้งาน RLS
-alter table public.school_activities enable row level security;
-
--- 1. ทุกคน (รวมนักเรียน) สามารถดูกิจกรรมได้
+-- 4.5 School Activities Policies
 drop policy if exists "Anyone can view activities" on public.school_activities;
-create policy "Anyone can view activities" 
-on public.school_activities for select 
-using (true);
+create policy "Anyone can view activities" on public.school_activities for select using (true);
 
--- 2. เฉพาะ Admin และ Teacher เท่านั้นที่สร้าง/แก้ไข/ลบกิจกรรมได้
 drop policy if exists "Staff can manage activities" on public.school_activities;
-create policy "Staff can manage activities" 
-on public.school_activities for all
-using (
-  exists (
-    select 1 from public.profiles
-    where id = auth.uid() 
-    and role in ('admin', 'teacher')
-  )
-);
+create policy "Staff can manage activities" on public.school_activities for all using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher') );
 
--- ========================================================
--- 7. STORAGE BUCKET: AVATARS
--- ========================================================
+-- 4.6 User Assets Policies
+drop policy if exists "Anyone can view assets" on public.user_assets;
+create policy "Anyone can view assets" on public.user_assets for select using (true);
 
--- 1. สร้าง Bucket ชื่อ avatars (ถ้ายังไม่มี) และตั้งค่าเป็น Public
-insert into storage.buckets (id, name, public)
-values ('avatars', 'avatars', true)
-on conflict (id) do nothing;
+drop policy if exists "Users manage own assets" on public.user_assets;
+create policy "Users manage own assets" on public.user_assets for all using (auth.uid() = user_id);
 
--- 2. ตั้งค่า RLS สำหรับ Storage.objects
--- หมายเหตุ: Storage ใน Supabase ใช้ตาราง storage.objects
+-- 5. STORAGE BUCKETS (Managed via SQL)
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true) on conflict (id) do nothing;
 
--- 2.1 Policy: ใครก็ได้สามารถดูรูปใน bucket avatars ได้ (SELECT)
-drop policy if exists "Anyone can view avatars" on storage.objects;
-create policy "Anyone can view avatars"
-on storage.objects for select
-using ( bucket_id = 'avatars' );
-
--- 2.2 Policy: ผู้ใช้ที่ล็อกอินแล้วสามารถอัปโหลดรูปของตัวเองได้ (INSERT)
--- ตรวจสอบว่า bucket_id คือ avatars และชื่อโฟลเดอร์แรกตรงกับ auth.uid()
-drop policy if exists "Users can upload own avatars" on storage.objects;
-create policy "Users can upload own avatars"
-on storage.objects for insert
-to authenticated
-with check (
-    bucket_id = 'avatars' AND 
-    (auth.uid()::text = (storage.foldername(name))[1])
-);
-
--- 2.3 Policy: ผู้ใช้ที่ล็อกอินแล้วสามารถแก้ไขรูปของตัวเองได้ (UPDATE)
-drop policy if exists "Users can update own avatars" on storage.objects;
-create policy "Users can update own avatars"
-on storage.objects for update
-to authenticated
-using (
-    bucket_id = 'avatars' AND 
-    (auth.uid()::text = (storage.foldername(name))[1])
-);
-
--- ========================================================
--- SETUP COMPLETE
+-- 6. SETUP COMPLETE
 -- ========================================================

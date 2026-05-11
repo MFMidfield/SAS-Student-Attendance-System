@@ -1,13 +1,13 @@
 import { supabase } from '../../../lib/supabaseClient.js'
 import { showToast } from "../../../lib/ui";
 
-export function initAdminActivity(imageLogo, imageBander) {
+export function initTeacherActivity(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
 
     // Back to admin dashboard
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-dashboard';
+            window.location.hash = '#teacher-dashboard';
         });
     }
 
@@ -169,6 +169,8 @@ export function initAdminActivity(imageLogo, imageBander) {
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
     }
+
+
 
     // --- Modal Logic ---
 
@@ -454,3 +456,4 @@ export function initAdminActivity(imageLogo, imageBander) {
     // Initial fetch
     fetchActivities();
 }
+

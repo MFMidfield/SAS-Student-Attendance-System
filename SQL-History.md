@@ -729,27 +729,80 @@ using (
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 
+-- 1. ให้ Admin สามารถอัปโหลดรูป (INSERT) ให้ใครก็ได้ใน bucket avatars
+drop policy if exists "Admins can upload any avatars" on storage.objects;
+create policy "Admins can upload any avatars"
+on storage.objects for insert
+to authenticated
+with check (
+    bucket_id = 'avatars' AND 
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
+);
+-- 2. ให้ Admin สามารถแก้ไข/เขียนทับรูป (UPDATE) ให้ใครก็ได้ใน bucket avatars
+drop policy if exists "Admins can update any avatars" on storage.objects;
+create policy "Admins can update any avatars"
+on storage.objects for update
+to authenticated
+using (
+    bucket_id = 'avatars' AND 
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
+);
+-- 3. ให้ Admin สามารถเพิ่ม/แก้ไข ข้อมูลรูปภาพในตาราง user_assets ของทุกคนได้
+drop policy if exists "Admins can manage user_assets" on public.user_assets;
+create policy "Admins can manage user_assets"
+on public.user_assets for all
+to authenticated
+using ( (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin' );
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- แบบใช้ JWT Metadata (ถ้ามีการตั้งค่าไว้)
+CREATE POLICY "Teacher and Leader can view same class profiles" 
+ON public.profiles
+FOR SELECT
+TO authenticated
+USING (
+  (auth.jwt() -> 'user_metadata' ->> 'role') IN ('teacher', 'leader')
+  AND (auth.jwt() -> 'user_metadata' ->> 'class_id') = class_id
+);
 
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 
-
+-- 1. เพิ่มคอลัมน์สำหรับเก็บข้อมูลเริ่มต้นจากนักเรียน
+ALTER TABLE attendance_logs 
+ADD COLUMN student_status text,
+ADD COLUMN student_note text;
+-- 2. เพิ่มคอลัมน์สำหรับเก็บข้อมูลสรุปสุดท้ายและการตรวจสอบ
+ALTER TABLE attendance_logs 
+ADD COLUMN final_status text,
+ADD COLUMN verification_status text DEFAULT 'pending',
+ADD COLUMN teacher_note text,
+ADD COLUMN verified_by uuid REFERENCES profiles(id),
+ADD COLUMN verified_at timestamp with time zone;
+-- 3. (Optional) ย้ายข้อมูลจากคอลัมน์เก่า (status, note) มาลงคอลัมน์ใหม่ เพื่อไม่ให้ข้อมูลเดิมหาย
+UPDATE attendance_logs 
+SET 
+    student_status = status,
+    final_status = status,
+    student_note = note;
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 
-
-
---------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------
-
-
+DROP POLICY IF EXISTS "Staff update logs" ON public.attendance_logs;
+CREATE POLICY "Staff update logs" 
+ON public.attendance_logs FOR UPDATE 
+USING ( (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'teacher', 'leader') );
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 
-
+ALTER TABLE attendance_logs 
+DROP COLUMN IF EXISTS student_status,
+DROP COLUMN IF EXISTS student_note;
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------

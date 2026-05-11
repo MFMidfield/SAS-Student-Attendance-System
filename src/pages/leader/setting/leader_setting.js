@@ -1,7 +1,7 @@
 import { supabase } from '../../../lib/supabaseClient.js'
 import { showToast } from '../../../lib/ui.js'
 
-export function initStudentSetting(imageLogo, imageBander) {
+export function initLeaderSetting(userAvatar, imageBander) {
     const backBtn = document.getElementById('btn-back');
     const logoutBtn = document.getElementById('btn-logout');
     const studentImage = document.getElementById('student-image');
@@ -9,8 +9,7 @@ export function initStudentSetting(imageLogo, imageBander) {
     const studentNameElem = document.getElementById('student-name');
     const studentRoleElem = document.getElementById('student-role');
     const infoEmail = document.getElementById('info-email');
-    const infoStuId = document.getElementById('info-stu-id');
-    const infoClass = document.getElementById('info-class');
+    const infoRole = document.getElementById('info-role');
 
     // Fetch user name from metadata and profile info
     const fetchUserInfo = async () => {
@@ -29,31 +28,25 @@ export function initStudentSetting(imageLogo, imageBander) {
         if (user) {
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('role, stu_id, class_id')
+                .select('role')
                 .eq('id', user.id)
                 .single();
 
             if (profile) {
-                if (studentRoleElem) studentRoleElem.textContent = profile.role || 'Student';
-                if (infoStuId) infoStuId.textContent = profile.stu_id || '—';
-                if (infoClass) infoClass.textContent = profile.class_id || '—';
+                if (studentRoleElem) studentRoleElem.textContent = profile.role || 'Leader';
+                if (infoRole) infoRole.textContent = profile.role || 'Leader';
             }
         }
     };
     fetchUserInfo();
 
-    if (studentImage && imageLogo) {
-        studentImage.src = imageLogo;
-    }
+    if (studentImage && userAvatar) studentImage.src = userAvatar;
+    if (banderImage && imageBander) banderImage.src = imageBander;
 
-    if (banderImage && imageBander) {
-        banderImage.src = imageBander;
-    }
-
-    // Back to student dashboard
+    // Back to leader dashboard
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            window.location.hash = '#student-dashboard';
+            window.location.hash = '#leader-dashboard';
         });
     }
 
@@ -138,7 +131,7 @@ export function initStudentSetting(imageLogo, imageBander) {
     }
 
     // =============================================
-    // Avatar Upload & Crop Logic (Cropper.js)
+    // Avatar Upload & Crop Logic
     // =============================================
     const avatarModal = document.getElementById('avatar-modal');
     const saveModal = document.getElementById('save-modal');
