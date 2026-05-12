@@ -1,7 +1,7 @@
 -- ========================================================
 -- LUNAR PROJECT: SUPABASE DATABASE SETUP SCRIPT
 -- Consolidated from SQL History for a fresh setup.
--- Last Updated: 2026-05-11
+-- Last Updated: 2026-05-12
 -- ========================================================
 
 -- 1. EXTENSIONS
@@ -34,7 +34,8 @@ create table if not exists public.attendance_logs (
   class_id_record text,
   status text,                   -- ค่าแรกจากนักเรียน
   note text default '-',         -- หมายเหตุจากนักเรียน
-  subject text default 'homeroom' not null,
+  subject text default '-',
+  leave_scope text default 'period', -- 'period', 'full_day', 'morning', 'afternoon'
   
   -- Verification Fields (Added for Unified Logic)
   final_status text,             -- ค่าที่ครูสรุป
@@ -43,23 +44,7 @@ create table if not exists public.attendance_logs (
   verified_by uuid references public.profiles(id),
   verified_at timestamptz,
   
-  created_at timestamptz default now() not null
-);
-
--- 2.3 Attendance Verify (Keep for legacy/archive if needed, but Unified Table is preferred)
-create table if not exists public.attendance_verify (
-  id uuid default gen_random_uuid() primary key,
-  student_id uuid references public.profiles(id) on delete cascade not null,
-  stu_id_record text,
-  firstname_record text,
-  lastname_record text,
-  class_id_record text,
-  status text,
-  note text default '-',
-  subject text default 'homeroom' not null,
-  is_verified boolean default false,
-  verified_by uuid references public.profiles(id),
-  verified_at timestamptz,
+  attendance_date date default current_date not null, -- วันที่เข้าเรียน/วันที่ลา
   created_at timestamptz default now() not null
 );
 
@@ -174,16 +159,10 @@ create trigger before_attendance_insert
   before insert on public.attendance_logs
   for each row execute procedure public.copy_student_info_to_log();
 
-drop trigger if exists before_verify_insert on public.attendance_verify;
-create trigger before_verify_insert
-  before insert on public.attendance_verify
-  for each row execute procedure public.copy_student_info_to_log();
-
 -- 4. ROW LEVEL SECURITY (RLS)
 
 alter table public.profiles enable row level security;
 alter table public.attendance_logs enable row level security;
-alter table public.attendance_verify enable row level security;
 alter table public.schedule enable row level security;
 alter table public.user_assets enable row level security;
 alter table public.school_activities enable row level security;
@@ -216,13 +195,6 @@ create policy "Staff update logs" on public.attendance_logs for update using ( (
 
 drop policy if exists "Staff delete logs" on public.attendance_logs;
 create policy "Staff delete logs" on public.attendance_logs for delete using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
-
--- 4.3 Attendance Verify Policies
-drop policy if exists "Students view own verify" on public.attendance_verify;
-create policy "Students view own verify" on public.attendance_verify for select using (auth.uid() = student_id);
-
-drop policy if exists "Staff view all verify" on public.attendance_verify;
-create policy "Staff view all verify" on public.attendance_verify for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
 
 -- 4.4 Schedule Policies
 drop policy if exists "Public view schedule" on public.schedule;

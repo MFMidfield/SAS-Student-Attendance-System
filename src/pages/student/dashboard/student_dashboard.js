@@ -27,7 +27,7 @@ export function initStudentDashBoard(imageLogo, imageBander) {
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
         const { data: logs, error } = await supabase
-            .from('attendance_verify')
+            .from('attendance_logs')
             .select('status')
             .eq('student_id', user.id)
             .gte('created_at', startOfMonth)
@@ -116,35 +116,43 @@ export function initStudentDashBoard(imageLogo, imageBander) {
         if (!schedules || schedules.length === 0) {
             scheduleContainer.innerHTML = `
                 <div class="bg-white border-2 border-[#1E1E1E] p-6 text-center shadow-[3px_3px_0px_#1E1E1E] flex flex-col items-center gap-2">
-                    <div class="text-2xl">🍃</div>
                     <p class="text-[10px] font-black text-[#1E1E1E]/40 uppercase tracking-widest">No classes scheduled for today</p>
                 </div>`;
             return;
         }
 
-        // 3. Render schedule
-        scheduleContainer.innerHTML = '';
-
-        schedules.forEach(item => {
+        // 3. Filter and Render only current class
+        const currentClasses = schedules.filter(item => {
             const startStr = item.start_time.replace(/:/g, '').substring(0, 4);
             const endStr = item.end_time.replace(/:/g, '').substring(0, 4);
             const start = parseInt(startStr);
             const end = parseInt(endStr);
+            return currentTime >= start && currentTime <= end;
+        });
 
-            const isCurrent = currentTime >= start && currentTime <= end;
+        if (currentClasses.length === 0) {
+            scheduleContainer.innerHTML = `
+                <div class="bg-white/50 border-2 border-dashed border-[#1E1E1E]/20 p-6 text-center shadow-[2px_2px_0px_#1E1E1E]/5">
+                    <p class="text-[10px] font-black text-[#1E1E1E]/30 uppercase tracking-widest">No classes at this time</p>
+                </div>`;
+            return;
+        }
 
+        scheduleContainer.innerHTML = '';
+
+        currentClasses.forEach(item => {
             const card = document.createElement('div');
-            card.className = `flex items-center gap-3 p-3 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] transition-all hover:-translate-y-0.5 ${isCurrent ? 'bg-[#F2C00F]/10 border-[#F2C00F]/50 ring-2 ring-[#F2C00F]/20' : 'bg-white'}`;
+            card.className = `flex items-center gap-3 p-3 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] transition-all hover:-translate-y-0.5 bg-[#F2C00F]/10 border-[#F2C00F]/50 ring-2 ring-[#F2C00F]/20`;
 
             card.innerHTML = `
-                <div class="w-12 h-12 shrink-0 border-2 border-[#1E1E1E] flex flex-col items-center justify-center ${isCurrent ? 'bg-[#F2C00F]' : 'bg-[#EEEDDE]'} shadow-[2px_2px_0px_#1E1E1E]">
+                <div class="w-12 h-12 shrink-0 border-2 border-[#1E1E1E] flex flex-col items-center justify-center bg-[#F2C00F] shadow-[2px_2px_0px_#1E1E1E]">
                     <span class="text-[9px] font-black opacity-50 uppercase">P${item.period}</span>
                     <span class="text-[10px] font-black">${item.start_time.substring(0, 5)}</span>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                         <p class="font-black text-xs text-[#1E1E1E] truncate uppercase">${item.subject_name}</p>
-                        ${isCurrent ? '<span class="px-1.5 py-0.5 bg-[#219653] text-[8px] font-black text-white uppercase rounded-sm animate-pulse">Now</span>' : ''}
+                        <span class="px-1.5 py-0.5 bg-[#219653] text-[8px] font-black text-white uppercase rounded-sm animate-pulse">Now</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                          <svg class="w-2.5 h-2.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">

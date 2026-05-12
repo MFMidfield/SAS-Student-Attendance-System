@@ -1,78 +1,131 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
+<!-- ==========================================
+COMMON HTML PATTERNS & TEMPLATES
+========================================== -->
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance - Neubrutalism</title>
+    <title>HTML Templates</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Custom Font เพื่อให้เข้ากับสไตล์ */
-         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
-
-        body {
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-        }
-
-        /* Animation for fade in */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
-        }
-
-        /* Animation สำหรับปุ่มที่ถูกเลือก (Toggle) */
-        .btn-active {
-            transform: translate(2px, 2px) !important;
-            box-shadow: 2px 2px 0px #1E1E1E !important;
-            color: #ffffff !important;
-        }
-
-        .btn-active-2 {
-            transform: translate(2px, 2px) !important;
-            box-shadow: 2px 2px 0px #1E1E1E !important;
-            color: #1E1E1E !important;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+        body { font-family: 'M PLUS Rounded 1c', sans-serif; }
+        .countdown-ring { transform: rotate(-90deg); }
+        .countdown-ring circle { transition: stroke-dashoffset 1s linear; }
     </style>
 </head>
-
 <body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
 
-    <div id="main-card"
-        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
-
-        <div class="relative w-full h-64 bg-[#1E1E1E] overflow-hidden border-b-4 border-[#1E1E1E]">
-            <img id="bander-image" src="" alt="Student Profile" class="w-full h-full object-cover">
-        </div>
-
-        <div class="relative -mt-23 px-6 mb-6">
-            <div class="flex flex-row max-w-[450px] justify-between">
-                <div
-                    class="h-28 w-28 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-center overflow-hidden relative z-10">
-                    <img id="student-image" src="" alt="Student Profile" class="w-full h-full object-cover">
+    <!-- 1. MAIN CARD TEMPLATE (Neubrutalism Style) -->
+    <!-- Usage: Main container for pages (e.g. Dashboard, Check-in, Management) -->
+    <div id="main-card" class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden mb-5">
+        <!-- Top Accent Bar -->
+        <div class="w-full h-2 bg-gradient-to-r from-[#E46F20] via-[#F18B74] to-[#FEB729]"></div>
+        
+        <!-- Header Section -->
+        <div class="relative px-5 pt-5 pb-4">
+            <div class="flex items-center gap-4">
+                <div class="shrink-0 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
+                    <!-- Example Icon -->
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
                 </div>
-                <div
-                    class="bg-[#FFFFFF] w-[260px] mt-auto border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] px-4 p-2 text-center relative z-10">
-                    <span id="student-name" class="text-[#1E1E1E] text-xl font-black uppercase tracking-wider"
-                        style="-webkit-text-stroke: 0.5px #1E1E1E;">Loading...</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Subtitle</p>
+                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Page Title</h1>
                 </div>
             </div>
         </div>
+        <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
 
-        <div class="px-6 space-y-4">
-            edit here
+        <!-- Filter / Search Section -->
+        <div class="px-5 pt-4 pb-2">
+            <div class="flex gap-2 mb-3">
+                <select class="px-3 py-2 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none cursor-pointer uppercase appearance-none">
+                    <option value="all">ALL FILTERS</option>
+                </select>
+            </div>
+            <div class="w-full relative">
+                <input type="text" placeholder="Search..." class="w-full px-4 py-2.5 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none placeholder-[#1E1E1E]/30 transition-all">
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="px-5 pb-4">
+            <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1 pb-4">
+                <div class="bg-white border-2 border-[#1E1E1E] p-4 text-center shadow-[3px_3px_0px_#1E1E1E]">
+                    <p class="text-sm font-bold text-[#1E1E1E]/40 uppercase">Content goes here...</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#FEB729] via-[#F18B74] to-[#E46F20]"></div>
+    </div>
+
+    <!-- 2. BACK BUTTON TEMPLATE -->
+    <div class="fade-in w-full max-w-[450px] mb-10">
+        <button class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hover:bg-[#E0DFD1]">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span class="text-sm tracking-wider">Back</span>
+        </button>
+    </div>
+
+    <!-- 3. STANDARD MODAL TEMPLATE -->
+    <!-- Usage: Form editing, data viewing, actions -->
+    <div id="standard-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="backdrop" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in"></div>
+        <div class="relative w-full max-w-[450px] max-h-[90vh] overflow-y-auto bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-8 flex flex-col items-center text-center gap-6 fade-in">
+            <h2 class="text-2xl font-bold uppercase tracking-wider">Standard Modal</h2>
+            
+            <div class="relative w-full text-left">
+                <label class="text-[10px] font-bold uppercase ml-1">Input Label</label>
+                <input type="text" placeholder="Value" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-[#1E1E1E] font-bold focus:outline-none">
+            </div>
+
+            <div class="flex flex-row w-full gap-4 mt-4">
+                <button class="flex-1 py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">Save</button>
+                <button class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">Close</button>
+            </div>
         </div>
     </div>
-</body>
 
-</html> -->
+    <!-- 4. CONFIRMATION/COUNTDOWN MODAL TEMPLATE -->
+    <!-- Usage: Important actions like Submit, Verify, or Delete with a 5-second lock -->
+    <div id="confirm-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in"></div>
+        <div class="relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-8 flex flex-col items-center text-center gap-5 fade-in">
+            
+            <div class="bg-[#F2C00F] border-2 border-[#1E1E1E] p-4 shadow-[3px_3px_0px_#1E1E1E]">
+                <svg class="w-10 h-10" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+
+            <div class="flex flex-col items-center gap-2 w-full">
+                <h2 class="text-xl font-black uppercase tracking-tight text-[#1E1E1E]">Confirm Action?</h2>
+                <div class="flex items-center gap-3">
+                    <div class="relative w-10 h-10">
+                        <svg class="countdown-ring w-10 h-10" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15"/>
+                            <circle class="countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square"/>
+                        </svg>
+                        <span class="countdown-number absolute inset-0 flex items-center justify-center text-sm font-black">5</span>
+                    </div>
+                    <span class="countdown-label text-xs font-bold opacity-50 uppercase">Please wait...</span>
+                </div>
+            </div>
+
+            <div class="flex flex-row w-full gap-3 mt-4">
+                <!-- Starts disabled -->
+                <button disabled class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed">Confirm</button>
+                <button class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

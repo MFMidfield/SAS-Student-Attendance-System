@@ -15,17 +15,141 @@ export function initStudent(imageLogo, imageBander) {
     const banderImage = document.getElementById('bander-image');
     const studentNameElem = document.getElementById('student-name');
     const saveIcon = document.getElementById('saveIcon')
-    const subjectSelect = document.getElementById('subject-select');
+    const subjectDisplay = document.getElementById('subject-display');
+    const subjectContainer = document.getElementById('subject-container');
+    const dateContainer = document.getElementById('date-container');
+    const dateInput = document.getElementById('attendance-date');
+    const leaveScopeContainer = document.getElementById('leave-scope-container');
+    const scopeButtons = {
+        'full_day': document.getElementById('scope-full'),
+        'morning': document.getElementById('scope-morning'),
+        'afternoon': document.getElementById('scope-afternoon')
+    };
 
-    // Fetch user name from metadata
-    const fetchUserName = async () => {
+    // Fetch user profile and name
+    const fetchUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.user_metadata && studentNameElem) {
             const { firstname, lastname } = user.user_metadata;
             studentNameElem.textContent = `${firstname} ${lastname}`;
         }
-        return user;
+        
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('class_id')
+                .eq('id', user.id)
+                .single();
+            return { ...user, profile };
+        }
+        return null;
     };
+
+    let isClassActive = false;
+    let currentSubjectName = "";
+    let hasCheckedPresentToday = false;
+    let hasUsedDailyLeave = false;
+
+    // Helper: Get initial attendance date based on 8 PM logic
+    const getInitialDate = () => {
+        const now = new Date();
+        const target = new Date(now);
+        // If after 8 PM (20:00), default to tomorrow
+        if (now.getHours() >= 20) {
+            target.setDate(target.getDate() + 1);
+        }
+        return target.toISOString().split('T')[0];
+    };
+
+    // Set initial date
+    if (dateInput) dateInput.value = getInitialDate();
+
+    // 1. Fetch current subject based on time
+    const fetchCurrentSubject = async (userProfile) => {
+        if (!userProfile || !userProfile.profile) return;
+        
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const currentTime = now.getHours() * 100 + now.getMinutes();
+
+        const { data: schedules } = await supabase
+            .from('schedule')
+            .select('subject_name, start_time, end_time')
+            .eq('room', userProfile.profile.class_id)
+            .eq('day_of_week', dayOfWeek);
+
+        const current = (schedules || []).find(item => {
+            const start = parseInt(item.start_time.replace(/:/g, '').substring(0, 4));
+            const end = parseInt(item.end_time.replace(/:/g, '').substring(0, 4));
+            return currentTime >= start && currentTime <= end;
+        });
+
+        if (current) {
+            isClassActive = true;
+            currentSubjectName = current.subject_name;
+            if (subjectDisplay) {
+                subjectDisplay.textContent = current.subject_name;
+            }
+        } else {
+            isClassActive = false;
+            currentSubjectName = "";
+            if (subjectDisplay) {
+                subjectDisplay.textContent = "No class scheduled";
+            }
+        }
+    };
+
+    let lastFullDayLeave = false;
+    let lastAnyPresent = false;
+
+    // Function to re-validate submission limits for a specific date and status
+    const checkSubmissionLimits = async (targetDate) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // 1. Check for ANY leave on this date
+        const { data: leaveLogs } = await supabase
+            .from('attendance_logs')
+            .select('status, leave_scope, subject')
+            .eq('student_id', user.id)
+            .eq('attendance_date', targetDate)
+            .in('status', ['sick', 'personal', 'activity']);
+
+        // 2. Check for ANY present log on this date
+        const { data: presentLogs } = await supabase
+            .from('attendance_logs')
+            .select('id, subject')
+            .eq('student_id', user.id)
+            .eq('attendance_date', targetDate)
+            .eq('status', 'present');
+
+        // Reset flags
+        hasCheckedPresentToday = false;
+        hasUsedDailyLeave = false;
+        
+        lastFullDayLeave = (leaveLogs || []).some(l => l.leave_scope === 'full_day');
+        lastAnyPresent = (presentLogs || []).length > 0;
+
+        // If trying to check present, see if this SPECIFIC subject is done
+        if (isClassActive && currentSubjectName) {
+            const subjectDone = (presentLogs || []).some(l => l.subject === currentSubjectName);
+            if (subjectDone) hasCheckedPresentToday = true;
+        }
+
+        // If any leave exists for this date, we consider leave "used" for this date
+        if ((leaveLogs || []).length > 0) hasUsedDailyLeave = true;
+
+        // Update UI with conflict logic
+        updateUI(lastFullDayLeave, lastAnyPresent);
+    };
+
+    fetchUser().then(userData => {
+        if (userData) {
+            fetchCurrentSubject(userData).then(() => {
+                checkSubmissionLimits(dateInput?.value || new Date().toISOString().split('T')[0]);
+            });
+        }
+    });
 
 
     /* 
@@ -70,12 +194,9 @@ export function initStudent(imageLogo, imageBander) {
     };
     */
 
-    fetchUserName();
-    /*
-    fetchUserName().then(user => {
-        if (user) fetchSubjects(user);
+    fetchUser().then(userData => {
+        if (userData) fetchCurrentSubject(userData);
     });
-    */
 
     if (studentImage && imageLogo) {
         studentImage.src = imageLogo;
@@ -84,21 +205,91 @@ export function initStudent(imageLogo, imageBander) {
     if (banderImage && imageBander) {
         banderImage.src = imageBander;
     }
-
+    
     let currentStatus = 'present';
+    let currentLeaveScope = 'full_day';
 
-    function updateUI() {
+    function updateUI(hasFullDayLeave = false, hasAnyPresent = false) {
         Object.values(statusButtons).forEach(btn => {
             if (btn) btn.classList.remove('btn-active');
         });
         if (statusButtons[currentStatus]) {
             statusButtons[currentStatus].classList.add('btn-active');
         }
+        if (currentStatus === 'present') {
+            if (subjectContainer) subjectContainer.classList.remove('hidden');
+            if (dateContainer) dateContainer.classList.add('hidden');
+            if (leaveScopeContainer) leaveScopeContainer.classList.add('hidden');
+        } else {
+            if (subjectContainer) subjectContainer.classList.add('hidden');
+            if (dateContainer) dateContainer.classList.remove('hidden');
+            if (leaveScopeContainer) leaveScopeContainer.classList.remove('hidden');
+            
+            // Highlight active scope button
+            Object.entries(scopeButtons).forEach(([key, btn]) => {
+                if (!btn) return;
+                if (key === currentLeaveScope) {
+                    btn.classList.add('bg-[#F2C00F]', 'text-[#1E1E1E]');
+                    btn.classList.remove('bg-white');
+                } else {
+                    btn.classList.remove('bg-[#F2C00F]', 'text-[#1E1E1E]');
+                    btn.classList.add('bg-white');
+                }
+            });
+        }
+
+        // Disable submit button if conditions aren't met
+        if (submitBtn) {
+            let isDisabled = false;
+            let reason = "";
+
+            if (hasFullDayLeave) {
+                isDisabled = true;
+                reason = "Full day leave active";
+            } else if (currentStatus === 'present') {
+                if (!isClassActive) {
+                    isDisabled = true;
+                    reason = "No class now";
+                } else if (hasCheckedPresentToday) {
+                    isDisabled = true;
+                    reason = "Already submitted";
+                }
+            } else if (['sick', 'personal', 'activity'].includes(currentStatus)) {
+                if (hasUsedDailyLeave) {
+                    isDisabled = true;
+                    reason = "Leave already submitted";
+                } else if (hasAnyPresent && currentLeaveScope === 'full_day') {
+                    isDisabled = true;
+                    reason = "Already present today";
+                } else if (!reasonBox || !reasonBox.value || reasonBox.value.trim() === "") {
+                    isDisabled = true;
+                    reason = "Reason required";
+                }
+            }
+
+            if (isDisabled) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
+                submitBtn.innerHTML = `<span>${reason}</span>`;
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
+                submitBtn.innerHTML = `
+                    <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Confirm
+                `;
+            }
+        }
     }
 
     function selectStatus(status) {
         currentStatus = status;
-        updateUI();
+        // 1. Update UI colors immediately for responsiveness
+        updateUI(lastFullDayLeave, lastAnyPresent); 
+        // 2. Re-validate in background
+        checkSubmissionLimits(dateInput?.value || new Date().toISOString().split('T')[0]);
     }
 
     // Attach listeners
@@ -106,6 +297,40 @@ export function initStudent(imageLogo, imageBander) {
     if (statusButtons.activity) statusButtons.activity.addEventListener('click', () => selectStatus('activity'));
     if (statusButtons.sick) statusButtons.sick.addEventListener('click', () => selectStatus('sick'));
     if (statusButtons.personal) statusButtons.personal.addEventListener('click', () => selectStatus('personal'));
+
+    if (reasonBox) {
+        reasonBox.addEventListener('input', () => {
+            updateUI(lastFullDayLeave, lastAnyPresent);
+        });
+    }
+
+    // Leave Scope buttons
+    if (scopeButtons.full_day) scopeButtons.full_day.addEventListener('click', () => { 
+        currentLeaveScope = 'full_day'; 
+        updateUI(lastFullDayLeave, lastAnyPresent);
+        checkSubmissionLimits(dateInput?.value || new Date().toISOString().split('T')[0]); 
+    });
+    if (scopeButtons.morning) scopeButtons.morning.addEventListener('click', () => { 
+        currentLeaveScope = 'morning'; 
+        updateUI(lastFullDayLeave, lastAnyPresent);
+        checkSubmissionLimits(dateInput?.value || new Date().toISOString().split('T')[0]); 
+    });
+    if (scopeButtons.afternoon) scopeButtons.afternoon.addEventListener('click', () => { 
+        currentLeaveScope = 'afternoon'; 
+        updateUI(lastFullDayLeave, lastAnyPresent);
+        checkSubmissionLimits(dateInput?.value || new Date().toISOString().split('T')[0]); 
+    });
+
+    if (dateInput) {
+        dateInput.addEventListener('change', async () => {
+            // Show checking state immediately
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<span>Validating...</span>`;
+            }
+            await checkSubmissionLimits(dateInput.value);
+        });
+    }
 
     let countdownTimer;
     const modal = document.getElementById('modal');
@@ -158,23 +383,38 @@ export function initStudent(imageLogo, imageBander) {
         const { data: { user } } = await supabase.auth.getUser();
         const status = currentStatus;
         const reason = reasonBox.value || "-";
-        const subject = subjectSelect?.value || "";
+        const subject = currentSubjectName || "-";
+        const scope = currentLeaveScope;
 
-        if (!subject || subject === "") {
-            showToast('กรุณาเลือกวิชาเรียนก่อนกดยืนยัน', 'error');
+        // Check reason for non-present statuses
+        if (['sick', 'personal', 'activity'].includes(status) && (!reason || reason === "-" || reason === "")) {
+            showToast('Please enter a reason', 'error');
+            if (reasonBox) {
+                reasonBox.classList.add('shake-animation', 'border-red-500');
+                setTimeout(() => reasonBox.classList.remove('shake-animation', 'border-red-500'), 1000);
+            }
             return;
         }
 
         if (user) {
             // 2. บันทึกลงตาราง Log
+            const selectedDate = ['sick', 'personal', 'activity'].includes(status) 
+                ? (dateInput?.value || new Date().toISOString().split('T')[0])
+                : new Date().toISOString().split('T')[0];
+
+            const finalSubject = subject;
+            const finalScope = ['sick', 'personal', 'activity'].includes(status) ? scope : 'period';
+
             const { error } = await supabase
                 .from('attendance_logs')
                 .insert([
                     {
                         student_id: user.id,
-                        status: status, // หรือรับค่าจาก Select box
+                        status: status,
                         note: reason,
-                        subject: subject
+                        subject: finalSubject,
+                        attendance_date: selectedDate,
+                        leave_scope: finalScope
                     }
                 ]);
 
@@ -182,7 +422,9 @@ export function initStudent(imageLogo, imageBander) {
                 console.error('Error recording attendance:', error.message);
                 showToast(error.message, 'error');
             } else {
-                showToast('บันทึกการเข้าเรียนสำเร็จ!', 'success');
+                showToast('Attendance recorded successfully!', 'success');
+                // Re-validate everything immediately
+                await checkSubmissionLimits(selectedDate);
             }
         }
     };
@@ -190,22 +432,18 @@ export function initStudent(imageLogo, imageBander) {
     let errorTimeout;
     if (submitBtn) {
         submitBtn.addEventListener('click', () => {
-            const subject = subjectSelect ? subjectSelect.value : '';
+            const subject = currentSubjectName || "";
 
-            if (!subject || subject === "") {
-                showToast('กรุณาเลือกวิชาเรียนก่อนกดยืนยัน', 'error');
-
-                if (subjectSelect) {
-                    if (errorTimeout) clearTimeout(errorTimeout);
-                    subjectSelect.classList.add('shake-animation', 'border-error');
-                    subjectSelect.classList.remove('border-[#1E1E1E]');
-                    subjectSelect.classList.add('border-red-500');
-                    errorTimeout = setTimeout(() => {
-                        subjectSelect.classList.remove('shake-animation', 'border-error');
-                        subjectSelect.classList.remove('border-red-500');
-                        subjectSelect.classList.add('border-[#1E1E1E]');
-                    }, 3000);
-                }
+            // Final check on submit
+            if (currentStatus === 'present' && !isClassActive) {
+                showToast('No class active now', 'error');
+                return;
+            }
+            
+            if (['sick', 'personal', 'activity'].includes(currentStatus) && (!reasonBox.value || reasonBox.value.trim() === "")) {
+                showToast('Reason is required for leaves', 'error');
+                reasonBox.classList.add('shake-animation', 'border-red-500');
+                setTimeout(() => reasonBox.classList.remove('shake-animation', 'border-red-500'), 1000);
                 return;
             }
 
@@ -223,7 +461,15 @@ export function initStudent(imageLogo, imageBander) {
                     };
                     summaryStatus.className = `text-xs font-black uppercase ${statusColors[currentStatus] || ''}`;
                 }
-                if (summarySubject) summarySubject.textContent = subject;
+                if (summarySubject) {
+                    if (['sick', 'personal', 'activity'].includes(currentStatus)) {
+                        const scopeNames = { 'full_day': 'All Day', 'morning': 'Morning', 'afternoon': 'Afternoon' };
+                        const scopeText = scopeNames[currentLeaveScope] || 'All Day';
+                        summarySubject.innerHTML = `Date: ${dateInput?.value || '-'}<br><span class="text-[10px] opacity-70">${scopeText}</span>`;
+                    } else {
+                        summarySubject.textContent = subject;
+                    }
+                }
                 if (summaryReason) summaryReason.textContent = reasonBox.value || "-";
 
                 // Reset backdrop animation

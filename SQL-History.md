@@ -811,3 +811,75 @@ DROP COLUMN IF EXISTS student_note;
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
+
+-- DROP ATTENDANCE_VERIFY TABLE (Migrating to Unified Table)
+-- 1. Drop Security Policies
+DROP POLICY IF EXISTS "Students view own verify" ON public.attendance_verify;
+DROP POLICY IF EXISTS "Staff view all verify" ON public.attendance_verify;
+
+-- 2. Drop Trigger
+DROP TRIGGER IF EXISTS before_verify_insert ON public.attendance_verify;
+
+-- 3. Drop Table
+DROP TABLE IF EXISTS public.attendance_verify CASCADE;
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- เพิ่มคอลัมน์ attendance_date เพื่อรองรับการลาล่วงหน้าและการตรวจสอบวันที่เข้าเรียน
+ALTER TABLE public.attendance_logs 
+ADD COLUMN attendance_date DATE;
+
+-- อัปเดตข้อมูลเก่าให้ใช้วันที่จาก created_at
+UPDATE public.attendance_logs 
+SET attendance_date = created_at::DATE 
+WHERE attendance_date IS NULL;
+
+-- ตั้งค่า NOT NULL และ Default
+ALTER TABLE public.attendance_logs 
+ALTER COLUMN attendance_date SET DEFAULT CURRENT_DATE,
+ALTER COLUMN attendance_date SET NOT NULL;
+
+-- สร้าง Index เพื่อความเร็วในการค้นหาตามวันที่
+CREATE INDEX IF NOT EXISTS idx_attendance_logs_date ON public.attendance_logs (attendance_date);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- เพิ่มคอลัมน์ leave_scope ในตาราง attendance_logs
+ALTER TABLE public.attendance_logs 
+ADD COLUMN leave_scope text DEFAULT 'period';
+-- กำหนด Constraint เพื่อควบคุมข้อมูล (ป้องกันการใส่ค่ามั่ว)
+ALTER TABLE public.attendance_logs 
+ADD CONSTRAINT check_leave_scope 
+CHECK (leave_scope IN ('period', 'full_day', 'morning', 'afternoon'));
+-- อัปเดตข้อมูลเก่าให้เป็น 'period' (กรณีเช็คชื่อรายวิชา) 
+-- และข้อมูลที่เป็นใบลา (Sick/Personal/Activity) ให้เป็น 'full_day' ไปก่อน
+UPDATE public.attendance_logs 
+SET leave_scope = 'full_day' 
+WHERE status IN ('sick', 'personal', 'activity');
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- 1. เปลี่ยนค่า Default ของคอลัมน์ subject เป็น '-'
+ALTER TABLE public.attendance_logs 
+ALTER COLUMN subject SET DEFAULT '-';
+-- 2. อนุญาตให้คอลัมน์ subject เป็น NULL ได้ (เพื่อความปลอดภัยในการส่งข้อมูล)
+ALTER TABLE public.attendance_logs 
+ALTER COLUMN subject DROP NOT NULL;
+-- 3. อัปเดตข้อมูลเก่าที่เป็น 'homeroom' (ค่าเดิม) ให้เป็น '-' ให้หมดถ้าต้องการ
+UPDATE public.attendance_logs 
+SET subject = '-' 
+WHERE subject = 'homeroom';
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- เปลี่ยนค่า Default ของ leave_scope เป็น 'period'
+ALTER TABLE public.attendance_logs 
+ALTER COLUMN leave_scope SET DEFAULT 'period';
+-- อัปเดตข้อมูลเก่าที่เป็นใบลา (Sick/Personal/Activity) ให้เป็น 'full_day' ให้ถูกต้อง
+UPDATE public.attendance_logs 
+SET leave_scope = 'full_day' 
+WHERE status IN ('sick', 'personal', 'activity') AND leave_scope = 'period';

@@ -30,3 +30,10 @@ Date/Month/Year
 - ปรับปรุง UI ปุ่มกดในตารางหน้า Approve ให้แสดงป้ายสถานะ (Pending/Approved/Rejected) และแสดงชื่อผู้ตรวจสอบ
 - เพิ่ม Modal หน้าต่างแสดงรายละเอียดเหตุผลที่ถูก Reject 
 - ปรับปรุงระบบ Verify All โดยย้ายปุ่มไปไว้ท้ายตาราง, กรองเฉพาะนักเรียนที่รอตรวจ, และสามารถเลือกสถานะรายคน (รวมถึงสถานะ Absent) ก่อนกดอนุมัติรวดเดียวผ่าน Batch Update
+
+13/5/26
+- ปรับโครงสร้างระบบ (Unified Architecture) สำหรับ Teacher และ Leader ให้ใช้งานระบบตรวจเช็คชื่อ (Attendance Approve) ตัวเดียวกับ Admin เพื่อความเสถียรและลดโค้ดที่ซ้ำซ้อน
+- ยกเลิกการใช้งานตาราง `attendance_verify` อย่างถาวร และเปลี่ยนมาใช้ระบบ Status Update ในตาราง `attendance_logs` เพียงตารางเดียว
+- ปรับปรุงหน้า Admin Logs ให้เป็นหน้าสรุปข้อมูล (Purely Informational) สำหรับการตรวจสอบย้อนหลังและ Export ข้อมูลเท่านั้น
+- พัฒนาระบบ Validation ในการส่งใบลา (Sick/Personal/Activity) โดยบังคับกรอกเหตุผลและระบุช่วงเวลา (Full Day/Morning/Afternoon) พร้อม UI แจ้งเตือนหากมีข้อมูลซ้ำซ้อน
+- ปรับจูน UI และ Animation ของ Modal ยืนยันตัวตน (Countdown Timer) ให้เป็นมาตรฐานเดียวกันทั้งระบบ

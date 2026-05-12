@@ -87,12 +87,10 @@
             <div class="flex items-center gap-2 mb-3">
                 <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Quick Actions</span>
             </div>
-
-
-            <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-row w-full mb-4">
                 <!-- Attendance Card -->
                 <button id="btn-attendance"
-                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
+                    class="fade-in flex w-full flex-row justify-between items-center gap-2 p-4 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
                     <div
                         class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
@@ -103,6 +101,10 @@
                     <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Attendance</span>
                     <span class="text-[10px] font-bold text-[#1E1E1E]/50">Check-in</span>
                 </button>
+            </div>
+
+        
+            <div class="grid grid-cols-2 gap-3">
                 <!-- User Management -->
                 <button id="btn-user-edit"
                     class="fade-in flex flex-col items-center gap-2 p-4 bg-[#FEB729] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
@@ -131,19 +133,7 @@
                     <span class="text-[10px] font-bold text-[#1E1E1E]/50">Class timetable</span>
                 </button>
 
-                <!-- Attendance Verify Logs -->
-                <button id="btn-verify-logs"
-                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#5B8DEF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
-                    <div
-                        class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                        </svg>
-                    </div>
-                    <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Verified</span>
-                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Check history</span>
-                </button>
+
             </div>
         </div>
 

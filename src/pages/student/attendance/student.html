@@ -12,8 +12,14 @@
         body {
             font-family: 'M PLUS Rounded 1c', sans-serif;
         }
-        .countdown-ring { transform: rotate(-90deg); }
-        .countdown-ring circle { transition: stroke-dashoffset 1s linear; }
+
+        .countdown-ring {
+            transform: rotate(-90deg);
+        }
+
+        .countdown-ring circle {
+            transition: stroke-dashoffset 1s linear;
+        }
     </style>
 </head>
 
@@ -213,21 +219,39 @@
                 <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Details</span>
             </div>
 
-            <!-- Subject Select -->
-            <div class="relative mb-5">
-                <!-- <select id="subject-select"
-                    class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all outline-none appearance-none cursor-pointer text-sm">
-                    <option value="" disabled selected>Select Subject</option>
-                </select> -->
-                <select id="subject-select" disabled
-                    class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all outline-none appearance-none cursor-not-allowed text-sm opacity-60">
-                    <option value="homeroom" selected>Homeroom</option>
-                </select>
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-                    </svg>
+            <!-- Subject Display (Non-interactive) -->
+            <div id="subject-container" class="relative mb-5">
+                <div id="subject-display"
+                    class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold text-sm">
+                    No class scheduled
                 </div>
+            </div>
+
+            <!-- Leave Scope (Hidden by default) -->
+            <div id="leave-scope-container" class="relative mb-5 hidden space-y-2">
+
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" id="scope-full" 
+                        class="scope-btn py-2 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] font-black text-[10px] uppercase transition-all bg-white hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#1E1E1E]">
+                        All Day
+                    </button>
+                    <button type="button" id="scope-morning" 
+                        class="scope-btn py-2 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] font-black text-[10px] uppercase transition-all bg-white hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#1E1E1E]">
+                        Morning
+                    </button>
+                    <button type="button" id="scope-afternoon" 
+                        class="scope-btn py-2 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] font-black text-[10px] uppercase transition-all bg-white hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#1E1E1E]">
+                        Afternoon
+                    </button>
+                </div>
+            </div>
+
+            <!-- Date Select (Hidden by default) -->
+            <div id="date-container" class="relative mb-5 hidden">
+                <input type="date" id="attendance-date" 
+                    onkeydown="return false"
+                    onclick="this.showPicker()"
+                    class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all outline-none text-sm cursor-pointer">
             </div>
 
             <div class="flex items-center gap-2 mb-1">
@@ -284,13 +308,19 @@
             <!-- Text & Countdown -->
             <div class="flex flex-col items-center gap-2 w-full">
                 <h2 class="text-xl font-black uppercase tracking-tight text-[#1E1E1E]">Confirm Submit?</h2>
+                <p class="text-[10px] font-bold text-[#E25C5C] uppercase tracking-widest -mt-1">You can only submit once
+                </p>
                 <div class="flex items-center gap-3">
                     <div class="relative w-10 h-10">
                         <svg class="countdown-ring w-10 h-10" viewBox="0 0 36 36">
-                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15"/>
-                            <circle id="countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square"/>
+                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2"
+                                opacity="0.15" />
+                            <circle id="countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E"
+                                stroke-width="2.5" stroke-dasharray="97.39" stroke-dashoffset="0"
+                                stroke-linecap="square" />
                         </svg>
-                        <span id="countdown-number" class="absolute inset-0 flex items-center justify-center text-sm font-black">5</span>
+                        <span id="countdown-number"
+                            class="absolute inset-0 flex items-center justify-center text-sm font-black">5</span>
                     </div>
                     <span id="countdown-label" class="text-xs font-bold opacity-50 uppercase">Please wait...</span>
                 </div>
@@ -304,7 +334,7 @@
                     <span id="summary-status" class="text-[#219653]">Present</span>
                 </div>
                 <div class="flex justify-between text-xs font-black uppercase">
-                    <span class="opacity-50">Subject:</span>
+                    <span class="opacity-50">Details:</span>
                     <span id="summary-subject" class="truncate max-w-[150px]">Homeroom</span>
                 </div>
                 <div class="flex flex-col text-xs font-black uppercase pt-1 border-t border-[#1E1E1E]/10">

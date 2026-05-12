@@ -21,35 +21,69 @@ export function initAdminLogs(imageLogo, imageBander) {
 
     let userRole = 'student';
     let userClassId = null;
+    let currentUserId = null;
 
     const logList = document.getElementById('schedule-list');
+    const logsContainer = document.getElementById('logs-container');
     const roomFilter = document.getElementById('room-filter');
-    const dateFilter = document.getElementById('date-filter');
     const searchFilter = document.getElementById('search-filter');
+    const btnExport = document.getElementById('btn-export');
 
-    let allLogsData = []; // เก็บข้อมูลทั้งหมดที่ดึงมา เพื่อให้ค้นหาได้เร็วโดยไม่ต้องดึง DB ใหม่
+    let allLogsData = []; 
+    let currentVerifyItem = null; 
+    let confirmAction = null; 
+    let countdownTimer = null;
+    let verifyAllCountdownTimer = null;
 
-    // --- Setup Date Filter ---
-    const setupDateFilter = () => {
-        if (!dateFilter) return;
-        const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
-        
-        dateFilter.min = "2026-05-01";
-        dateFilter.max = todayStr;
-        dateFilter.value = todayStr; // Default เป็นวันปัจจุบัน
-    };
-    setupDateFilter();
-
-    // Note Modal Elements
+    // Note/Verify Modal Elements
     const noteModal = document.getElementById('modal-note');
     const noteModalClose = document.getElementById('btn-note-close');
     const noteStudentName = document.getElementById('note-student-name');
     const noteStudentId = document.getElementById('note-student-id');
     const noteClass = document.getElementById('note-class');
-    const noteStatus = document.getElementById('note-status');
+    const noteStatusSelect = document.getElementById('note-status-select');
     const noteDate = document.getElementById('note-date');
     const noteContent = document.getElementById('note-content');
+    const btnApprove = document.getElementById('btn-approve');
+    const btnUnapprove = document.getElementById('btn-unapprove');
+    const btnCancelVerify = document.getElementById('btn-cancel-verify');
+    const btnVerifyAll = document.getElementById('btn-verify-all');
+
+    // Confirmation Modal Elements
+    const confirmModal = document.getElementById('modal-confirm');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmDesc = document.getElementById('confirm-desc');
+    const confirmStudentName = document.getElementById('confirm-student-name');
+    const confirmIconWrapper = document.getElementById('confirm-icon-wrapper');
+    const confirmIconApprove = document.getElementById('confirm-icon-approve');
+    const confirmIconUnapprove = document.getElementById('confirm-icon-unapprove');
+    const confirmReasonContainer = document.getElementById('confirm-reason-container');
+    const confirmReasonInput = document.getElementById('confirm-reason-input');
+    const countdownCircle = document.getElementById('countdown-circle');
+    const countdownNumber = document.getElementById('countdown-number');
+    const countdownLabel = document.getElementById('countdown-label');
+    const btnConfirmSubmit = document.getElementById('btn-confirm-submit');
+    const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
+
+    // Verify All Modal Elements
+    const verifyAllModal = document.getElementById('modal-verify-all');
+    const verifyAllList = document.getElementById('verify-all-list');
+    const verifyAllCount = document.getElementById('verify-all-count');
+    const verifyAllCountdownCircle = document.getElementById('verify-all-countdown-circle');
+    const verifyAllCountdownNumber = document.getElementById('verify-all-countdown-number');
+    const verifyAllCountdownLabel = document.getElementById('verify-all-countdown-label');
+    const btnVerifyAllSubmit = document.getElementById('btn-verify-all-submit');
+    const btnVerifyAllCancel = document.getElementById('btn-verify-all-cancel');
+    const btnVerifyAllClose = document.getElementById('btn-verify-all-close');
+
+    // Reject Detail Modal Elements
+    const rejectDetailModal = document.getElementById('modal-reject-detail');
+    const rejectReasonText = document.getElementById('reject-reason-text');
+    const rejectVerifierName = document.getElementById('reject-verifier-name');
+    const rejectVerifierRole = document.getElementById('reject-verifier-role');
+    const rejectVerifyTime = document.getElementById('reject-verify-time');
+    const btnRejectDetailClose = document.getElementById('btn-reject-detail-close');
+    const btnRejectDetailConfirm = document.getElementById('btn-reject-detail-confirm');
 
     // --- Helper: Status ---
     const STATUS_CONFIG = {
@@ -57,14 +91,24 @@ export function initAdminLogs(imageLogo, imageBander) {
         sick:     { label: 'ลาป่วย',   bg: 'bg-[#E25C5C]', text: 'text-white',      tag: 'SICK'     },
         personal: { label: 'ลากิจ',    bg: 'bg-[#F2A00F]', text: 'text-[#1E1E1E]', tag: 'PERSONAL' },
         activity: { label: 'กิจกรรม', bg: 'bg-[#5C9EE2]', text: 'text-white',      tag: 'ACTIVITY' },
+        absent:   { label: 'ขาดเรียน', bg: 'bg-[#1E1E1E]', text: 'text-white',      tag: 'ABSENT'   },
+    };
+
+    const VERIFY_STATUS_CONFIG = {
+        pending:  { label: 'PENDING', bg: 'bg-gray-200', text: 'text-[#1E1E1E]' },
+        approved: { label: 'APPROVED', bg: 'bg-[#73CB8F]/20', text: 'text-[#219653]' },
+        rejected: { label: 'REJECTED', bg: 'bg-[#E25C5C]/20', text: 'text-[#E25C5C]' },
     };
 
     const getStatus = (status) => STATUS_CONFIG[status] || { label: status || 'N/A', bg: 'bg-gray-200', text: 'text-[#1E1E1E]', tag: status?.toUpperCase() || 'N/A' };
+    const getVerifyStatus = (status) => VERIFY_STATUS_CONFIG[status || 'pending'];
 
     // --- Check Role & Permissions ---
     const checkUserPermissions = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+
+        currentUserId = user.id;
 
         const { data: profile } = await supabase
             .from('profiles')
@@ -78,9 +122,12 @@ export function initAdminLogs(imageLogo, imageBander) {
         }
     };
 
-    // --- Note Modal Logic ---
+    // ============================================================
+    //  VERIFY MODAL LOGIC
+    // ============================================================
     const openNoteModal = (item) => {
         if (!noteModal) return;
+        currentVerifyItem = item;
         const cfg = getStatus(item.status);
         const date = new Date(item.created_at);
         const dateStr = date.toLocaleDateString('th-TH', {
@@ -92,12 +139,18 @@ export function initAdminLogs(imageLogo, imageBander) {
         if (noteStudentId) noteStudentId.textContent = item.stu_id_record || '-';
         if (noteClass) noteClass.textContent = item.class_id_record || '-';
         if (noteDate) noteDate.textContent = dateStr;
-        if (document.getElementById('note-subject')) document.getElementById('note-subject').textContent = item.subject || '-';
+        if (document.getElementById('note-subject')) {
+            let detailText = item.subject || '-';
+            if (['sick', 'personal', 'activity'].includes(item.status)) {
+                const scopeNames = { 'full_day': 'All Day', 'morning': 'Morning', 'afternoon': 'Afternoon' };
+                detailText = scopeNames[item.leave_scope] || 'All Day';
+            }
+            document.getElementById('note-subject').textContent = detailText;
+        }
         if (noteContent) noteContent.textContent = item.note?.trim() || '(ไม่มีหมายเหตุ)';
 
-        if (noteStatus) {
-            noteStatus.textContent = cfg.label;
-            noteStatus.className = `inline-block px-4 py-1 border-2 border-[#1E1E1E] text-sm font-bold uppercase shadow-[2px_2px_0px_#1E1E1E] ${cfg.bg} ${cfg.text}`;
+        if (noteStatusSelect) {
+            noteStatusSelect.value = item.status ? item.status.toLowerCase() : 'none';
         }
 
         const backdrop = document.getElementById('backdrop-note');
@@ -115,6 +168,7 @@ export function initAdminLogs(imageLogo, imageBander) {
 
     const closeNoteModal = () => {
         if (!noteModal) return;
+        currentVerifyItem = null;
         const modalContent = noteModal.querySelector('.modal-content');
         const backdrop = document.getElementById('backdrop-note');
         if (modalContent && backdrop) {
@@ -130,6 +184,289 @@ export function initAdminLogs(imageLogo, imageBander) {
             }, 400);
         } else {
             noteModal.classList.add('hidden');
+        }
+    };
+
+    // ============================================================
+    //  CONFIRMATION MODAL LOGIC (nested on top of verify modal)
+    // ============================================================
+    const openConfirmModal = (action) => {
+        if (!confirmModal || !currentVerifyItem) return;
+        confirmAction = action;
+
+        const studentFullName = `${currentVerifyItem.firstname_record || ''} ${currentVerifyItem.lastname_record || ''}`.trim() || '-';
+
+        if (action === 'approve') {
+            if (confirmTitle) confirmTitle.textContent = 'ยืนยัน Approve?';
+            if (confirmDesc) confirmDesc.textContent = 'ข้อมูลจะถูกอัปเดตสถานะเป็น "อนุมัติแล้ว"';
+            if (confirmIconWrapper) confirmIconWrapper.className = 'w-16 h-16 border-3 border-[#1E1E1E] flex items-center justify-center shadow-[4px_4px_0px_#1E1E1E] bg-[#73CB8F]';
+            if (confirmIconApprove) confirmIconApprove.classList.remove('hidden');
+            if (confirmIconUnapprove) confirmIconUnapprove.classList.add('hidden');
+            if (confirmReasonContainer) confirmReasonContainer.classList.add('hidden');
+        } else {
+            if (confirmTitle) confirmTitle.textContent = 'ยืนยัน Unapprove?';
+            if (confirmDesc) confirmDesc.textContent = 'ข้อมูลจะถูกอัปเดตสถานะเป็น "ไม่อนุมัติ"';
+            if (confirmIconWrapper) confirmIconWrapper.className = 'w-16 h-16 border-3 border-[#1E1E1E] flex items-center justify-center shadow-[4px_4px_0px_#1E1E1E] bg-[#E25C5C]';
+            if (confirmIconApprove) confirmIconApprove.classList.add('hidden');
+            if (confirmIconUnapprove) confirmIconUnapprove.classList.remove('hidden');
+            if (confirmReasonContainer) {
+                confirmReasonContainer.classList.remove('hidden');
+                if (confirmReasonInput) {
+                    confirmReasonInput.value = '';
+                    confirmReasonInput.classList.remove('border-[#E25C5C]', 'shake-animation');
+                }
+            }
+        }
+
+        if (confirmStudentName) confirmStudentName.textContent = studentFullName;
+
+        // Reset submit button to disabled
+        if (btnConfirmSubmit) {
+            btnConfirmSubmit.disabled = true;
+            btnConfirmSubmit.textContent = 'Submit';
+            btnConfirmSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed';
+        }
+
+        // Show modal
+        const confirmContent = confirmModal.querySelector('.confirm-content');
+        const backdrop = document.getElementById('backdrop-confirm');
+        confirmModal.classList.remove('hidden');
+        if (confirmContent) {
+            confirmContent.classList.remove('fade-out');
+            confirmContent.classList.add('fade-in');
+        }
+        if (backdrop) {
+            backdrop.classList.remove('backdrop-fade-out');
+            backdrop.classList.add('backdrop-fade-in');
+        }
+
+        // Start countdown
+        startCountdown();
+    };
+
+    const closeConfirmModal = () => {
+        if (!confirmModal) return;
+        confirmAction = null;
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+        }
+
+        const confirmContent = confirmModal.querySelector('.confirm-content');
+        const backdrop = document.getElementById('backdrop-confirm');
+        if (confirmContent && backdrop) {
+            confirmContent.classList.remove('fade-in');
+            confirmContent.classList.add('fade-out');
+            backdrop.classList.remove('backdrop-fade-in');
+            backdrop.classList.add('backdrop-fade-out');
+            setTimeout(() => {
+                confirmModal.classList.add('hidden');
+                confirmContent.classList.remove('fade-out');
+                confirmContent.classList.add('fade-in');
+                backdrop.classList.remove('backdrop-fade-out');
+            }, 300);
+        } else {
+            confirmModal.classList.add('hidden');
+        }
+    };
+
+    const startCountdown = () => {
+        let secondsLeft = 3;
+        const totalDash = 97.39; // circumference of r=15.5
+
+        // Reset ring
+        if (countdownCircle) countdownCircle.style.strokeDashoffset = '0';
+        if (countdownNumber) countdownNumber.textContent = '3';
+        if (countdownLabel) countdownLabel.textContent = 'กรุณาอ่านข้อมูล...';
+
+        countdownTimer = setInterval(() => {
+            secondsLeft--;
+            if (countdownNumber) countdownNumber.textContent = secondsLeft;
+            if (countdownCircle) countdownCircle.style.strokeDashoffset = `${totalDash * ((3 - secondsLeft) / 3)}`;
+
+            if (secondsLeft <= 0) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                if (countdownLabel) countdownLabel.textContent = 'พร้อมแล้ว!';
+                if (countdownNumber) countdownNumber.textContent = '✓';
+                unlockSubmitButton();
+            }
+        }, 1000);
+    };
+
+    const unlockSubmitButton = () => {
+        if (!btnConfirmSubmit) return;
+        btnConfirmSubmit.disabled = false;
+
+        if (confirmAction === 'approve') {
+            btnConfirmSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#73CB8F] hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+        } else {
+            btnConfirmSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#E25C5C] text-white hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+        }
+    };
+
+    // ============================================================
+    //  SUBMIT ACTIONS (Approve / Unapprove)
+    // ============================================================
+    const handleConfirmSubmit = async () => {
+        if (!currentVerifyItem || !confirmAction) return;
+
+        let reason = '-';
+        if (confirmAction === 'unapprove') {
+            reason = confirmReasonInput ? confirmReasonInput.value.trim() : '';
+            if (!reason) {
+                if (confirmReasonInput) {
+                    confirmReasonInput.classList.add('border-[#E25C5C]', 'shake-animation');
+                    setTimeout(() => confirmReasonInput.classList.remove('shake-animation'), 500);
+                }
+                return;
+            }
+        }
+
+        // Lock button during processing
+        if (btnConfirmSubmit) {
+            btnConfirmSubmit.disabled = true;
+            btnConfirmSubmit.textContent = 'Processing...';
+            btnConfirmSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed';
+        }
+
+        const item = currentVerifyItem;
+
+        try {
+            const finalStatus = (noteStatusSelect && noteStatusSelect.value !== 'none') ? noteStatusSelect.value : currentVerifyItem.status;
+            const verifyStatus = confirmAction === 'approve' ? 'approved' : 'rejected';
+
+            const { error: updateError } = await supabase
+                .from('attendance_logs')
+                .update({
+                    final_status: finalStatus,
+                    verification_status: verifyStatus,
+                    teacher_note: reason,
+                    verified_by: currentUserId,
+                    verified_at: new Date().toISOString()
+                })
+                .eq('id', item.id);
+
+            if (updateError) {
+                console.error('Error updating attendance_logs:', updateError);
+                alert('เกิดข้อผิดพลาดในการบันทึก: ' + updateError.message);
+                resetSubmitButton();
+                return;
+            }
+
+            // Success — close both modals & refresh
+            closeConfirmModal();
+            setTimeout(() => {
+                closeNoteModal();
+                fetchLogs(); // รีเฟรชข้อมูล
+            }, 350);
+
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            alert('เกิดข้อผิดพลาดที่ไม่คาดคิด');
+            resetSubmitButton();
+        }
+    };
+
+    const resetSubmitButton = () => {
+        if (!btnConfirmSubmit) return;
+        btnConfirmSubmit.disabled = false;
+        btnConfirmSubmit.textContent = 'Submit';
+        if (confirmAction === 'approve') {
+            btnConfirmSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#73CB8F] hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+        } else {
+            btnConfirmSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#E25C5C] text-white hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+        }
+    };
+
+    // --- Export to Excel Logic ---
+    const handleExportExcel = async () => {
+        try {
+            // 1. Show Loading State on Button
+            const originalBtnContent = btnExport.innerHTML;
+            btnExport.disabled = true;
+            btnExport.innerHTML = `<span class="animate-spin text-xs">🌀</span> Exporting...`;
+
+            // 2. Fetch ALL logs from database
+            // We fetch all columns but specifically joined data for better export
+            const { data: logs, error } = await supabase
+                .from('attendance_logs')
+                .select(`
+                    created_at,
+                    attendance_date,
+                    stu_id_record,
+                    firstname_record,
+                    lastname_record,
+                    class_id_record,
+                    status,
+                    leave_scope,
+                    subject,
+                    note,
+                    verification_status,
+                    final_status,
+                    verified_at,
+                    teacher_note,
+                    verifier:profiles!attendance_logs_verified_by_fkey (
+                        firstname,
+                        lastname
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!logs || logs.length === 0) {
+                alert('No data to export.');
+                btnExport.disabled = false;
+                btnExport.innerHTML = originalBtnContent;
+                return;
+            }
+
+            // 3. Transform data for Excel
+            const excelData = logs.map(log => {
+                const verifierName = log.verifier ? `${log.verifier.firstname} ${log.verifier.lastname || ''}` : '-';
+                const scopeNames = { 'full_day': 'All Day', 'morning': 'Morning', 'afternoon': 'Afternoon' };
+                
+                return {
+                    'Timestamp': new Date(log.created_at).toLocaleString('th-TH'),
+                    'Attendance Date': log.attendance_date || '-',
+                    'Student ID': log.stu_id_record || '-',
+                    'First Name': log.firstname_record || '-',
+                    'Last Name': log.lastname_record || '-',
+                    'Room': log.class_id_record || '-',
+                    'Submit Status': log.status || '-',
+                    'Leave Scope': scopeNames[log.leave_scope] || (log.status !== 'present' ? 'All Day' : '-'),
+                    'Subject': log.subject || '-',
+                    'Reason': log.note || '-',
+                    'Verify Status': log.verification_status || 'pending',
+                    'Final Status': log.final_status || '-',
+                    'Verified By': verifierName,
+                    'Verifier Note': log.teacher_note || '-'
+                };
+            });
+
+            // 4. Create Workbook and Export
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Attendance Logs");
+
+            // Auto-size columns (rough approximation)
+            const max_width = excelData.reduce((w, r) => Math.max(w, Object.values(r).join("").length), 10);
+            ws["!cols"] = Object.keys(excelData[0]).map(() => ({ wch: 15 }));
+
+            // Generate filename with date
+            const fileName = `Attendance_Logs_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+            // 5. Restore Button State
+            btnExport.disabled = false;
+            btnExport.innerHTML = originalBtnContent;
+
+        } catch (err) {
+            console.error('Export Error:', err);
+            alert('Failed to export excel: ' + err.message);
+            btnExport.disabled = false;
+            btnExport.innerHTML = originalBtnContent;
         }
     };
 
@@ -154,23 +491,67 @@ export function initAdminLogs(imageLogo, imageBander) {
             });
         }
 
-        if (filtered.length === 0) {
-            logList.innerHTML = `<div class="text-center py-10 opacity-30 font-bold uppercase italic tracking-tighter">
-                ${searchTerm ? 'No results matching your search.' : 'No attendance logs found.'}
-            </div>`;
-            return;
+        const pendingCount = filtered.filter(item => !item.verification_status || item.verification_status === 'pending').length;
+        const verifyAllContainer = document.getElementById('verify-all-container');
+
+        if (pendingCount === 0) {
+            if (logsContainer && logsContainer.innerHTML === '') {
+                logsContainer.innerHTML = `<div class="text-center py-10 opacity-30 font-bold uppercase italic tracking-tighter">
+                    ${searchTerm ? 'No results matching your search.' : 'No attendance logs found.'}
+                </div>`;
+            }
+            if (verifyAllContainer) verifyAllContainer.classList.add('hidden');
+        } else {
+            if (verifyAllContainer) {
+                verifyAllContainer.classList.remove('hidden');
+                if (btnVerifyAll) btnVerifyAll.textContent = `✓ Verify All Pending (${pendingCount})`;
+            }
         }
 
-        logList.innerHTML = '';
+        if (logsContainer) logsContainer.innerHTML = '';
         filtered.forEach(item => {
             const cfg = getStatus(item.status);
+            const vCfg = getVerifyStatus(item.verification_status);
             const date = new Date(item.created_at);
             const dateStr = date.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' });
             const timeStr = date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-            const hasNote = item.note && item.note.trim() !== '';
+            const hasNote = item.note && item.note.trim() !== '' && item.note.trim() !== '-';
+
+            let detailText = item.subject || 'Homeroom';
+            if (['sick', 'personal', 'activity'].includes(item.status)) {
+                const scopeNames = { 'full_day': 'All Day', 'morning': 'Morning', 'afternoon': 'Afternoon' };
+                detailText = scopeNames[item.leave_scope] || 'All Day';
+            }
+
+            const isPending = !item.verification_status || item.verification_status === 'pending';
+            const isApproved = item.verification_status === 'approved';
+            const isRejected = item.verification_status === 'rejected';
+
+            let verifierInfo = '';
+            if (!isPending && item.verifier) {
+                verifierInfo = ` <span class="opacity-40 mx-1">|</span> ตรวจโดย: ${item.verifier.firstname} (${item.verifier.role})`;
+            }
 
             const row = document.createElement('div');
             row.className = 'flex border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] bg-white overflow-hidden fade-in mb-4';
+
+            // Button Logic
+            let btnClass = '';
+            let btnText = 'VERIFY';
+            let btnDisabled = false;
+            let btnIcon = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>`;
+
+            if (isPending) {
+                btnClass = hasNote ? 'bg-[#F2C00F]' : 'bg-white';
+                btnClass += ' hover:bg-[#5C9EE2] hover:text-white';
+            } else if (isApproved) {
+                btnClass = 'bg-[#5C9EE2] text-white cursor-not-allowed opacity-70'; // ฟ้า-ขาว
+                btnDisabled = true;
+            } else if (isRejected) {
+                btnClass = 'bg-[#E25C5C] text-white hover:bg-[#C54B4B]';
+                btnText = 'DETAIL';
+                btnIcon = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />`;
+            }
 
             row.innerHTML = `
                 <div class="w-16 shrink-0 flex flex-col items-center justify-center border-r-2 border-[#1E1E1E] ${cfg.bg} ${cfg.text}">
@@ -183,46 +564,50 @@ export function initAdminLogs(imageLogo, imageBander) {
                         <span class="opacity-40">·</span>
                         <span>ห้อง ${item.class_id_record || '-'}</span>
                         <span class="opacity-40">·</span>
-                        <span class="text-[#219653]">วิชา ${item.subject || '-'}</span>
+                        <span class="px-1.5 py-0.5 rounded-sm ${vCfg.bg} ${vCfg.text} text-[8px] font-black uppercase tracking-tighter">${vCfg.label}</span>
                     </div>
                     <div class="px-3 py-2 border-b-2 border-[#1E1E1E] font-bold text-sm leading-tight truncate">
                         ${item.firstname_record || ''} ${item.lastname_record || ''}
                     </div>
-                    <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic flex items-center gap-2">
-                        <span>รหัส ${item.stu_id_record || '-'}</span>
-                        <span class="not-italic text-[9px] text-[#F2A00F] opacity-100">PENDING</span>
+                    <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
+                        รหัส ${item.stu_id_record || '-'} <span class="opacity-40">|</span> ${detailText}${verifierInfo}
                     </div>
                 </div>
-                <button class="view-note-btn w-12 shrink-0 flex flex-col items-center justify-center gap-1 border-l-2 border-[#1E1E1E] ${hasNote ? 'bg-[#F2C00F]' : 'bg-white'} hover:bg-[#F2C00F] transition-colors" title="ดูหมายเหตุ">
+                <button class="view-btn w-12 shrink-0 flex flex-col items-center justify-center gap-1 border-l-2 border-[#1E1E1E] ${btnClass} transition-colors" title="${btnText}" ${btnDisabled ? 'disabled' : ''}>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        ${btnIcon}
                     </svg>
-                    ${hasNote ? '<span class="text-[8px] font-black">NOTE</span>' : ''}
+                    <span class="text-[7px] font-black">${btnText}</span>
                 </button>
             `;
 
-            row.querySelector('.view-note-btn').addEventListener('click', () => openNoteModal(item));
-            logList.appendChild(row);
+            const btn = row.querySelector('.view-btn');
+            if (isPending) {
+                btn.addEventListener('click', () => openNoteModal(item));
+            } else if (isRejected) {
+                btn.addEventListener('click', () => openRejectModal(item));
+            }
+            if (logsContainer) logsContainer.appendChild(row);
         });
     };
 
     // --- Fetch Attendance Logs from Database ---
     const fetchLogs = async () => {
-        if (!logList) return;
-        logList.innerHTML = '<div class="text-center py-10 opacity-50 font-bold italic">Loading...</div>';
+        if (!logsContainer) return;
+        logsContainer.innerHTML = '<div class="text-center py-10 opacity-50 font-bold italic">Loading...</div>';
 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        let query = supabase.from('attendance_logs').select('*');
+        let query = supabase.from('attendance_logs').select(`
+            *,
+            verifier:profiles!attendance_logs_verified_by_fkey (
+                firstname,
+                lastname,
+                role
+            )
+        `);
 
-        // กรองตามวันที่
-        if (dateFilter && dateFilter.value) {
-            const selectedDate = dateFilter.value;
-            query = query
-                .gte('created_at', `${selectedDate}T00:00:00.000Z`)
-                .lte('created_at', `${selectedDate}T23:59:59.999Z`);
-        }
 
         // กรองตาม Role
         if (userRole === 'student' && userClassId) {
@@ -257,16 +642,78 @@ export function initAdminLogs(imageLogo, imageBander) {
         renderLogs();
     };
 
-    // Event Listeners
+    // ============================================================
+    //  EVENT LISTENERS
+    // ============================================================
+
+    // Verify Modal buttons
     if (noteModalClose) noteModalClose.addEventListener('click', closeNoteModal);
+    if (btnCancelVerify) btnCancelVerify.addEventListener('click', closeNoteModal);
+    if (btnApprove) btnApprove.addEventListener('click', () => openConfirmModal('approve'));
+    if (btnUnapprove) btnUnapprove.addEventListener('click', () => openConfirmModal('unapprove'));
+
+    // Confirmation Modal buttons
+    if (btnConfirmSubmit) btnConfirmSubmit.addEventListener('click', handleConfirmSubmit);
+    if (btnConfirmCancel) btnConfirmCancel.addEventListener('click', closeConfirmModal);
+
+    // Filters
     if (roomFilter) roomFilter.addEventListener('change', renderLogs); // เปลี่ยนห้องไม่ต้องดึง DB ใหม่
-    if (dateFilter) dateFilter.addEventListener('change', fetchLogs); // เปลี่ยนวันที่ต้องดึง DB ใหม่
-    if (searchFilter) searchFilter.addEventListener('input', renderLogs); // พิมพ์ค้นหาไม่ต้องดึง DB ใหม่ (Instant Search)
+    if (searchFilter) searchFilter.addEventListener('input', renderLogs);
+    if (btnExport) btnExport.addEventListener('click', () => handleExportExcel());
     if (backBtn) backBtn.addEventListener('click', () => { window.location.hash = '#admin-dashboard'; });
 
     // คลิก backdrop ปิด modal
     const backdropNote = document.getElementById('backdrop-note');
     if (backdropNote) backdropNote.addEventListener('click', closeNoteModal);
+
+    // Reject Detail Modal handlers
+    const closeRejectModal = () => {
+        if (!rejectDetailModal) return;
+        const modalContent = rejectDetailModal.querySelector('.modal-content');
+        const backdrop = document.getElementById('backdrop-reject-detail');
+        if (modalContent && backdrop) {
+            modalContent.classList.replace('fade-in', 'fade-out');
+            backdrop.classList.replace('backdrop-fade-in', 'backdrop-fade-out');
+            setTimeout(() => {
+                rejectDetailModal.classList.add('hidden');
+                modalContent.classList.replace('fade-out', 'fade-in');
+                backdrop.classList.replace('backdrop-fade-out', 'backdrop-fade-in');
+            }, 400);
+        } else {
+            rejectDetailModal.classList.add('hidden');
+        }
+    };
+
+    const openRejectModal = (item) => {
+        if (!rejectDetailModal) return;
+        
+        if (rejectReasonText) rejectReasonText.textContent = item.teacher_note || '(ไม่ระบุเหตุผล)';
+        if (rejectVerifierName && item.verifier) {
+            rejectVerifierName.textContent = `${item.verifier.firstname} ${item.verifier.lastname || ''}`.trim();
+        }
+        if (rejectVerifierRole && item.verifier) {
+            rejectVerifierRole.textContent = item.verifier.role || 'STAFF';
+        }
+        
+        if (rejectVerifyTime && item.verified_at) {
+            const vTime = new Date(item.verified_at);
+            rejectVerifyTime.textContent = vTime.toLocaleDateString('th-TH', { 
+                year: 'numeric', month: 'long', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+        }
+
+        const backdrop = document.getElementById('backdrop-reject-detail');
+        const modalContent = rejectDetailModal.querySelector('.modal-content');
+        rejectDetailModal.classList.remove('hidden');
+        if (modalContent) modalContent.classList.add('fade-in');
+        if (backdrop) backdrop.classList.add('backdrop-fade-in');
+    };
+
+    if (btnRejectDetailClose) btnRejectDetailClose.addEventListener('click', closeRejectModal);
+    if (btnRejectDetailConfirm) btnRejectDetailConfirm.addEventListener('click', closeRejectModal);
+    const backdropReject = document.getElementById('backdrop-reject-detail');
+    if (backdropReject) backdropReject.addEventListener('click', closeRejectModal);
 
     // Init
     const init = async () => {
@@ -274,4 +721,214 @@ export function initAdminLogs(imageLogo, imageBander) {
         await fetchLogs();
     };
     init();
+
+    // ============================================================
+    //  VERIFY ALL MODAL LOGIC
+    // ============================================================
+
+    // ดึงรายการที่กรองแล้ว (ตาม room + search)
+    function getFilteredLogs() {
+        const currentRoom = roomFilter ? roomFilter.value : 'all';
+        const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
+
+        let filtered = currentRoom === 'all'
+            ? allLogsData
+            : allLogsData.filter(item => item.class_id_record === currentRoom);
+
+        if (searchTerm) {
+            filtered = filtered.filter(item => {
+                const fullName = `${item.firstname_record} ${item.lastname_record}`.toLowerCase();
+                const stuId = (item.stu_id_record || '').toLowerCase();
+                return fullName.includes(searchTerm) || stuId.includes(searchTerm);
+            });
+        }
+        return filtered;
+    }
+
+    function openVerifyAllModal() {
+        if (!verifyAllModal) return;
+        const items = getFilteredLogs().filter(item => !item.verification_status || item.verification_status === 'pending');
+        if (items.length === 0) return;
+
+        // Update count
+        if (verifyAllCount) verifyAllCount.textContent = `${items.length} รายการ`;
+
+        // Populate student list
+        if (verifyAllList) {
+            verifyAllList.innerHTML = '';
+            items.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-3 py-3 border-b-2 border-[#1E1E1E]/10 last:border-0';
+                
+                // Dropdown Options
+                const options = [
+                    { val: 'present',  label: 'Present',  color: 'bg-[#73CB8F]' },
+                    { val: 'sick',     label: 'Sick',     color: 'bg-[#E25C5C] text-white' },
+                    { val: 'personal', label: 'Personal', color: 'bg-[#F2A00F]' },
+                    { val: 'activity', label: 'Activity', color: 'bg-[#5C9EE2] text-white' },
+                    { val: 'absent',   label: 'Absent',   color: 'bg-[#1E1E1E] text-white' }
+                ];
+
+                const currentStatus = item.status?.toLowerCase() || 'present';
+
+                row.innerHTML = `
+                    <span class="w-7 h-7 shrink-0 flex items-center justify-center border-2 border-[#1E1E1E] text-xs font-black bg-[#EEEDDE] shadow-[2px_2px_0px_#1E1E1E]">${idx + 1}</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-black truncate">${item.firstname_record || ''} ${item.lastname_record || ''}</p>
+                        <p class="text-[9px] font-bold opacity-50 uppercase tracking-tighter">ID: ${item.stu_id_record || '-'} · ROOM: ${item.class_id_record || '-'}</p>
+                    </div>
+                    <div class="shrink-0 w-[100px]">
+                        <select class="verify-all-status-select w-full px-2 py-1.5 border-2 border-[#1E1E1E] text-[10px] font-black uppercase shadow-[2px_2px_0px_#1E1E1E] focus:outline-none cursor-pointer bg-white" data-id="${item.id}">
+                            ${options.map(opt => `<option value="${opt.val}" ${opt.val === currentStatus ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+                verifyAllList.appendChild(row);
+
+                // Add color change listener for the select
+                const select = row.querySelector('.verify-all-status-select');
+                const updateSelectStyle = (val) => {
+                    const optCfg = options.find(o => o.val === val);
+                    select.className = `verify-all-status-select w-full px-2 py-1.5 border-2 border-[#1E1E1E] text-[10px] font-black uppercase shadow-[2px_2px_0px_#1E1E1E] focus:outline-none cursor-pointer ${optCfg.color}`;
+                };
+                select.addEventListener('change', (e) => updateSelectStyle(e.target.value));
+                updateSelectStyle(currentStatus);
+            });
+        }
+
+        // Reset submit button
+        if (btnVerifyAllSubmit) {
+            btnVerifyAllSubmit.disabled = true;
+            btnVerifyAllSubmit.textContent = 'Approve All';
+            btnVerifyAllSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed';
+        }
+
+        // Show modal
+        const content = verifyAllModal.querySelector('.verify-all-content');
+        const backdrop = document.getElementById('backdrop-verify-all');
+        verifyAllModal.classList.remove('hidden');
+        if (content) {
+            content.classList.remove('fade-out');
+            content.classList.add('fade-in');
+        }
+        if (backdrop) {
+            backdrop.classList.remove('backdrop-fade-out');
+            backdrop.classList.add('backdrop-fade-in');
+        }
+
+        // Start countdown
+        startVerifyAllCountdown();
+    }
+
+    function closeVerifyAllModal() {
+        if (!verifyAllModal) return;
+        if (verifyAllCountdownTimer) {
+            clearInterval(verifyAllCountdownTimer);
+            verifyAllCountdownTimer = null;
+        }
+
+        const content = verifyAllModal.querySelector('.verify-all-content');
+        const backdrop = document.getElementById('backdrop-verify-all');
+        if (content && backdrop) {
+            content.classList.remove('fade-in');
+            content.classList.add('fade-out');
+            backdrop.classList.remove('backdrop-fade-in');
+            backdrop.classList.add('backdrop-fade-out');
+            setTimeout(() => {
+                verifyAllModal.classList.add('hidden');
+                content.classList.remove('fade-out');
+                content.classList.add('fade-in');
+                backdrop.classList.remove('backdrop-fade-out');
+            }, 300);
+        } else {
+            verifyAllModal.classList.add('hidden');
+        }
+    }
+
+    function startVerifyAllCountdown() {
+        let secondsLeft = 5;
+        const totalDash = 97.39;
+
+        if (verifyAllCountdownCircle) verifyAllCountdownCircle.style.strokeDashoffset = '0';
+        if (verifyAllCountdownNumber) verifyAllCountdownNumber.textContent = '5';
+        if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'กรุณาอ่านข้อมูล...';
+
+        verifyAllCountdownTimer = setInterval(() => {
+            secondsLeft--;
+            if (verifyAllCountdownNumber) verifyAllCountdownNumber.textContent = secondsLeft;
+            if (verifyAllCountdownCircle) verifyAllCountdownCircle.style.strokeDashoffset = `${totalDash * ((5 - secondsLeft) / 5)}`;
+
+            if (secondsLeft <= 0) {
+                clearInterval(verifyAllCountdownTimer);
+                verifyAllCountdownTimer = null;
+                if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'พร้อมแล้ว!';
+                if (verifyAllCountdownNumber) verifyAllCountdownNumber.textContent = '✓';
+                // Unlock button
+                if (btnVerifyAllSubmit) {
+                    btnVerifyAllSubmit.disabled = false;
+                    btnVerifyAllSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#73CB8F] hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+                }
+            }
+        }, 1000);
+    }
+
+    async function handleVerifyAllSubmit() {
+        const items = getFilteredLogs().filter(item => !item.verification_status || item.verification_status === 'pending');
+        if (items.length === 0) return;
+
+        // Lock button
+        if (btnVerifyAllSubmit) {
+            btnVerifyAllSubmit.disabled = true;
+            btnVerifyAllSubmit.textContent = 'Processing...';
+            btnVerifyAllSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed';
+        }
+
+        try {
+            // Collect statuses from dropdowns
+            const selects = document.querySelectorAll('.verify-all-status-select');
+            
+            // Batch update using Promise.all for safe partial updates
+            const updatePromises = Array.from(selects).map(sel => {
+                return supabase
+                    .from('attendance_logs')
+                    .update({
+                        final_status: sel.value,
+                        verification_status: 'approved',
+                        verified_by: currentUserId,
+                        verified_at: new Date().toISOString()
+                    })
+                    .eq('id', sel.getAttribute('data-id'));
+            });
+
+            const results = await Promise.all(updatePromises);
+
+            // Check for errors in any of the updates
+            const errorResult = results.find(res => res.error);
+            if (errorResult) {
+                console.error('Batch update error:', errorResult.error);
+                alert('เกิดข้อผิดพลาดในการบันทึก: ' + errorResult.error.message);
+                if (btnVerifyAllSubmit) {
+                    btnVerifyAllSubmit.disabled = false;
+                    btnVerifyAllSubmit.textContent = 'Approve All';
+                    btnVerifyAllSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#73CB8F] hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+                }
+                return;
+            }
+
+            // Success
+            closeVerifyAllModal();
+            setTimeout(() => {
+                fetchLogs();
+            }, 350);
+
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            alert('เกิดข้อผิดพลาดที่ไม่คาดคิด');
+            if (btnVerifyAllSubmit) {
+                btnVerifyAllSubmit.disabled = false;
+                btnVerifyAllSubmit.textContent = 'Approve All';
+                btnVerifyAllSubmit.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#73CB8F] hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
+            }
+        }
+    }
 }
