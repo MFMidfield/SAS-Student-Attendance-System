@@ -1,5 +1,5 @@
 import { supabase } from "../../../lib/supabaseClient";
-import { showToast } from "../../../lib/ui";
+import { showToast, escapeHTML } from "../../../lib/ui";
 
 export function initStudentSchedule(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
@@ -26,7 +26,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
     }
 
     let userRole = 'student'; // Default role
-    let userClassId = null; // เก็บ class_id ของนักเรียน (เช่น "4/9")
+    let userClassId = null; // Store student's class_id (e.g., "4/9")
 
     const scheduleList = document.getElementById('schedule-list');
     const roomFilter = document.getElementById('room-filter');
@@ -37,7 +37,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // ดึง Role และ class_id จากตาราง profiles
+        // Fetch Role and class_id from profiles table
         const { data: profile } = await supabase
             .from('profiles')
             .select('role, class_id')
@@ -48,7 +48,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
             userRole = profile.role;
             userClassId = profile.class_id;
             
-            // แสดงตัวกรองห้อง เฉพาะเมื่อเป็น admin หรือ teacher เท่านั้น
+            // Show room filter only for admin or teacher roles
             if (userRole === 'admin' || userRole === 'teacher') {
                 if (roomFilter) roomFilter.classList.remove('hidden');
             }
@@ -79,7 +79,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
 
         let query = supabase.from('schedule').select('*');
 
-        // ถ้านักเรียน ให้ดึงเฉพาะตารางของห้องตัวเอง (เทียบกับคอลัมน์ room ใน schedule)
+        // If student, fetch only their own class schedule
         if (userRole === 'student' && userClassId) {
             query = query.eq('room', userClassId);
         }
@@ -97,7 +97,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
             return;
         }
 
-        // --- อัปเดตตัวเลือกห้อง (Room Filter) ---
+        // --- Update Room Filter options ---
         const currentFilter = roomFilter.value;
         const rooms = [...new Set(data.map(item => item.room))].filter(Boolean);
         roomFilter.innerHTML = '<option value="all">ALL ROOMS</option>';
@@ -109,7 +109,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
         });
         roomFilter.value = currentFilter;
 
-        // --- กรองข้อมูลตามห้องที่เลือกและวันที่เลือก ---
+        // --- Filter data by selected room and day ---
         const roomVal = roomFilter ? roomFilter.value : 'all';
         const dayVal = dayFilter ? dayFilter.value : 'all';
 
@@ -155,14 +155,14 @@ export function initStudentSchedule(imageLogo, imageBander) {
                         <span class="text-[10px] font-bold text-[#1E1E1E]/60">${item.start_time.substring(0, 5)} — ${item.end_time.substring(0, 5)}</span>
                     </div>
                     <div class="px-3 py-2 border-b border-[#1E1E1E]/10">
-                        <p class="font-bold text-sm text-[#1E1E1E] leading-tight truncate">${item.subject_name}</p>
+                        <p class="font-bold text-sm text-[#1E1E1E] leading-tight truncate">${escapeHTML(item.subject_name)}</p>
                     </div>
                     <div class="px-3 py-1.5 flex items-center gap-1.5">
                         <svg class="w-3 h-3 shrink-0 opacity-40" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        <span class="text-[10px] font-bold text-[#1E1E1E]/50 truncate">${item.teacher_name}</span>
-                        <span class="ml-auto text-[9px] font-bold text-[#1E1E1E]/30 uppercase shrink-0">RM ${item.room}</span>
+                        <span class="text-[10px] font-bold text-[#1E1E1E]/50 truncate">${escapeHTML(item.teacher_name)}</span>
+                        <span class="ml-auto text-[9px] font-bold text-[#1E1E1E]/30 uppercase shrink-0">RM ${escapeHTML(item.room)}</span>
                     </div>
                 </div>
             `;
@@ -190,7 +190,7 @@ export function initStudentSchedule(imageLogo, imageBander) {
         }
     };
 
-    // เริ่มต้นระบบ: เช็คสิทธิ์ก่อน แล้วค่อยดึงข้อมูล
+    // Initialize system: Check permissions then fetch data
     const init = async () => {
         setDefaultDay();
         await checkUserPermissions();

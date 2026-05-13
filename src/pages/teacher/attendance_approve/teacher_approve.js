@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabaseClient";
+import { escapeHTML } from "../../../lib/ui";
 
 export function initTeacherApprove(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
@@ -29,8 +30,8 @@ export function initTeacherApprove(imageLogo, imageBander) {
     const dateFilter = document.getElementById('date-filter');
     const searchFilter = document.getElementById('search-filter');
 
-    let allLogsData = []; // เก็บข้อมูลทั้งหมดที่ดึงมา เพื่อให้ค้นหาได้เร็วโดยไม่ต้องดึง DB ใหม่
-    let currentVerifyItem = null; // เก็บ item ที่กำลัง verify อยู่
+    let allLogsData = []; // Store all fetched logs to enable fast local search
+    let currentVerifyItem = null; // Store the item currently being verified
     let confirmAction = null; // 'approve' | 'unapprove'
     let countdownTimer = null;
     let verifyAllCountdownTimer = null;
@@ -43,7 +44,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
         
         dateFilter.min = "2026-05-01";
         dateFilter.max = todayStr;
-        dateFilter.value = todayStr; // Default เป็นวันปัจจุบัน
+        dateFilter.value = todayStr; // Default to current date
     };
     setupDateFilter();
 
@@ -99,11 +100,11 @@ export function initTeacherApprove(imageLogo, imageBander) {
 
     // --- Helper: Status ---
     const STATUS_CONFIG = {
-        present:  { label: 'มาเรียน',  bg: 'bg-[#73CB8F]', text: 'text-[#1E1E1E]', tag: 'PRESENT'  },
-        sick:     { label: 'ลาป่วย',   bg: 'bg-[#E25C5C]', text: 'text-white',      tag: 'SICK'     },
-        personal: { label: 'ลากิจ',    bg: 'bg-[#F2A00F]', text: 'text-[#1E1E1E]', tag: 'PERSONAL' },
-        activity: { label: 'กิจกรรม', bg: 'bg-[#5C9EE2]', text: 'text-white',      tag: 'ACTIVITY' },
-        absent:   { label: 'ขาดเรียน', bg: 'bg-[#1E1E1E]', text: 'text-white',      tag: 'ABSENT'   },
+        present:  { label: 'Present',  bg: 'bg-[#73CB8F]', text: 'text-[#1E1E1E]', tag: 'PRESENT'  },
+        sick:     { label: 'Sick',     bg: 'bg-[#E25C5C]', text: 'text-white',      tag: 'SICK'     },
+        personal: { label: 'Personal', bg: 'bg-[#F2A00F]', text: 'text-[#1E1E1E]', tag: 'PERSONAL' },
+        activity: { label: 'Activity', bg: 'bg-[#5C9EE2]', text: 'text-white',      tag: 'ACTIVITY' },
+        absent:   { label: 'Absent',   bg: 'bg-[#1E1E1E]', text: 'text-white',      tag: 'ABSENT'   },
     };
 
     const VERIFY_STATUS_CONFIG = {
@@ -159,7 +160,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
             }
             document.getElementById('note-subject').textContent = detailText;
         }
-        if (noteContent) noteContent.textContent = item.note?.trim() || '(ไม่มีหมายเหตุ)';
+        if (noteContent) noteContent.textContent = item.note?.trim() || '(No remarks)';
 
         if (noteStatusSelect) {
             noteStatusSelect.value = item.status ? item.status.toLowerCase() : 'none';
@@ -209,15 +210,15 @@ export function initTeacherApprove(imageLogo, imageBander) {
         const studentFullName = `${currentVerifyItem.firstname_record || ''} ${currentVerifyItem.lastname_record || ''}`.trim() || '-';
 
         if (action === 'approve') {
-            if (confirmTitle) confirmTitle.textContent = 'ยืนยัน Approve?';
-            if (confirmDesc) confirmDesc.textContent = 'ข้อมูลจะถูกอัปเดตสถานะเป็น "อนุมัติแล้ว"';
+            if (confirmTitle) confirmTitle.textContent = 'Confirm Approve?';
+            if (confirmDesc) confirmDesc.textContent = 'Status will be updated to "APPROVED"';
             if (confirmIconWrapper) confirmIconWrapper.className = 'w-16 h-16 border-3 border-[#1E1E1E] flex items-center justify-center shadow-[4px_4px_0px_#1E1E1E] bg-[#73CB8F]';
             if (confirmIconApprove) confirmIconApprove.classList.remove('hidden');
             if (confirmIconUnapprove) confirmIconUnapprove.classList.add('hidden');
             if (confirmReasonContainer) confirmReasonContainer.classList.add('hidden');
         } else {
-            if (confirmTitle) confirmTitle.textContent = 'ยืนยัน Unapprove?';
-            if (confirmDesc) confirmDesc.textContent = 'ข้อมูลจะถูกอัปเดตสถานะเป็น "ไม่อนุมัติ"';
+            if (confirmTitle) confirmTitle.textContent = 'Confirm Unapprove?';
+            if (confirmDesc) confirmDesc.textContent = 'Status will be updated to "REJECTED"';
             if (confirmIconWrapper) confirmIconWrapper.className = 'w-16 h-16 border-3 border-[#1E1E1E] flex items-center justify-center shadow-[4px_4px_0px_#1E1E1E] bg-[#E25C5C]';
             if (confirmIconApprove) confirmIconApprove.classList.add('hidden');
             if (confirmIconUnapprove) confirmIconUnapprove.classList.remove('hidden');
@@ -289,7 +290,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
         // Reset ring
         if (countdownCircle) countdownCircle.style.strokeDashoffset = '0';
         if (countdownNumber) countdownNumber.textContent = '3';
-        if (countdownLabel) countdownLabel.textContent = 'กรุณาอ่านข้อมูล...';
+        if (countdownLabel) countdownLabel.textContent = 'Please review info...';
 
         countdownTimer = setInterval(() => {
             secondsLeft--;
@@ -299,7 +300,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
             if (secondsLeft <= 0) {
                 clearInterval(countdownTimer);
                 countdownTimer = null;
-                if (countdownLabel) countdownLabel.textContent = 'พร้อมแล้ว!';
+                if (countdownLabel) countdownLabel.textContent = 'Ready!';
                 if (countdownNumber) countdownNumber.textContent = '✓';
                 unlockSubmitButton();
             }
@@ -361,7 +362,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
 
             if (updateError) {
                 console.error('Error updating attendance_logs:', updateError);
-                alert('เกิดข้อผิดพลาดในการบันทึก: ' + updateError.message);
+                alert('Error saving data: ' + updateError.message);
                 resetSubmitButton();
                 return;
             }
@@ -370,12 +371,12 @@ export function initTeacherApprove(imageLogo, imageBander) {
             closeConfirmModal();
             setTimeout(() => {
                 closeNoteModal();
-                fetchLogs(); // รีเฟรชข้อมูล
+                fetchLogs(); // Refresh data
             }, 350);
 
         } catch (err) {
             console.error('Unexpected error:', err);
-            alert('เกิดข้อผิดพลาดที่ไม่คาดคิด');
+            alert('An unexpected error occurred');
             resetSubmitButton();
         }
     };
@@ -398,12 +399,12 @@ export function initTeacherApprove(imageLogo, imageBander) {
         const currentRoom = roomFilter ? roomFilter.value : 'all';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
 
-        // 1. กรองตามห้อง
+        // 1. Filter by room
         let filtered = currentRoom === 'all' 
             ? allLogsData 
             : allLogsData.filter(item => item.class_id_record === currentRoom);
 
-        // 2. กรองตามคำค้นหา (ชื่อ, นามสกุล, รหัส)
+        // 2. Filter by search term (firstname, lastname, stu_id)
         if (searchTerm) {
             filtered = filtered.filter(item => {
                 const fullName = `${item.firstname_record} ${item.lastname_record}`.toLowerCase();
@@ -415,21 +416,27 @@ export function initTeacherApprove(imageLogo, imageBander) {
         const pendingCount = filtered.filter(item => !item.verification_status || item.verification_status === 'pending').length;
         const verifyAllContainer = document.getElementById('verify-all-container');
 
-        if (pendingCount === 0) {
-            if (logsContainer && logsContainer.innerHTML === '') {
+        if (logsContainer) logsContainer.innerHTML = '';
+
+        if (filtered.length === 0) {
+            if (logsContainer) {
                 logsContainer.innerHTML = `<div class="text-center py-10 opacity-30 font-bold uppercase italic tracking-tighter">
-                    ${searchTerm ? 'No results matching your search.' : 'No attendance logs found.'}
+                    ${searchTerm ? 'No results matching your search.' : 'NO DATA FOR TODAY'}
                 </div>`;
             }
             if (verifyAllContainer) verifyAllContainer.classList.add('hidden');
+            return; // Stop if no data
         } else {
             if (verifyAllContainer) {
-                verifyAllContainer.classList.remove('hidden');
-                if (btnVerifyAll) btnVerifyAll.textContent = `✓ Verify All Pending (${pendingCount})`;
+                if (pendingCount > 0) {
+                    verifyAllContainer.classList.remove('hidden');
+                    if (btnVerifyAll) btnVerifyAll.textContent = `✓ Verify All Pending (${pendingCount})`;
+                } else {
+                    verifyAllContainer.classList.add('hidden');
+                }
             }
         }
 
-        if (logsContainer) logsContainer.innerHTML = '';
         filtered.forEach(item => {
             const cfg = getStatus(item.status);
             const vCfg = getVerifyStatus(item.verification_status);
@@ -450,7 +457,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
 
             let verifierInfo = '';
             if (!isPending && item.verifier) {
-                verifierInfo = ` <span class="opacity-40 mx-1">|</span> ตรวจโดย: ${item.verifier.firstname} (${item.verifier.role})`;
+                verifierInfo = ` <span class="opacity-40 mx-1">|</span> Verified by: ${item.verifier.firstname} (${item.verifier.role})`;
             }
 
             const row = document.createElement('div');
@@ -466,7 +473,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
                 btnClass = hasNote ? 'bg-[#F2C00F]' : 'bg-white';
                 btnClass += ' hover:bg-[#5C9EE2] hover:text-white';
             } else if (isApproved) {
-                btnClass = 'bg-[#5C9EE2] text-white cursor-not-allowed opacity-70'; // ฟ้า-ขาว
+                btnClass = 'bg-[#5C9EE2] text-white cursor-not-allowed opacity-70'; // Blue-White
                 btnDisabled = true;
             } else if (isRejected) {
                 btnClass = 'bg-[#E25C5C] text-white hover:bg-[#C54B4B]';
@@ -483,15 +490,15 @@ export function initTeacherApprove(imageLogo, imageBander) {
                     <div class="px-3 py-1 border-b-2 border-[#1E1E1E] bg-[#EEEDDE]/50 text-[10px] font-bold flex items-center gap-2">
                         <span>${timeStr}</span>
                         <span class="opacity-40">·</span>
-                        <span>ห้อง ${item.class_id_record || '-'}</span>
+                        <span>Room ${item.class_id_record || '-'}</span>
                         <span class="opacity-40">·</span>
                         <span class="px-1.5 py-0.5 rounded-sm ${vCfg.bg} ${vCfg.text} text-[8px] font-black uppercase tracking-tighter">${vCfg.label}</span>
                     </div>
                     <div class="px-3 py-2 border-b-2 border-[#1E1E1E] font-bold text-sm leading-tight truncate">
-                        ${item.firstname_record || ''} ${item.lastname_record || ''}
+                        ${escapeHTML(item.firstname_record || '')} ${escapeHTML(item.lastname_record || '')}
                     </div>
                     <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
-                        รหัส ${item.stu_id_record || '-'} <span class="opacity-40">|</span> ${detailText}${verifierInfo}
+                        ID ${escapeHTML(item.stu_id_record || '-')} <span class="opacity-40">|</span> ${escapeHTML(detailText)}${escapeHTML(verifierInfo)}
                     </div>
                 </div>
                 <button class="view-btn w-12 shrink-0 flex flex-col items-center justify-center gap-1 border-l-2 border-[#1E1E1E] ${btnClass} transition-colors" title="${btnText}" ${btnDisabled ? 'disabled' : ''}>
@@ -529,7 +536,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
             )
         `);
 
-        // กรองตามวันที่
+        // Filter by date
         if (dateFilter && dateFilter.value) {
             const selectedDate = dateFilter.value;
             query = query
@@ -537,7 +544,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
                 .lte('created_at', `${selectedDate}T23:59:59.999Z`);
         }
 
-        // กรองตาม Role
+        // Filter by Role
         if (userRole === 'student' && userClassId) {
             query = query.eq('class_id_record', userClassId);
         }
@@ -552,7 +559,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
 
         allLogsData = data || [];
 
-        // อัปเดตตัวเลือกใน Room Filter
+        // Update Room Filter options
         if (roomFilter && (userRole === 'admin' || userRole === 'teacher')) {
             roomFilter.classList.remove('hidden');
             const currentRoom = roomFilter.value || 'all';
@@ -585,12 +592,12 @@ export function initTeacherApprove(imageLogo, imageBander) {
     if (btnConfirmCancel) btnConfirmCancel.addEventListener('click', closeConfirmModal);
 
     // Filters
-    if (roomFilter) roomFilter.addEventListener('change', renderLogs); // เปลี่ยนห้องไม่ต้องดึง DB ใหม่
-    if (dateFilter) dateFilter.addEventListener('change', fetchLogs); // เปลี่ยนวันที่ต้องดึง DB ใหม่
-    if (searchFilter) searchFilter.addEventListener('input', renderLogs); // พิมพ์ค้นหาไม่ต้องดึง DB ใหม่ (Instant Search)
+    if (roomFilter) roomFilter.addEventListener('change', renderLogs); // Room change doesn't require new DB fetch
+    if (dateFilter) dateFilter.addEventListener('change', fetchLogs); // Date change requires new DB fetch
+    if (searchFilter) searchFilter.addEventListener('input', renderLogs); // Instant Search
     if (backBtn) backBtn.addEventListener('click', () => { window.location.hash = '#teacher-dashboard'; });
 
-    // คลิก backdrop ปิด modal
+    // Click backdrop to close modal
     const backdropNote = document.getElementById('backdrop-note');
     if (backdropNote) backdropNote.addEventListener('click', closeNoteModal);
 
@@ -621,7 +628,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
     const openRejectModal = (item) => {
         if (!rejectDetailModal) return;
         
-        if (rejectReasonText) rejectReasonText.textContent = item.teacher_note || '(ไม่ระบุเหตุผล)';
+        if (rejectReasonText) rejectReasonText.textContent = item.teacher_note || '(No reason provided)';
         if (rejectVerifierName && item.verifier) {
             rejectVerifierName.textContent = `${item.verifier.firstname} ${item.verifier.lastname || ''}`.trim();
         }
@@ -660,7 +667,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
     //  VERIFY ALL MODAL LOGIC
     // ============================================================
 
-    // ดึงรายการที่กรองแล้ว (ตาม room + search)
+    // Get filtered logs (by room + search)
     function getFilteredLogs() {
         const currentRoom = roomFilter ? roomFilter.value : 'all';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
@@ -685,7 +692,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
         if (items.length === 0) return;
 
         // Update count
-        if (verifyAllCount) verifyAllCount.textContent = `${items.length} รายการ`;
+        if (verifyAllCount) verifyAllCount.textContent = `${items.length} items`;
 
         // Populate student list
         if (verifyAllList) {
@@ -708,8 +715,8 @@ export function initTeacherApprove(imageLogo, imageBander) {
                 row.innerHTML = `
                     <span class="w-7 h-7 shrink-0 flex items-center justify-center border-2 border-[#1E1E1E] text-xs font-black bg-[#EEEDDE] shadow-[2px_2px_0px_#1E1E1E]">${idx + 1}</span>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-black truncate">${item.firstname_record || ''} ${item.lastname_record || ''}</p>
-                        <p class="text-[9px] font-bold opacity-50 uppercase tracking-tighter">ID: ${item.stu_id_record || '-'} · ROOM: ${item.class_id_record || '-'}</p>
+                        <p class="text-xs font-black truncate">${escapeHTML(item.firstname_record || '')} ${escapeHTML(item.lastname_record || '')}</p>
+                        <p class="text-[9px] font-bold opacity-50 uppercase tracking-tighter">ID: ${escapeHTML(item.stu_id_record || '-')} · ROOM: ${escapeHTML(item.class_id_record || '-')}</p>
                     </div>
                     <div class="shrink-0 w-[100px]">
                         <select class="verify-all-status-select w-full px-2 py-1.5 border-2 border-[#1E1E1E] text-[10px] font-black uppercase shadow-[2px_2px_0px_#1E1E1E] focus:outline-none cursor-pointer bg-white" data-id="${item.id}">
@@ -785,7 +792,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
 
         if (verifyAllCountdownCircle) verifyAllCountdownCircle.style.strokeDashoffset = '0';
         if (verifyAllCountdownNumber) verifyAllCountdownNumber.textContent = '5';
-        if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'กรุณาอ่านข้อมูล...';
+        if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'Please review info...';
 
         verifyAllCountdownTimer = setInterval(() => {
             secondsLeft--;
@@ -795,7 +802,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
             if (secondsLeft <= 0) {
                 clearInterval(verifyAllCountdownTimer);
                 verifyAllCountdownTimer = null;
-                if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'พร้อมแล้ว!';
+                if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'Ready!';
                 if (verifyAllCountdownNumber) verifyAllCountdownNumber.textContent = '✓';
                 // Unlock button
                 if (btnVerifyAllSubmit) {
@@ -840,7 +847,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
             const errorResult = results.find(res => res.error);
             if (errorResult) {
                 console.error('Batch update error:', errorResult.error);
-                alert('เกิดข้อผิดพลาดในการบันทึก: ' + errorResult.error.message);
+                alert('Error saving data: ' + errorResult.error.message);
                 if (btnVerifyAllSubmit) {
                     btnVerifyAllSubmit.disabled = false;
                     btnVerifyAllSubmit.textContent = 'Approve All';
@@ -857,7 +864,7 @@ export function initTeacherApprove(imageLogo, imageBander) {
 
         } catch (err) {
             console.error('Unexpected error:', err);
-            alert('เกิดข้อผิดพลาดที่ไม่คาดคิด');
+            alert('An unexpected error occurred');
             if (btnVerifyAllSubmit) {
                 btnVerifyAllSubmit.disabled = false;
                 btnVerifyAllSubmit.textContent = 'Approve All';

@@ -92,8 +92,8 @@ export function initLogin() {
                 const role = profile.role;
                 const enteredStuId = document.getElementById('student-id').value.trim();
 
-                // Check Student ID for student role
-                if (role === 'student') {
+                // Check Student ID for student and leader role
+                if (role === 'student' || role === 'leader') {
                     if (!enteredStuId || enteredStuId !== profile.stu_id) {
                         await supabase.auth.signOut();
                         msgElement.textContent = 'Invalid Student ID.';

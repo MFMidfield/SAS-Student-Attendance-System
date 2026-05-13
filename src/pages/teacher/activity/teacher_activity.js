@@ -1,5 +1,5 @@
 import { supabase } from '../../../lib/supabaseClient.js'
-import { showToast } from "../../../lib/ui";
+import { showToast, escapeHTML } from "../../../lib/ui";
 
 export function initTeacherActivity(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
@@ -124,9 +124,9 @@ export function initTeacherActivity(imageLogo, imageBander) {
                     <div class="flex-1 p-3 min-w-0">
                         <div class="flex items-start justify-between gap-2 h-full">
                             <div class="flex-1 flex flex-col min-w-0 justify-center h-full">
-                                <p class="text-xs font-black text-[#1E1E1E] uppercase tracking-wide truncate">${escapeHtml(activity.title)}</p>
-                                <p class="text-[9px] font-bold text-[#1E1E1E]/50 mt-0.5">${startTime} - ${endTime} • ${escapeHtml(activity.location || 'TBA')}</p>
-                                <p class="text-[9px] font-bold text-[#1E1E1E]/40 mt-1 line-clamp-1">${escapeHtml(activity.description || 'No description')}</p>
+                                <p class="text-xs font-black text-[#1E1E1E] uppercase tracking-wide truncate">${escapeHTML(activity.title)}</p>
+                                <p class="text-[9px] font-bold text-[#1E1E1E]/50 mt-0.5">${startTime} - ${endTime} • ${escapeHTML(activity.location || 'TBA')}</p>
+                                <p class="text-[9px] font-bold text-[#1E1E1E]/40 mt-1 line-clamp-1">${escapeHTML(activity.description || 'No description')}</p>
                             </div>
                         </div>
                     </div>
@@ -161,14 +161,7 @@ export function initTeacherActivity(imageLogo, imageBander) {
         });
     };
 
-    const escapeHtml = (unsafe) => {
-        return (unsafe || '').toString()
-             .replace(/&/g, "&amp;")
-             .replace(/</g, "&lt;")
-             .replace(/>/g, "&gt;")
-             .replace(/"/g, "&quot;")
-             .replace(/'/g, "&#039;");
-    }
+
 
 
 

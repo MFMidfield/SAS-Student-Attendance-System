@@ -87,40 +87,40 @@
             </div>
             <div class="grid grid-cols-2 gap-2.5">
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ชื่อ-นามสกุล</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Full Name</p>
                     <p id="note-student-name" class="text-sm font-black leading-tight">-</p>
                 </div>
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">รหัสนักเรียน</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Student ID</p>
                     <p id="note-student-id" class="text-sm font-black">-</p>
                 </div>
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ห้องเรียน</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Classroom</p>
                     <p id="note-class" class="text-sm font-black">-</p>
                 </div>
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E] flex flex-col justify-between">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">สถานะ</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Status</p>
                     <select id="note-status-select" class="w-full px-2 py-1 border-2 border-[#1E1E1E] text-xs font-bold uppercase shadow-[2px_2px_0px_#1E1E1E] bg-white focus:outline-none cursor-pointer">
                         <option value="none">NONE</option>
-                        <option value="present">มาเรียน</option>
-                        <option value="sick">ลาป่วย</option>
-                        <option value="personal">ลากิจ</option>
-                        <option value="activity">กิจกรรม</option>
+                        <option value="present">Present</option>
+                        <option value="sick">Sick</option>
+                        <option value="personal">Personal Leave</option>
+                        <option value="activity">Activity</option>
                     </select>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-2.5">
                 <div class="border-2 border-[#1E1E1E] bg-[#EEEDDE] p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">วันที่-เวลา</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Date & Time</p>
                     <p id="note-date" class="text-sm font-black">-</p>
                 </div>
                 <div class="border-2 border-[#1E1E1E] bg-[#EEEDDE] p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">วิชา</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Subject</p>
                     <p id="note-subject" class="text-sm font-black leading-tight">-</p>
                 </div>
             </div>
             <div class="border-2 border-[#1E1E1E] bg-white p-4 shadow-[2px_2px_0px_#1E1E1E] min-h-[60px]">
-                <p class="text-[9px] font-bold uppercase opacity-50 mb-2">หมายเหตุ</p>
+                <p class="text-[9px] font-bold uppercase opacity-50 mb-2">Note</p>
                 <p id="note-content" class="text-sm font-bold leading-relaxed opacity-80 italic whitespace-pre-wrap">-</p>
             </div>
             <div class="flex gap-3 mt-1">
@@ -137,8 +137,8 @@
                 <svg id="confirm-icon-approve" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 <svg id="confirm-icon-unapprove" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
             </div>
-            <h3 id="confirm-title" class="text-lg font-black uppercase tracking-wider text-center">ยืนยันการดำเนินการ?</h3>
-            <p id="confirm-desc" class="text-sm font-bold text-center opacity-70 leading-relaxed">กรุณายืนยันว่าคุณต้องการดำเนินการนี้</p>
+            <h3 id="confirm-title" class="text-lg font-black uppercase tracking-wider text-center">Confirm Action?</h3>
+            <p id="confirm-desc" class="text-sm font-bold text-center opacity-70 leading-relaxed">Please confirm that you want to proceed with this action.</p>
             <div class="flex items-center gap-3">
                 <div class="relative w-10 h-10">
                     <svg class="countdown-ring w-10 h-10" viewBox="0 0 36 36">
@@ -147,16 +147,16 @@
                     </svg>
                     <span id="countdown-number" class="absolute inset-0 flex items-center justify-center text-sm font-black">3</span>
                 </div>
-                <span id="countdown-label" class="text-xs font-bold opacity-50 uppercase">กรุณารอ...</span>
+                <span id="countdown-label" class="text-xs font-bold opacity-50 uppercase">Please wait...</span>
             </div>
             <div class="w-full border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E] text-center">
-                <p class="text-[9px] font-bold uppercase opacity-50 mb-1">นักเรียน</p>
+                <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Student</p>
                 <p id="confirm-student-name" class="text-sm font-black">-</p>
             </div>
             
             <div id="confirm-reason-container" class="w-full hidden">
-                <p class="text-[10px] font-bold uppercase text-[#1E1E1E] mb-1">เหตุผลการไม่อนุมัติ <span class="text-[#E25C5C]">*</span></p>
-                <textarea id="confirm-reason-input" rows="2" placeholder="กรุณาระบุเหตุผล..." class="w-full p-2 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-xs font-bold focus:outline-none resize-none transition-all"></textarea>
+                <p class="text-[10px] font-bold uppercase text-[#1E1E1E] mb-1">Rejection Reason <span class="text-[#E25C5C]">*</span></p>
+                <textarea id="confirm-reason-input" rows="2" placeholder="Please provide a reason..." class="w-full p-2 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-xs font-bold focus:outline-none resize-none transition-all"></textarea>
             </div>
             <div class="flex gap-3 w-full">
                 <button id="btn-confirm-submit" class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed" disabled>Submit</button>
@@ -175,12 +175,12 @@
                     </div>
                     <div>
                         <h2 class="text-base font-black uppercase tracking-wider">Verify All</h2>
-                        <p id="verify-all-count" class="text-[10px] font-bold opacity-50">0 รายการ</p>
+                        <p id="verify-all-count" class="text-[10px] font-bold opacity-50">0 items</p>
                     </div>
                 </div>
                 <button id="btn-verify-all-close" class="w-8 h-8 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[2px_2px_0px_#1E1E1E] font-bold text-sm transition-colors">✕</button>
             </div>
-            <p class="text-xs font-bold opacity-60 leading-relaxed">รายชื่อนักเรียนทั้งหมดที่จะถูก Approve และบันทึกลงระบบ</p>
+            <p class="text-xs font-bold opacity-60 leading-relaxed">List of all students to be Approved and saved to the system.</p>
             <div id="verify-all-list" class="flex-1 overflow-y-auto space-y-2 max-h-[300px] border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]"></div>
             <div class="flex items-center justify-center gap-3">
                 <div class="relative w-10 h-10">
@@ -190,7 +190,7 @@
                     </svg>
                     <span id="verify-all-countdown-number" class="absolute inset-0 flex items-center justify-center text-sm font-black">5</span>
                 </div>
-                <span id="verify-all-countdown-label" class="text-xs font-bold opacity-50 uppercase">กรุณารอ...</span>
+                <span id="verify-all-countdown-label" class="text-xs font-bold opacity-50 uppercase">Please wait...</span>
             </div>
             <div class="flex gap-3 w-full">
                 <button id="btn-verify-all-submit" class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed" disabled>Approve All</button>
@@ -214,18 +214,18 @@
             </div>
             
             <div class="border-2 border-[#1E1E1E] bg-[#E25C5C]/10 p-4 shadow-[2px_2px_0px_#E25C5C]">
-                <p class="text-[10px] font-bold uppercase text-[#E25C5C] mb-2">เหตุผลที่ไม่อนุมัติ</p>
+                <p class="text-[10px] font-bold uppercase text-[#E25C5C] mb-2">Reason for Rejection</p>
                 <p id="reject-reason-text" class="text-sm font-bold leading-relaxed whitespace-pre-wrap text-[#1E1E1E] italic">--</p>
             </div>
 
             <div class="grid grid-cols-1 gap-2.5">
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ผู้ตรวจสอบ</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Verifier</p>
                     <p id="reject-verifier-name" class="text-sm font-black text-[#1E1E1E]">--</p>
                     <p id="reject-verifier-role" class="text-[10px] font-bold opacity-60 uppercase">--</p>
                 </div>
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
-                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">เวลาที่ตรวจสอบ</p>
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Verification Time</p>
                     <p id="reject-verify-time" class="text-sm font-black text-[#1E1E1E]">--</p>
                 </div>
             </div>

@@ -883,3 +883,357 @@ ALTER COLUMN leave_scope SET DEFAULT 'period';
 UPDATE public.attendance_logs 
 SET leave_scope = 'full_day' 
 WHERE status IN ('sick', 'personal', 'activity') AND leave_scope = 'period';
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+create or replace function restrict_role_update() returns trigger as $$
+    begin
+      -- ถ้ามีการพยายามเปลี่ยน role
+      if old.role is distinct from new.role then
+        -- ตรวจสอบว่าผู้ที่กำลังเปลี่ยน ใช่ admin หรือไม่
+        if (auth.jwt() -> 'user_metadata' ->> 'role') is distinct from 'admin' then
+          raise exception 'ไม่อนุญาตให้เปลี่ยนระดับสิทธิ์ (role) ด้วยตัวเอง';
+        end if;
+      end if;
+      return new;
+    end;
+    $$ language plpgsql security definer;
+
+    drop trigger if exists prevent_unauthorized_role_update on public.profiles;
+    create trigger prevent_unauthorized_role_update
+      before update on public.profiles
+      for each row execute procedure restrict_role_update();
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- 1. ตาราง Profiles (ข้อมูลพื้นฐาน)
+ALTER TABLE public.profiles ALTER COLUMN firstname TYPE varchar(100);
+ALTER TABLE public.profiles ALTER COLUMN lastname TYPE varchar(100);
+ALTER TABLE public.profiles ALTER COLUMN stu_id TYPE varchar(20);
+
+-- 2. ตาราง Attendance Logs (ข้อมูลการเช็คชื่อ)
+ALTER TABLE public.attendance_logs ALTER COLUMN stu_id_record TYPE varchar(20);
+ALTER TABLE public.attendance_logs ALTER COLUMN firstname_record TYPE varchar(100);
+ALTER TABLE public.attendance_logs ALTER COLUMN lastname_record TYPE varchar(100);
+ALTER TABLE public.attendance_logs ALTER COLUMN class_id_record TYPE varchar(20);
+ALTER TABLE public.attendance_logs ALTER COLUMN subject TYPE varchar(100);
+ALTER TABLE public.attendance_logs ALTER COLUMN note TYPE varchar(500);
+ALTER TABLE public.attendance_logs ALTER COLUMN teacher_note TYPE varchar(500);
+
+-- 3. ตาราง Schedule (ตารางเรียน)
+ALTER TABLE public.schedule ALTER COLUMN subject_name TYPE varchar(100);
+ALTER TABLE public.schedule ALTER COLUMN room TYPE varchar(50);
+ALTER TABLE public.schedule ALTER COLUMN teacher_name TYPE varchar(100);
+ALTER TABLE public.schedule ALTER COLUMN grade_level TYPE varchar(20);
+
+-- 4. ตาราง School Activities (กิจกรรมโรงเรียน)
+ALTER TABLE public.school_activities ALTER COLUMN title TYPE varchar(255);
+ALTER TABLE public.school_activities ALTER COLUMN description TYPE varchar(1000);
+ALTER TABLE public.school_activities ALTER COLUMN location TYPE varchar(255);
+ALTER TABLE public.school_activities ALTER COLUMN organizer TYPE varchar(100);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- ==========================================
+-- STEP 1: Drop trigger
+-- ==========================================
+DROP TRIGGER IF EXISTS on_profile_role_update ON public.profiles;
+
+-- ==========================================
+-- STEP 2: Drop ALL dependent policies
+-- ==========================================
+DROP POLICY IF EXISTS "Admins and Teachers can manage schedules" ON public.schedule;
+DROP POLICY IF EXISTS "Admins can view everything" ON public.profiles;
+DROP POLICY IF EXISTS "Admins, teachers, and leaders can view all attendance logs" ON public.attendance_logs;
+DROP POLICY IF EXISTS "Admins can update any profile" ON public.profiles;
+DROP POLICY IF EXISTS "Staff and leaders can delete logs" ON public.attendance_logs;
+DROP POLICY IF EXISTS "Staff can manage activities" ON public.school_activities;
+DROP POLICY IF EXISTS "Admins can manage all assets" ON public.user_assets;
+DROP POLICY IF EXISTS "Admins can manage user_assets" ON public.user_assets;
+DROP POLICY IF EXISTS "Teacher and Leader can view same class profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Staff update logs" ON public.attendance_logs;
+
+-- ==========================================
+-- STEP 3: Alter columns
+-- ==========================================
+ALTER TABLE public.profiles 
+  ALTER COLUMN role TYPE varchar USING role::varchar;
+
+ALTER TABLE public.profiles 
+  ALTER COLUMN class_id TYPE varchar USING class_id::varchar;
+
+-- ==========================================
+-- STEP 4: Recreate trigger
+-- ==========================================
+CREATE TRIGGER on_profile_role_update
+AFTER INSERT OR UPDATE ON public.profiles
+FOR EACH ROW
+EXECUTE FUNCTION sync_role_to_auth();
+
+-- ==========================================
+-- STEP 5: Recreate ALL policies
+-- ==========================================
+CREATE POLICY "Admins and Teachers can manage schedules"
+ON public.schedule
+FOR ALL TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = ANY (ARRAY['admin'::text, 'teacher'::text])
+  )
+);
+
+CREATE POLICY "Staff and leaders can delete logs"
+ON public.attendance_logs
+FOR DELETE TO public
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = ANY (ARRAY['admin'::text, 'teacher'::text, 'leader'::text])
+  )
+);
+
+CREATE POLICY "Staff update logs"
+ON public.attendance_logs
+FOR UPDATE TO public
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['admin'::text, 'teacher'::text, 'leader'::text])
+);
+
+CREATE POLICY "Staff can manage activities"
+ON public.school_activities
+FOR ALL TO public
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = ANY (ARRAY['admin'::text, 'teacher'::text])
+  )
+);
+
+CREATE POLICY "Admins can manage user_assets"
+ON public.user_assets
+FOR ALL TO authenticated
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin'::text
+);
+
+CREATE POLICY "Admins can manage all assets"
+ON public.user_assets TO public
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = ANY (ARRAY['admin'::text, 'teacher'::text])
+  )
+);
+
+CREATE POLICY "Admins can view everything"
+ON public.profiles TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::text
+  )
+);
+
+CREATE POLICY "Admins can update any profile"
+ON public.profiles TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'::text
+  )
+);
+
+CREATE POLICY "Admins, teachers, and leaders can view all attendance logs"
+ON public.attendance_logs TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = ANY (ARRAY['admin'::text, 'teacher'::text, 'leader'::text])
+  )
+);
+
+CREATE POLICY "Teacher and Leader can view same class profiles"
+ON public.profiles TO authenticated
+USING (
+  (((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['teacher'::text, 'leader'::text]))
+  AND
+  (((auth.jwt() -> 'user_metadata'::text) ->> 'class_id'::text) = class_id)
+);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- ==========================================
+-- Drop policies บน profiles ที่วนหาตัวเอง
+-- ==========================================
+DROP POLICY IF EXISTS "Admins can view everything" ON public.profiles;
+DROP POLICY IF EXISTS "Admins can update any profile" ON public.profiles;
+DROP POLICY IF EXISTS "Teacher and Leader can view same class profiles" ON public.profiles;
+
+-- ==========================================
+-- Recreate ทั้งหมดโดยใช้ JWT (ไม่วนหาตัวเอง)
+-- ==========================================
+CREATE POLICY "Admins can view everything"
+ON public.profiles FOR SELECT TO authenticated
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin'
+);
+
+CREATE POLICY "Admins can update any profile"
+ON public.profiles FOR UPDATE TO authenticated
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin'
+);
+
+CREATE POLICY "Teacher and Leader can view same class profiles"
+ON public.profiles FOR SELECT TO authenticated
+USING (
+  (((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['teacher'::text, 'leader'::text]))
+  AND
+  (((auth.jwt() -> 'user_metadata'::text) ->> 'class_id'::text) = class_id)
+);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+drop policy if exists "Students insert their own logs" on public.attendance_logs;
+    create policy "Students insert their own logs" on public.attendance_logs 
+      for insert 
+      with check (
+        auth.uid() = student_id 
+        and verification_status = 'pending'
+      );
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------

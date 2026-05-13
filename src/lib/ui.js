@@ -1,3 +1,14 @@
+export const escapeHTML = (str) => {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, (tag) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[tag] || tag));
+};
+
 export const showToast = (message, type = 'success') => {
     let container = document.getElementById('toast-container');
     if (!container) {

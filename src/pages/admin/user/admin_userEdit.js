@@ -1,5 +1,5 @@
 import { supabase } from "../../../lib/supabaseClient";
-import { showToast } from "../../../lib/ui";
+import { showToast, escapeHTML } from "../../../lib/ui";
 
 export function initAdminUserEdit(userAvatar, pfdefault) {
     const backBtn = document.getElementById('btn-back');
@@ -45,7 +45,7 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
     let Timer;
     let deleteTimer;
     let userRole = 'student'; // Default role
-    let userClassId = null; // เก็บ class_id ของนักเรียน
+    let userClassId = null; // Store student class_id
 
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
@@ -75,20 +75,20 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
     const updateClassroomStatus = () => {
         if (!classIdInput || !roleInput) return;
 
-        // หา Option N/A ใน select
+        // Find N/A option in select
         const naOption = Array.from(classIdInput.options).find(opt => opt.value === 'N/A');
 
         if (roleInput.value === 'admin') {
-            if (naOption) naOption.hidden = false; // แสดง N/A
+            if (naOption) naOption.hidden = false; // Show N/A
             classIdInput.value = 'N/A';
             classIdInput.disabled = true;
             classIdInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'opacity-60');
         } else {
-            if (naOption) naOption.hidden = true; // ซ่อน N/A
+            if (naOption) naOption.hidden = true; // Hide N/A
             classIdInput.disabled = false;
             classIdInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'opacity-60');
 
-            // ถ้าค่าปัจจุบันเป็น N/A ให้ล้างออกเพื่อให้เลือกห้องจริงได้
+            // If current value is N/A, clear it to allow selecting a real room
             if (classIdInput.value === 'N/A') {
                 classIdInput.value = '';
             }
@@ -100,7 +100,7 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // ดึง Role และ class_id จากตาราง profiles
+        // Fetch Role and class_id from profiles table
         const { data: profile } = await supabase
             .from('profiles')
             .select('role, class_id')
@@ -153,15 +153,15 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
             classIdInput.value = data.class_id || '';
             roleInput.value = data.role || 'student';
 
-            // แสดง Email (ถ้ามีใน data)
+            // Show Email (if present in data)
             if (emailDisplay) {
                 emailDisplay.textContent = data.email || 'N/A';
             }
 
-            // ตรวจสอบสถานะ Classroom ทันทีที่เปิด Modal
+            // Check Classroom status immediately when opening Modal
             updateClassroomStatus();
 
-            // แสดงปุ่ม Delete เมื่ออยู่ในโหมด Edit
+            // Show Delete button in Edit mode
             if (deleteBtn) deleteBtn.classList.remove('hidden');
         }
 
@@ -354,7 +354,7 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
         fieldsToCheck.forEach(id => {
             const element = document.getElementById(id);
             if (element) {
-                // ถ้าเป็น Role Admin ไม่ต้องตรวจสอบช่อง Classroom (เพราะถูก disabled และเป็น N/A)
+                // If Role is Admin, no need to validate Classroom (since it's disabled and N/A)
                 if (id === 'class_id' && roleInput.value === 'admin') {
                     return;
                 }
@@ -379,7 +379,7 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
     const logList = document.getElementById('schedule-list');
     const searchFilter = document.getElementById('search-filter');
 
-    let allUsersData = []; // เก็บข้อมูลผู้ใช้ทั้งหมด
+    let allUsersData = []; // Store all user data
 
     // --- Render Users (Apply Filters) ---
     const renderUsers = () => {
@@ -387,17 +387,17 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
         const currentClass = classFilter ? classFilter.value : 'all';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
 
-        // 1. กรองตาม Role
+        // 1. Filter by Role
         let filtered = currentRole === 'all'
             ? allUsersData
             : allUsersData.filter(item => item.role === currentRole);
 
-        // 2. กรองตาม ห้องเรียน
+        // 2. Filter by Classroom
         if (currentClass !== 'all') {
             filtered = filtered.filter(item => item.class_id === currentClass);
         }
 
-        // 3. กรองตามคำค้นหา (ชื่อ, นามสกุล, รหัส)
+        // 3. Filter by search term (firstname, lastname, stu_id)
         if (searchTerm) {
             filtered = filtered.filter(item => {
                 const fullName = `${item.firstname} ${item.lastname}`.toLowerCase();
@@ -431,10 +431,10 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
                 </div>
                 <div class="flex-1 flex flex-col min-w-0">
                     <div class="px-3 py-1 border-b-2 border-[#1E1E1E] bg-[#EEEDDE]/50 text-[10px] font-bold truncate">
-                        ID: ${stuId} &nbsp;|&nbsp; Class: ${classId} |&nbsp; Class: ${item.role || 'N/A'}
+                        ID: ${escapeHTML(stuId)} &nbsp;|&nbsp; Class: ${escapeHTML(classId)} |&nbsp; Role: ${escapeHTML(item.role || 'N/A')}
                     </div>
                     <div class="px-3 py-2 font-bold text-[13px] leading-tight truncate">
-                        ${displayName}
+                        ${escapeHTML(displayName)}
                     </div>
                 </div>
                 <button class="edit-item-btn w-12 shrink-0 flex items-center justify-center border-l-2 border-[#1E1E1E] bg-white hover:bg-[#F2C00F] transition-colors">
@@ -573,7 +573,7 @@ export function initAdminUserEdit(userAvatar, pfdefault) {
         }
     });
 
-    // เริ่มต้นระบบ: เช็คสิทธิ์ก่อน แล้วค่อยดึงข้อมูล
+    // Initializing: Check permissions first, then fetch data
     const init = async () => {
         await checkUserPermissions();
         await fetchUsers();
