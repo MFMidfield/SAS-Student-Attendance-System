@@ -50,18 +50,18 @@ const ROUTES = {
     '#login':    { template: LoginPage,      init: initLogin,      auth: false },
     '#register': { template: RegisterPage,   init: initRegister,   auth: false },
     '#parent-check': { template: ParentCheckPage, init: initParentCheck, auth: false },
-    '#student':  { template: Student, init: () => initStudent(logo, bander), auth: true, allowedRoles: ['student'] },
-    '#student-dashboard': { template: StudentDashBoard, init: () => initStudentDashBoard(logo, bander), auth: true, allowedRoles: ['student'] },
-    '#student-schedule': { template: StudentSchedule, init: () => initStudentSchedule(logo, bander), auth: true, allowedRoles: ['student'] },
-    '#student-setting': { template: StudentSetting, init: () => initStudentSetting(logo, bander), auth: true, allowedRoles: ['student'] },
-    '#admin-user-edit': { template: AdminUserEdit, init: () => initAdminUserEdit(logo, bander), auth: true, allowedRoles: ['admin'] },
-    '#admin-setting': { template: AdminSetting, init: () => initAdminSetting(logo, bander), auth: true, allowedRoles: ['admin'] },
-    '#admin-dashboard': { template: AdminDashBoard, init: () => initAdminDashBoard(logo, bander), auth: true, allowedRoles: ['admin'] },
-    '#admin-schedule': { template: AdminSchedule, init: () => initAdminSchedule(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-logs': { template: AdminLogs, init: () => initAdminLogs(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-verify-logs': { template: AdminVerifyLogs, init: () => initAdminVerifyLogs(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-approve': { template: AdminApprove, init: () => initAdminApprove(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-activity': { template: AdminActivity, init: () => initAdminActivity(logo, bander), auth: true, allowedRoles: ['admin'] },
+    '#student':  { template: Student, init: (avatar) => initStudent(avatar, bander), auth: true, allowedRoles: ['student'] },
+    '#student-dashboard': { template: StudentDashBoard, init: (avatar) => initStudentDashBoard(avatar, bander), auth: true, allowedRoles: ['student'] },
+    '#student-schedule': { template: StudentSchedule, init: (avatar) => initStudentSchedule(avatar, bander), auth: true, allowedRoles: ['student'] },
+    '#student-setting': { template: StudentSetting, init: (avatar) => initStudentSetting(avatar, bander), auth: true, allowedRoles: ['student'] },
+    '#admin-user-edit': { template: AdminUserEdit, init: (avatar) => initAdminUserEdit(avatar, bander), auth: true, allowedRoles: ['admin'] },
+    '#admin-setting': { template: AdminSetting, init: (avatar) => initAdminSetting(avatar, bander), auth: true, allowedRoles: ['admin'] },
+    '#admin-dashboard': { template: AdminDashBoard, init: (avatar) => initAdminDashBoard(avatar, bander), auth: true, allowedRoles: ['admin'] },
+    '#admin-schedule': { template: AdminSchedule, init: (avatar) => initAdminSchedule(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-logs': { template: AdminLogs, init: (avatar) => initAdminLogs(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-verify-logs': { template: AdminVerifyLogs, init: (avatar) => initAdminVerifyLogs(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-approve': { template: AdminApprove, init: (avatar) => initAdminApprove(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-activity': { template: AdminActivity, init: (avatar) => initAdminActivity(avatar, bander), auth: true, allowedRoles: ['admin'] },
 };
 async function render() {
     const app = document.querySelector('#app');
@@ -72,6 +72,10 @@ async function render() {
     
     // หา Route ที่ตรงกับ Hash ปัจจุบัน (ถ้าไม่เจอให้ไปหน้าแรก)
     const route = ROUTES[hash] || ROUTES[''];
+
+    // 1. เตรียมรูปโปรไฟล์ (Default คือ logo)
+    let userAvatarUrl = logo;
+
     // --- ระบบ Auth Guard (ป้องกันการเข้าหน้าโดยไม่ได้รับอนุญาต) ---
     
     // 1. ถ้าหน้านี้ต้องใช้ Auth แต่ไม่มี Session -> ไปหน้า Login
@@ -81,6 +85,18 @@ async function render() {
     }
 
     if (session) {
+        // ดึงรูป Avatar จากตาราง user_assets
+        const { data: asset } = await supabase
+            .from('user_assets')
+            .select('url')
+            .eq('user_id', session.user.id)
+            .eq('asset_type', 'avatar')
+            .maybeSingle();
+        
+        if (asset && asset.url) {
+            userAvatarUrl = asset.url;
+        }
+
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
         const userRole = profile ? profile.role : 'student';
 
@@ -109,7 +125,7 @@ async function render() {
     
     // รันฟังก์ชัน Setup ของหน้านั้นๆ (ถ้ามี)
     if (route.init) {
-        route.init();
+        route.init(userAvatarUrl);
     }
 }
 // Event Listeners

@@ -616,6 +616,139 @@ end $$;
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 
+-- (ทางเลือก) หากน้องอยากแยกตารางเก็บประวัติรูปภาพ (เช่น เปลี่ยนรูปบ่อย)
+create table public.user_assets (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  asset_type text check (asset_type in ('logo', 'banner', 'avatar')),
+  url text not null,
+  created_at timestamptz default now()
+);
+
+create table public.school_activities (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,                -- ชื่อกิจกรรม
+  description text,                   -- คำอธิบาย (Note)
+  location text,                      -- สถานที่จัด
+  activity_date date not null,        -- วันที่จัดกิจกรรม
+  start_time time not null,           -- เวลาเริ่ม
+  end_time time not null,             -- เวลาสิ้นสุด
+  organizer text default 'โรงเรียน',   -- ผู้จัดกิจกรรม (สภานักเรียน, ชมรม, etc.)
+  created_at timestamptz default now(),
+  
+  constraint check_times check (start_time < end_time)
+);
+
+-- เปิดใช้งาน RLS
+alter table public.school_activities enable row level security;
+
+-- 1. ทุกคน (รวมนักเรียน) สามารถดูกิจกรรมได้
+create policy "Anyone can view activities" 
+on public.school_activities for select 
+using (true);
+
+-- 2. เฉพาะ Admin และ Teacher เท่านั้นที่สร้าง/แก้ไข/ลบกิจกรรมได้
+create policy "Staff can manage activities" 
+on public.school_activities for all
+using (
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid() 
+    and role in ('admin', 'teacher')
+  )
+);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+insert into public.user_assets (user_id, asset_type, url)
+select 
+    id, 
+    'logo', 
+    'https://canva.link/6ak2df25jxzs2jv' -- ใส่ URL รูปเริ่มต้นของน้องตรงนี้
+from public.profiles;
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+-- เปิดใช้งาน RLS
+alter table public.user_assets enable row level security;
+
+-- 1. ทุกคนสามารถดูรูป Logo/Avatar ของคนอื่นได้ (เช่น ในหน้าโปรไฟล์เพื่อน)
+create policy "Anyone can view assets" 
+on public.user_assets for select 
+using (true);
+
+-- 2. เจ้าของ ID เท่านั้นที่เพิ่ม/แก้ไข/ลบ รูปของตัวเองได้
+create policy "Users can manage their own assets" 
+on public.user_assets for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+-- 3. Admin และ Teacher สามารถจัดการรูปของใครก็ได้ (เพื่อลบรูปที่ไม่เหมาะสม)
+create policy "Admins can manage all assets" 
+on public.user_assets for all
+using (
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid() 
+    and role in ('admin', 'teacher')
+  )
+);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Anyone can view avatars" on storage.objects;
+create policy "Anyone can view avatars"
+on storage.objects for select
+using ( bucket_id = 'avatars' );
+
+drop policy if exists "Users can upload own avatars" on storage.objects;
+create policy "Users can upload own avatars"
+on storage.objects for insert
+to authenticated
+with check (
+    bucket_id = 'avatars' AND 
+    (auth.uid()::text = (storage.foldername(name))[1])
+);
+
+drop policy if exists "Users can update own avatars" on storage.objects;
+create policy "Users can update own avatars"
+on storage.objects for update
+to authenticated
+using (
+    bucket_id = 'avatars' AND 
+    (auth.uid()::text = (storage.foldername(name))[1])
+);
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
 
 
 --------------------------------------------------------------------------------------------------------------------

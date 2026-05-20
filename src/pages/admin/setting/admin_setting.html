@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Lunar PJ Admin</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
@@ -92,6 +93,21 @@
             </div>
 
             <div class="space-y-3">
+                <!-- Change Avatar Button -->
+                <button id="btn-change-avatar"
+                    class="w-full flex items-center gap-3 p-3.5 bg-[#B4F8C8] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all">
+                    <div class="w-10 h-10 shrink-0 bg-white/30 border-2 border-[#1E1E1E] flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-sm font-bold uppercase tracking-wider block">Change Avatar</span>
+                        <span class="text-[10px] font-bold opacity-60">Upload and crop profile picture</span>
+                    </div>
+                </button>
+                
                 <!-- Logout Button -->
                 <button id="btn-logout"
                     class="w-full flex items-center gap-3 p-3.5 bg-[#D96C6C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all">
@@ -105,6 +121,7 @@
                         <span class="text-[10px] font-bold opacity-60">Sign out of your account</span>
                     </div>
                 </button>
+
             </div>
         </div>
 
@@ -163,6 +180,90 @@
         </div>
     </div>
 
+    <!-- Avatar Crop Modal -->
+    <div id="avatar-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <!-- Backdrop with Blur -->
+        <div id="avatar-backdrop" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in"></div>
+
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-5 fade-in">
+            
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black uppercase tracking-tight text-[#1E1E1E]">Change Profile Picture</h2>
+            </div>
+            
+            <!-- Upload Area -->
+            <div class="space-y-3">
+                <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                <button id="btn-select-image" class="w-full py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase text-sm tracking-wider flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    Select Image
+                </button>
+            </div>
+
+            <!-- Crop Area -->
+            <div id="crop-container" class="bg-gray-100 border-2 border-dashed border-[#1E1E1E]/30 min-h-[300px] max-h-[400px] overflow-hidden relative">
+                <img id="avatar-crop-image" src="" style="display:block; max-width:100%; opacity:0;">
+                <div id="avatar-placeholder" class="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-40 text-[#1E1E1E]">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p class="text-xs font-bold uppercase tracking-widest">No image selected</p>
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="flex flex-row w-full gap-3 mt-2">
+                <button id="btn-save-avatar"
+                    class="flex-1 py-3 bg-[#B4F8C8] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
+                    ✓ Save
+                </button>
+                <button id="btn-cancel-avatar"
+                    class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
+                    ✕ Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Confirmation Modal -->
+    <div id="save-modal" class="fixed inset-0 z-[60] flex items-center justify-center hidden p-4">
+        <!-- Backdrop -->
+        <div id="save-backdrop" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in"></div>
+
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-8 flex flex-col items-center text-center gap-5 fade-in">
+            <!-- Icon -->
+            <div class="bg-[#B4F8C8] border-2 border-[#1E1E1E] p-4 shadow-[3px_3px_0px_#1E1E1E]">
+                <svg class="w-10 h-10" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+
+            <!-- Text -->
+            <div class="space-y-1">
+                <h2 class="text-2xl font-black uppercase tracking-tight text-[#1E1E1E]">Save Changes?</h2>
+                <p class="text-[#1E1E1E] text-sm font-bold opacity-60">Do you want to update your profile picture?</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-row w-full gap-3">
+                <button id="btn-confirm-save"
+                    class="flex-1 py-3 bg-[#B4F8C8] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
+                    ✓ Confirm
+                </button>
+                <button id="btn-cancel-save"
+                    class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
+                    ✕ Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cropper loaded via index.html -->
 </body>
+
 
 </html>

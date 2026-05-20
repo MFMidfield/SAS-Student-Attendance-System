@@ -221,5 +221,83 @@ begin
 end $$;
 
 -- ========================================================
+-- 6. SCHOOL ACTIVITIES
+-- ========================================================
+
+create table if not exists public.school_activities (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,                -- ชื่อกิจกรรม
+  description text,                   -- คำอธิบาย (Note)
+  location text,                      -- สถานที่จัด
+  activity_date date not null,        -- วันที่จัดกิจกรรม
+  start_time time not null,           -- เวลาเริ่ม
+  end_time time not null,             -- เวลาสิ้นสุด
+  organizer text default 'โรงเรียน',   -- ผู้จัดกิจกรรม (สภานักเรียน, ชมรม, etc.)
+  created_at timestamptz default now(),
+  
+  constraint check_times check (start_time < end_time)
+);
+
+-- เปิดใช้งาน RLS
+alter table public.school_activities enable row level security;
+
+-- 1. ทุกคน (รวมนักเรียน) สามารถดูกิจกรรมได้
+drop policy if exists "Anyone can view activities" on public.school_activities;
+create policy "Anyone can view activities" 
+on public.school_activities for select 
+using (true);
+
+-- 2. เฉพาะ Admin และ Teacher เท่านั้นที่สร้าง/แก้ไข/ลบกิจกรรมได้
+drop policy if exists "Staff can manage activities" on public.school_activities;
+create policy "Staff can manage activities" 
+on public.school_activities for all
+using (
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid() 
+    and role in ('admin', 'teacher')
+  )
+);
+
+-- ========================================================
+-- 7. STORAGE BUCKET: AVATARS
+-- ========================================================
+
+-- 1. สร้าง Bucket ชื่อ avatars (ถ้ายังไม่มี) และตั้งค่าเป็น Public
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+-- 2. ตั้งค่า RLS สำหรับ Storage.objects
+-- หมายเหตุ: Storage ใน Supabase ใช้ตาราง storage.objects
+
+-- 2.1 Policy: ใครก็ได้สามารถดูรูปใน bucket avatars ได้ (SELECT)
+drop policy if exists "Anyone can view avatars" on storage.objects;
+create policy "Anyone can view avatars"
+on storage.objects for select
+using ( bucket_id = 'avatars' );
+
+-- 2.2 Policy: ผู้ใช้ที่ล็อกอินแล้วสามารถอัปโหลดรูปของตัวเองได้ (INSERT)
+-- ตรวจสอบว่า bucket_id คือ avatars และชื่อโฟลเดอร์แรกตรงกับ auth.uid()
+drop policy if exists "Users can upload own avatars" on storage.objects;
+create policy "Users can upload own avatars"
+on storage.objects for insert
+to authenticated
+with check (
+    bucket_id = 'avatars' AND 
+    (auth.uid()::text = (storage.foldername(name))[1])
+);
+
+-- 2.3 Policy: ผู้ใช้ที่ล็อกอินแล้วสามารถแก้ไขรูปของตัวเองได้ (UPDATE)
+drop policy if exists "Users can update own avatars" on storage.objects;
+create policy "Users can update own avatars"
+on storage.objects for update
+to authenticated
+using (
+    bucket_id = 'avatars' AND 
+    (auth.uid()::text = (storage.foldername(name))[1])
+);
+
+-- ========================================================
 -- SETUP COMPLETE
 -- ========================================================
