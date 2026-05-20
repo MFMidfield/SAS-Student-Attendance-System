@@ -27,6 +27,8 @@ export function initStudent(imageLogo, imageBander) {
         return user;
     };
 
+
+    /* 
     // Fetch subjects from schedule based on student's class_id
     const fetchSubjects = async (user) => {
         if (!user || !subjectSelect) return;
@@ -61,16 +63,19 @@ export function initStudent(imageLogo, imageBander) {
             option.textContent = subject;
             subjectSelect.appendChild(option);
         });
-
         // Auto-select first subject if available
         if (uniqueSubjects.length > 0) {
             // subjectSelect.value = uniqueSubjects[0]; // Optional: auto select
         }
     };
+    */
 
+    fetchUserName();
+    /*
     fetchUserName().then(user => {
         if (user) fetchSubjects(user);
     });
+    */
 
     if (studentImage && imageLogo) {
         studentImage.src = imageLogo;
@@ -102,11 +107,11 @@ export function initStudent(imageLogo, imageBander) {
     if (statusButtons.sick) statusButtons.sick.addEventListener('click', () => selectStatus('sick'));
     if (statusButtons.personal) statusButtons.personal.addEventListener('click', () => selectStatus('personal'));
 
-    let Timer;
+    let countdownTimer;
     const modal = document.getElementById('modal');
-    const timerDisplay = document.getElementById('timer');
-    const timerLabel = document.getElementById('timer-label');
-    const timerUnit = document.getElementById('timer-unit');
+    const countdownCircle = document.getElementById('countdown-circle');
+    const countdownNumber = document.getElementById('countdown-number');
+    const countdownLabel = document.getElementById('countdown-label');
     const confirmBtn = document.getElementById('btn-confirm');
     const cancelBtn = document.getElementById('btn-cancel');
 
@@ -142,9 +147,9 @@ export function initStudent(imageLogo, imageBander) {
                 modal.classList.add('hidden');
             }
         }
-        clearInterval(Timer);
-        if (confirmBtn && confirmBtn._waitInterval) {
-            clearInterval(confirmBtn._waitInterval);
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
         }
     };
 
@@ -205,7 +210,7 @@ export function initStudent(imageLogo, imageBander) {
             }
 
             const backdrop = document.getElementById('backdrop');
-            if (modal && timerDisplay) {
+            if (modal) {
                 // Populate summary info
                 if (summaryStatus) {
                     summaryStatus.textContent = currentStatus;
@@ -228,51 +233,37 @@ export function initStudent(imageLogo, imageBander) {
                 }
 
                 modal.classList.remove('hidden');
-                let timeLeft = 10;
-                timerDisplay.textContent = timeLeft;
 
-                // Handle 5-second delay for confirm button
+                // Handle 5-second countdown
                 if (confirmBtn) {
                     confirmBtn.disabled = true;
-                    confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    let waitTime = 5;
-                    confirmBtn.textContent = `Confirm (${waitTime})`;
+                    confirmBtn.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed';
+                    confirmBtn.textContent = 'Confirm';
                     
-                    // Show review message
-                    if (timerLabel) timerLabel.textContent = "Please review your information";
-                    if (timerDisplay) timerDisplay.classList.add('hidden');
-                    if (timerUnit) timerUnit.classList.add('hidden');
+                    let secondsLeft = 5;
+                    const totalDash = 97.39;
 
-                    const waitInterval = setInterval(() => {
-                        waitTime--;
-                        if (waitTime > 0) {
-                            confirmBtn.textContent = `Confirm (${waitTime})`;
-                        } else {
-                            clearInterval(waitInterval);
+                    if (countdownCircle) countdownCircle.style.strokeDashoffset = '0';
+                    if (countdownNumber) countdownNumber.textContent = '5';
+                    if (countdownLabel) countdownLabel.textContent = 'Please wait...';
+
+                    countdownTimer = setInterval(() => {
+                        secondsLeft--;
+                        if (countdownNumber) countdownNumber.textContent = secondsLeft;
+                        if (countdownCircle) countdownCircle.style.strokeDashoffset = `${totalDash * ((5 - secondsLeft) / 5)}`;
+
+                        if (secondsLeft <= 0) {
+                            clearInterval(countdownTimer);
+                            countdownTimer = null;
+                            if (countdownLabel) countdownLabel.textContent = 'Ready!';
+                            if (countdownNumber) countdownNumber.textContent = '✓';
+                            
+                            // Unlock button
                             confirmBtn.disabled = false;
-                            confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            confirmBtn.className = 'flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-[#219653] text-[#1E1E1E] hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer';
                             confirmBtn.textContent = '✓ Confirm';
-
-                            // Restore auto-close timer labels and start countdown
-                            if (timerLabel) timerLabel.textContent = "Auto-closing in";
-                            if (timerDisplay) {
-                                timerDisplay.classList.remove('hidden');
-                                timerDisplay.textContent = timeLeft;
-                            }
-                            if (timerUnit) timerUnit.classList.remove('hidden');
-
-                            Timer = setInterval(() => {
-                                timeLeft--;
-                                if (timerDisplay) timerDisplay.textContent = timeLeft;
-                                if (timeLeft <= 0) {
-                                    closeModal();
-                                }
-                            }, 1000);
                         }
                     }, 1000);
-
-                    // Store waitInterval on the button so it can be cleared if modal closes early
-                    confirmBtn._waitInterval = waitInterval;
                 }
             }
         });
@@ -287,7 +278,8 @@ export function initStudent(imageLogo, imageBander) {
             console.log("Reason:", reason);
 
             if (reasonBox) reasonBox.value = "";
-            if (subjectSelect) subjectSelect.selectedIndex = 0;
+            // if (subjectSelect) subjectSelect.selectedIndex = 0;
+
             selectStatus('present');
             closeModal();
         });

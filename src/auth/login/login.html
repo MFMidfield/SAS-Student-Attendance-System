@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Lunar PJ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
+
+    <div id="login-card"
+        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+
+        <!-- Top Accent Bar -->
+        <div class="w-full h-2 bg-gradient-to-r from-[#F2C00F] via-[#E46F20] to-[#D96C6C]"></div>
+
+        <!-- Header Section -->
+        <div class="relative px-5 pt-5 pb-4">
+            <div class="flex items-center gap-4">
+                <!-- Logo Icon -->
+                <div class="shrink-0 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-3">
+                    <svg class="w-8 h-8" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                        <path d="M19 3v4" />
+                        <path d="M17 5h4" />
+                    </svg>
+                </div>
+
+                <!-- Title -->
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Welcome Back</p>
+                    <h1 class="text-2xl font-bold text-[#1E1E1E] tracking-tight"
+                        style="-webkit-text-stroke: 0.3px #1E1E1E;">Log In</h1>
+                </div>
+
+                <!-- Lock Icon -->
+                <div class="shrink-0 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
+
+        <!-- Form Section -->
+        <div class="px-5 pt-4 pb-2">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Credentials</span>
+            </div>
+
+            <form class="space-y-3" id="loginForm">
+                <div class="relative">
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Email</p>
+                    <input type="email" id="email" placeholder="your@email.com" required
+                        class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 transition-all focus:outline-none">
+                </div>
+                <div class="relative">
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Password</p>
+                    <input type="password" id="password" placeholder="••••••••" required
+                        pattern="^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.<>/?~` ]*$"
+                        title="Password must contain only English characters and special symbols."
+                        class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 transition-all focus:outline-none">
+                </div>
+                <div class="relative">
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Student ID (Only for Students)</p>
+                    <input type="text" id="student-id" placeholder="STD-XXXXX"
+                        class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 transition-all focus:outline-none">
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3.5 mt-1 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Confirm
+                </button>
+                <p id="msg" class="text-center font-bold text-sm"></p>
+            </form>
+        </div>
+
+        <!-- Links Section -->
+        <div class="px-5 pt-2 pb-5">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Options</span>
+            </div>
+            <div class="space-y-2">
+
+                <a href="#parent-check"
+                    class="w-full flex items-center gap-3 p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] transition-all cursor-pointer">
+                    <div class="w-8 h-8 shrink-0 bg-[#5B8DEF]/20 border border-[#1E1E1E]/30 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <span class="text-xs font-bold text-[#1E1E1E] uppercase tracking-wider">Parent Check</span>
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40">Check your child's attendance</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Accent -->
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#D96C6C] via-[#E46F20] to-[#F2C00F]"></div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="fade-in w-full max-w-[450px] mt-4">
+        <button id="btn-back"
+            class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span class="text-sm tracking-wider">Back</span>
+        </button>
+    </div>
+
+</body>
+
+</html>

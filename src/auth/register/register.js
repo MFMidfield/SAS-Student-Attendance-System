@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient.js'
+import { supabase } from '../../lib/supabaseClient.js'
 
 export function initRegister() {
     const registerBtn = document.getElementById('register');
@@ -16,7 +16,7 @@ export function initRegister() {
     const confirmPasswordInput = document.getElementById('confirm-password');
 
     const filterNonEnglish = (e) => {
-        const regex = /[^a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~` ]/g;
+        const regex = /[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?~` ]/g;
         if (regex.test(e.target.value)) {
             e.target.value = e.target.value.replace(regex, '');
         }
@@ -51,8 +51,6 @@ export function initRegister() {
                 element.classList.remove('border-red-500');
                 element.classList.add('border-[#1E1E1E]');
             }
-
-            // Clear red border when user types
             if (!element.dataset.hasListener) {
                 element.addEventListener('input', () => {
                     if (element.value.trim() !== "") {
@@ -66,9 +64,7 @@ export function initRegister() {
 
         if (hasEmpty) {
             msgElement.textContent = 'Please fill in all fields!'
-            msgElement.className = 'text-red-500 text-center font-bold'
-            
-            // หน่วงเวลา 2 วินาทีแล้วกลับเป็นสีเดิม
+            msgElement.className = 'text-red-500 text-center font-bold text-sm'
             setTimeout(() => {
                 fields.forEach(field => {
                     const element = document.getElementById(field.id);
@@ -78,7 +74,6 @@ export function initRegister() {
                 });
                 msgElement.textContent = '';
             }, 2000);
-            
             return;
         }
 
@@ -90,15 +85,12 @@ export function initRegister() {
         const password = document.getElementById('password').value
         const confirmPassword = document.getElementById('confirm-password').value
 
-        // Regex for English characters, numbers, and special symbols
-        const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~` ]*$/;
-
+        const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?~` ]*$/;
         if (!passwordRegex.test(password)) {
-            msgElement.textContent = 'Password must contain only English characters and special symbols!'
-            msgElement.className = 'text-red-500 text-center font-bold'
+            msgElement.textContent = 'Password must contain only English characters!'
+            msgElement.className = 'text-red-500 text-center font-bold text-sm'
             const pwdElem = document.getElementById('password');
             pwdElem.classList.add('border-red-500');
-            
             setTimeout(() => {
                 pwdElem.classList.remove('border-red-500');
                 pwdElem.classList.add('border-[#1E1E1E]');
@@ -109,10 +101,9 @@ export function initRegister() {
 
         if (password !== confirmPassword) {
             msgElement.textContent = 'Passwords do not match!'
-            msgElement.className = 'text-red-500 text-center font-bold'
+            msgElement.className = 'text-red-500 text-center font-bold text-sm'
             const confirmPwdElem = document.getElementById('confirm-password');
             confirmPwdElem.classList.add('border-red-500');
-
             setTimeout(() => {
                 confirmPwdElem.classList.remove('border-red-500');
                 confirmPwdElem.classList.add('border-[#1E1E1E]');
@@ -121,7 +112,6 @@ export function initRegister() {
             return
         }
 
-        // lastname, class_id, stu_id
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -138,10 +128,10 @@ export function initRegister() {
 
         if (error) {
             msgElement.textContent = error.message
-            msgElement.className = 'text-red-500 text-center font-bold'
+            msgElement.className = 'text-red-500 text-center font-bold text-sm'
         } else {
             msgElement.textContent = 'Registration successful! Please check your email.'
-            msgElement.className = 'text-green-600 text-center font-bold'
+            msgElement.className = 'text-green-600 text-center font-bold text-sm'
         }
     })
 }

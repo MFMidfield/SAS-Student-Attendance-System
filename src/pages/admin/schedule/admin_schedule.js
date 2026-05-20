@@ -41,6 +41,9 @@ export function initAdminSchedule(imageLogo, imageBander) {
     const scheduleList = document.getElementById('schedule-list');
     const roomFilter = document.getElementById('room-filter');
     const searchFilter = document.getElementById('search-filter');
+    const dayFilterBtns = document.querySelectorAll('.day-filter-btn');
+
+    let selectedDayFilter = '1';
 
     // Delete Confirmation Elements
     const deleteConfirmModal = document.getElementById('modal-delete-confirm');
@@ -125,13 +128,44 @@ export function initAdminSchedule(imageLogo, imageBander) {
             classIdInput.value = data.room;
             teacherNameInput.value = data.teacher_name;
 
-            // แสดงปุ่ม Delete เมื่ออยู่ในโหมด Edit
-            if (deleteBtn) deleteBtn.classList.remove('hidden');
+            // --- ข้อจำกัดสำหรับวิชาพิเศษ (Period 0 หรือ Homeroom) ---
+            const isSpecial = (data.period === 0 || (data.subject_name || '').toLowerCase() === 'homeroom');
+
+            if (isSpecial) {
+                // ห้ามลบ
+                if (deleteBtn) deleteBtn.classList.add('hidden');
+                // ล็อคฟิลด์สำคัญ
+                dayInput.disabled = true;
+                periodInput.disabled = true;
+                startTimeInput.disabled = true;
+                endTimeInput.disabled = true;
+                subjectInput.disabled = true;
+                classIdInput.disabled = true;
+
+                // เพิ่มสไตล์เพื่อให้ดูเหมือนถูกล็อค
+                [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
+                    el.classList.add('opacity-50', 'cursor-not-allowed');
+                });
+            } else {
+                // แสดงปุ่ม Delete เมื่ออยู่ในโหมด Edit ปกติ
+                if (deleteBtn) deleteBtn.classList.remove('hidden');
+                // ปลดล็อคฟิลด์
+                [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
+                    el.disabled = false;
+                    el.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+            }
         } else {
             modalTitle.textContent = 'Add Schedule';
             editIdInput.value = '';
             // Reset fields
             [startTimeInput, endTimeInput, subjectInput, classIdInput, teacherNameInput].forEach(i => i.value = '');
+            
+            // ปลดล็อคฟิลด์ทั้งหมดสำหรับโหมด Add
+            [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
+                el.disabled = false;
+                el.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
 
             // ซ่อนปุ่ม Delete เมื่ออยู่ในโหมด Add
             if (deleteBtn) deleteBtn.classList.add('hidden');
@@ -174,18 +208,30 @@ export function initAdminSchedule(imageLogo, imageBander) {
             ? allSchedulesData
             : allSchedulesData.filter(item => item.room === currentFilter);
 
-        // --- กรองตามคำค้นหา (วิชา และ ผู้สอน) ---
+        // --- กรองตามคำค้นหา (วิชา, ผู้สอน, ห้อง, คาบ) ---
         if (searchTerm) {
             filteredData = filteredData.filter(item => {
                 const subject = (item.subject_name || '').toLowerCase();
                 const teacher = (item.teacher_name || '').toLowerCase();
-                return subject.includes(searchTerm) || teacher.includes(searchTerm);
+                const room = (item.room || '').toLowerCase();
+                const period = (item.period || '').toString();
+
+                return subject.includes(searchTerm) || 
+                       teacher.includes(searchTerm) || 
+                       room.includes(searchTerm) || 
+                       period.includes(searchTerm);
             });
+        }
+
+        // --- กรองตามวันที่เลือก ---
+        if (selectedDayFilter !== 'all') {
+            const dayNum = parseInt(selectedDayFilter);
+            filteredData = filteredData.filter(item => item.day_of_week === dayNum);
         }
 
         if (filteredData.length === 0) {
             scheduleList.innerHTML = `<div class="text-center py-10 opacity-30 font-bold uppercase italic tracking-tighter">
-                ${searchTerm ? 'No schedule matching your search.' : 'No schedule found for this room.'}
+                No schedule found for this day or matching your search.
             </div>`;
             return;
         }
@@ -193,7 +239,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
         scheduleList.innerHTML = '';
         filteredData.forEach(item => {
             const row = document.createElement('div');
-            row.className = "flex border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] bg-white overflow-hidden fade-in mb-4";
+            row.className = "flex border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] bg-white overflow-hidden fade-in";
             const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
             const dayName = dayNames[item.day_of_week] || "N/A";
 
@@ -363,6 +409,23 @@ export function initAdminSchedule(imageLogo, imageBander) {
     if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteConfirm);
     if (roomFilter) roomFilter.addEventListener('change', renderSchedules);
     if (searchFilter) searchFilter.addEventListener('input', renderSchedules);
+
+    // --- Day Filter Event Listeners ---
+    dayFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedDayFilter = btn.getAttribute('data-day');
+            
+            // อัปเดต UI ของปุ่ม
+            dayFilterBtns.forEach(b => {
+                b.classList.remove('bg-[#F2C00F]');
+                b.classList.add('bg-white');
+            });
+            btn.classList.remove('bg-white');
+            btn.classList.add('bg-[#F2C00F]');
+
+            renderSchedules();
+        });
+    });
 
     if (confirmBtn) confirmBtn.addEventListener('click', () => {
         if (validateFields()) {

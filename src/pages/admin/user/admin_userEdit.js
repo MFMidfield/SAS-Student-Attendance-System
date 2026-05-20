@@ -221,7 +221,7 @@ export function initAdminUserEdit(imageLogo, imageBander) {
         scheduleList.innerHTML = '';
         filtered.forEach(item => {
             const row = document.createElement('div');
-            row.className = "flex border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] bg-white overflow-hidden fade-in mb-4";
+            row.className = "flex border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] bg-white overflow-hidden fade-in";
 
             const displayName = `${item.firstname || ''} ${item.lastname || ''}`.trim() || '(No Name)';
             const stuId = item.stu_id || '-';

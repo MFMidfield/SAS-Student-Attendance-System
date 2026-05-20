@@ -1,429 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Logs - Admin</title>
+    <title>Attendance Approve - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
-
-        body {
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-        }
-
-        /* Responsive for 375x667 (iPhone 6/7/8) */
+        body { font-family: 'M PLUS Rounded 1c', sans-serif; }
         @media (max-height: 670px) {
-            #main-card {
-                max-height: 95vh;
-                display: flex;
-                flex-direction: column;
-            }
-            #schedule-list {
-                max-height: 320px !important; 
-            }
+            #main-card { max-height: 95vh; display: flex; flex-direction: column; }
+            #schedule-list { max-height: 320px !important; }
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            to {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-        }
-
-        @keyframes backdropIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes backdropOut {
-            from {
-                opacity: 1;
-            }
-
-            to {
-                opacity: 0;
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes scaleOut {
-            from {
-                opacity: 1;
-                transform: scale(1);
-            }
-            to {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.35s ease forwards;
-        }
-
-        .fade-out {
-            animation: fadeOut 0.35s ease forwards;
-        }
-
-        .backdrop-fade-in {
-            animation: backdropIn 0.35s ease forwards;
-        }
-
-        .backdrop-fade-out {
-            animation: backdropOut 0.35s ease forwards;
-        }
-
-        .scale-in {
-            animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .scale-out {
-            animation: scaleOut 0.2s ease forwards;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #1E1E1E;
-            border-radius: 2px;
-        }
-
-        /* Countdown ring animation */
-        .countdown-ring {
-            transform: rotate(-90deg);
-        }
-        .countdown-ring circle {
-            transition: stroke-dashoffset 1s linear;
-        }
+        .countdown-ring { transform: rotate(-90deg); }
+        .countdown-ring circle { transition: stroke-dashoffset 1s linear; }
     </style>
 </head>
-
 <body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
-
-    <!-- Main Card -->
-    <div id="main-card"
-        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
-
-        <div class="relative mb-6 w-full border-b-2">
-            <div class="flex flex-row w-full">
-
-                <div class="flex-1 border-[#1E1E1E] px-4 p-2 flex justify-center items-center relative z-10">
-                    <span id="" class="text-[#1E1E1E] text-xl font-bold uppercase tracking-wider"
-                        style="-webkit-text-stroke: 0.5px #1E1E1E;">Attendance Logs</span>
+    <div id="main-card" class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+        <!-- Top Accent Bar -->
+        <div class="w-full h-2 bg-gradient-to-r from-[#73CB8F] via-[#5B8DEF] to-[#F2C00F]"></div>
+        <!-- Header -->
+        <div class="relative px-5 pt-5 pb-4">
+            <div class="flex items-center gap-4">
+                <div class="shrink-0 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 </div>
-
-
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Verify & Approve</p>
+                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Attendance Approve</h1>
+                </div>
             </div>
         </div>
-
-
-        <!-- Content -->
-        <div class="px-6 space-y-4 mb-6">
-            <!-- Header Row -->
-            <div class="flex justify-between items-center">
-                <div class="flex gap-2 justify-start mb-1">
-                    <!-- Date Filter -->
-                    <input type="date" id="date-filter" 
-                        onkeydown="return false"
-                        onclick="this.showPicker()"
-                        class="px-3 py-2 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[13px] font-bold focus:outline-none cursor-pointer hover:bg-[#EEEDDE] transition-colors">
-                    
-                    <!-- Room Filter (admin/teacher only — shown via JS) -->
-                    <select id="room-filter"
-                        class="px-3 py-2 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[14px] font-bold focus:outline-none cursor-pointer hover:bg-[#EEEDDE] transition-colors uppercase hidden">
-                        <option value="all">All Rooms</option>
-                    </select>
-                </div>
+        <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
+        <!-- Filters -->
+        <div class="px-5 pt-4 pb-2">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Filters</span>
             </div>
-
-            <!-- Search Filter -->
-                <div class="w-full relative mt-4">
-                    <input type="text" id="search-filter" placeholder="Search by Name, ID..." class="w-full px-4 py-2 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[13px] font-bold focus:outline-none placeholder-gray-500 transition-all">
-                    <svg class="w-5 h-5 absolute right-3 top-2.5 text-[#1E1E1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-
-            <!-- Verify All Button -->
-            <button id="btn-verify-all"
-                class="w-full py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hidden">
-                ✓ Verify All
-            </button>
-
-            <!-- Log List -->
-            <div id="schedule-list" class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                <div class="text-center py-10 opacity-50 font-bold">Loading...</div>
+            <div class="flex gap-2 mb-3">
+                <input type="date" id="date-filter" onkeydown="return false" onclick="this.showPicker()" class="px-3 py-2 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none cursor-pointer transition-colors">
+                <select id="room-filter" class="px-3 py-2 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none cursor-pointer uppercase hidden appearance-none">
+                    <option value="all">All Rooms</option>
+                </select>
+            </div>
+            <div class="w-full relative">
+                <input type="text" id="search-filter" placeholder="Search by Name, ID..." class="w-full px-4 py-2.5 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none placeholder-[#1E1E1E]/30 transition-all">
+                <svg class="w-4 h-4 absolute right-3 top-3 text-[#1E1E1E]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
         </div>
+        <!-- Verify All Button -->
+        <div class="px-5 pb-2">
+            <button id="btn-verify-all" class="w-full py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hidden">✓ Verify All</button>
+        </div>
+        <!-- Log List -->
+        <div class="px-5 pb-4">
+            <div id="schedule-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                <div class="bg-white border-2 border-[#1E1E1E] p-4 text-center shadow-[3px_3px_0px_#1E1E1E]">
+                    <p class="text-sm font-bold text-[#1E1E1E]/40 uppercase">Loading...</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#F2C00F] via-[#5B8DEF] to-[#73CB8F]"></div>
     </div>
-
     <!-- Back Button -->
-    <div class="fade-in flex flex-row justify-end items-center w-full max-w-[450px] mt-6">
-        <div class="w-full">
-            <button id="btn-back"
-                class="flex flex-row justify-center items-center w-full p-4 h-15 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-2xl font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                <span class="text-[#1E1E1E] text-xl font-bold uppercase tracking-wider"
-                    style="-webkit-text-stroke: 1px #1E1E1E;">Back</span>
-            </button>
-        </div>
+    <div class="fade-in w-full max-w-[450px] mt-4">
+        <button id="btn-back" class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <span class="text-sm tracking-wider">Back to Dashboard</span>
+        </button>
     </div>
-
-    <!-- ============================== -->
-    <!--  Verify Modal                  -->
-    <!-- ============================== -->
+    <!-- Verify Modal -->
     <div id="modal-note" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <!-- Backdrop -->
-        <div id="backdrop-note"
-            class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in cursor-pointer"></div>
-
-        <!-- Modal Content -->
-        <div
-            class="modal-content relative w-full max-w-[400px] bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-6 flex flex-col gap-5 fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
-
-            <!-- Header -->
+        <div id="backdrop-note" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in cursor-pointer"></div>
+        <div class="modal-content relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-4 fade-in max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="bg-[#5C9EE2] border-2 border-[#1E1E1E] p-2 shadow-[3px_3px_0px_#1E1E1E]">
-                        <!-- Shield/Verify Icon -->
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h2 class="text-lg font-black uppercase tracking-wider">Verify Attendance</h2>
+                    <h2 class="text-base font-black uppercase tracking-wider">Verify Attendance</h2>
                 </div>
-                <button id="btn-note-close"
-                    class="w-9 h-9 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[3px_3px_0px_#1E1E1E] font-bold hover:bg-[#E25C5C] hover:text-white transition-colors active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">
-                    ✕
-                </button>
+                <button id="btn-note-close" class="w-8 h-8 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[2px_2px_0px_#1E1E1E] font-bold text-sm transition-colors">✕</button>
             </div>
-
-            <!-- Student Info Grid -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[3px_3px_0px_#1E1E1E]">
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ชื่อ-นามสกุล</p>
                     <p id="note-student-name" class="text-sm font-black leading-tight">-</p>
                 </div>
-                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[3px_3px_0px_#1E1E1E]">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">รหัสนักเรียน</p>
                     <p id="note-student-id" class="text-sm font-black">-</p>
                 </div>
-                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[3px_3px_0px_#1E1E1E]">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ห้องเรียน</p>
                     <p id="note-class" class="text-sm font-black">-</p>
                 </div>
-                <div
-                    class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[3px_3px_0px_#1E1E1E] flex flex-col justify-between">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E] flex flex-col justify-between">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">สถานะ</p>
-                    <span id="note-status"
-                        class="inline-block px-3 py-1 border-2 border-[#1E1E1E] text-xs font-bold uppercase shadow-[2px_2px_0px_#1E1E1E] bg-gray-200">-</span>
+                    <span id="note-status" class="inline-block px-3 py-1 border-2 border-[#1E1E1E] text-xs font-bold uppercase shadow-[2px_2px_0px_#1E1E1E] bg-gray-200">-</span>
                 </div>
             </div>
-
-            <!-- Date & Subject -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="border-2 border-[#1E1E1E] bg-[#EEEDDE] p-3 shadow-[3px_3px_0px_#1E1E1E]">
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="border-2 border-[#1E1E1E] bg-[#EEEDDE] p-3 shadow-[2px_2px_0px_#1E1E1E]">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">วันที่-เวลา</p>
                     <p id="note-date" class="text-sm font-black">-</p>
                 </div>
-                <div class="border-2 border-[#1E1E1E] bg-[#EEEDDE] p-3 shadow-[3px_3px_0px_#1E1E1E]">
+                <div class="border-2 border-[#1E1E1E] bg-[#EEEDDE] p-3 shadow-[2px_2px_0px_#1E1E1E]">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">วิชา</p>
                     <p id="note-subject" class="text-sm font-black leading-tight">-</p>
                 </div>
             </div>
-
-            <!-- Note Content -->
-            <div class="border-2 border-[#1E1E1E] bg-white p-4 shadow-[3px_3px_0px_#1E1E1E] min-h-[80px]">
+            <div class="border-2 border-[#1E1E1E] bg-white p-4 shadow-[2px_2px_0px_#1E1E1E] min-h-[60px]">
                 <p class="text-[9px] font-bold uppercase opacity-50 mb-2">หมายเหตุ</p>
-                <p id="note-content" class="text-sm font-bold leading-relaxed opacity-80 italic whitespace-pre-wrap">-
-                </p>
+                <p id="note-content" class="text-sm font-bold leading-relaxed opacity-80 italic whitespace-pre-wrap">-</p>
             </div>
-
-            <!-- Action Buttons -->
             <div class="flex gap-3 mt-1">
-                <button id="btn-approve"
-                    class="flex-1 py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                    ✓ Approve
-                </button>
-                <button id="btn-unapprove"
-                    class="flex-1 py-3 bg-[#E25C5C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider text-white transition-all hover:brightness-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                    ✕ Unapprove
-                </button>
+                <button id="btn-approve" class="flex-1 py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all">✓ Approve</button>
+                <button id="btn-unapprove" class="flex-1 py-3 bg-[#E25C5C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider text-white transition-all">✕ Unapprove</button>
             </div>
         </div>
     </div>
-
-    <!-- ============================== -->
-    <!--  Confirmation Nested Modal     -->
-    <!-- ============================== -->
+    <!-- Confirmation Nested Modal -->
     <div id="modal-confirm" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
-        <!-- Backdrop -->
-        <div id="backdrop-confirm"
-            class="absolute inset-0 bg-[#1E1E1E]/60 backdrop-blur-sm backdrop-fade-in"></div>
-
-        <!-- Modal Content -->
-        <div class="confirm-content relative w-full max-w-[340px] bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-6 flex flex-col items-center gap-5 scale-in">
-
-            <!-- Icon -->
-            <div id="confirm-icon-wrapper" class="w-16 h-16 border-3 border-[#1E1E1E] flex items-center justify-center shadow-[4px_4px_0px_#1E1E1E] bg-[#F2C00F]">
-                <svg id="confirm-icon-approve" class="w-8 h-8 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-                <svg id="confirm-icon-unapprove" class="w-8 h-8 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+        <div id="backdrop-confirm" class="absolute inset-0 bg-[#1E1E1E]/60 backdrop-blur-sm backdrop-fade-in"></div>
+        <div class="confirm-content relative w-full max-w-[340px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col items-center gap-5 fade-in">
+            <div id="confirm-icon-wrapper" class="w-14 h-14 border-2 border-[#1E1E1E] flex items-center justify-center shadow-[3px_3px_0px_#1E1E1E] bg-[#F2C00F]">
+                <svg id="confirm-icon-approve" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                <svg id="confirm-icon-unapprove" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
             </div>
-
-            <!-- Title -->
             <h3 id="confirm-title" class="text-lg font-black uppercase tracking-wider text-center">ยืนยันการดำเนินการ?</h3>
-
-            <!-- Description -->
-            <p id="confirm-desc" class="text-sm font-bold text-center opacity-70 leading-relaxed">
-                กรุณายืนยันว่าคุณต้องการดำเนินการนี้
-            </p>
-
-            
-            <!-- Countdown Timer -->
+            <p id="confirm-desc" class="text-sm font-bold text-center opacity-70 leading-relaxed">กรุณายืนยันว่าคุณต้องการดำเนินการนี้</p>
             <div class="flex items-center gap-3">
                 <div class="relative w-10 h-10">
                     <svg class="countdown-ring w-10 h-10" viewBox="0 0 36 36">
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15" />
-                        <circle id="countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5"
-                        stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square" />
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15"/>
+                        <circle id="countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square"/>
                     </svg>
                     <span id="countdown-number" class="absolute inset-0 flex items-center justify-center text-sm font-black">3</span>
                 </div>
                 <span id="countdown-label" class="text-xs font-bold opacity-50 uppercase">กรุณารอ...</span>
             </div>
-            
-            <!-- Student Name Badge -->
-            <div class="w-full border-2 border-[#1E1E1E] bg-white p-3 shadow-[3px_3px_0px_#1E1E1E] text-center">
+            <div class="w-full border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E] text-center">
                 <p class="text-[9px] font-bold uppercase opacity-50 mb-1">นักเรียน</p>
                 <p id="confirm-student-name" class="text-sm font-black">-</p>
             </div>
-
-            <!-- Action Buttons -->
             <div class="flex gap-3 w-full">
-                <button id="btn-confirm-submit"
-                    class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed"
-                    disabled>
-                    Submit
-                </button>
-                <button id="btn-confirm-cancel"
-                    class="flex-1 py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hover:bg-[#EEEDDE] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                    Cancel
-                </button>
+                <button id="btn-confirm-submit" class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed" disabled>Submit</button>
+                <button id="btn-confirm-cancel" class="flex-1 py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all">Cancel</button>
             </div>
         </div>
     </div>
-
-    <!-- ============================== -->
-    <!--  Verify All Modal              -->
-    <!-- ============================== -->
+    <!-- Verify All Modal -->
     <div id="modal-verify-all" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
-        <!-- Backdrop -->
-        <div id="backdrop-verify-all"
-            class="absolute inset-0 bg-[#1E1E1E]/60 backdrop-blur-sm backdrop-fade-in"></div>
-
-        <!-- Modal Content -->
-        <div class="verify-all-content relative w-full max-w-[400px] bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-6 flex flex-col gap-4 scale-in max-h-[85vh] overflow-hidden">
-
-            <!-- Header -->
+        <div id="backdrop-verify-all" class="absolute inset-0 bg-[#1E1E1E]/60 backdrop-blur-sm backdrop-fade-in"></div>
+        <div class="verify-all-content relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-4 fade-in max-h-[85vh] overflow-hidden">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="bg-[#73CB8F] border-2 border-[#1E1E1E] p-2 shadow-[3px_3px_0px_#1E1E1E]">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-black uppercase tracking-wider">Verify All</h2>
+                        <h2 class="text-base font-black uppercase tracking-wider">Verify All</h2>
                         <p id="verify-all-count" class="text-[10px] font-bold opacity-50">0 รายการ</p>
                     </div>
                 </div>
-                <button id="btn-verify-all-close"
-                    class="w-9 h-9 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[3px_3px_0px_#1E1E1E] font-bold hover:bg-[#E25C5C] hover:text-white transition-colors active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">
-                    ✕
-                </button>
+                <button id="btn-verify-all-close" class="w-8 h-8 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[2px_2px_0px_#1E1E1E] font-bold text-sm transition-colors">✕</button>
             </div>
-
-            <!-- Description -->
-            <p class="text-xs font-bold opacity-60 leading-relaxed">
-                รายชื่อนักเรียนทั้งหมดที่จะถูก Approve และบันทึกลงระบบ
-            </p>
-
-            <!-- Student List -->
-            <div id="verify-all-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 max-h-[300px] border-2 border-[#1E1E1E] bg-white p-3 shadow-[3px_3px_0px_#1E1E1E]">
-                <!-- Populated by JS -->
-            </div>
-
-            <!-- Countdown Timer -->
+            <p class="text-xs font-bold opacity-60 leading-relaxed">รายชื่อนักเรียนทั้งหมดที่จะถูก Approve และบันทึกลงระบบ</p>
+            <div id="verify-all-list" class="flex-1 overflow-y-auto space-y-2 max-h-[300px] border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]"></div>
             <div class="flex items-center justify-center gap-3">
                 <div class="relative w-10 h-10">
                     <svg class="countdown-ring w-10 h-10" viewBox="0 0 36 36">
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15" />
-                        <circle id="verify-all-countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5"
-                            stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square" />
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2" opacity="0.15"/>
+                        <circle id="verify-all-countdown-circle" cx="18" cy="18" r="15.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-dasharray="97.39" stroke-dashoffset="0" stroke-linecap="square"/>
                     </svg>
                     <span id="verify-all-countdown-number" class="absolute inset-0 flex items-center justify-center text-sm font-black">5</span>
                 </div>
                 <span id="verify-all-countdown-label" class="text-xs font-bold opacity-50 uppercase">กรุณารอ...</span>
             </div>
-
-            <!-- Action Buttons -->
             <div class="flex gap-3 w-full">
-                <button id="btn-verify-all-submit"
-                    class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed"
-                    disabled>
-                    Approve All
-                </button>
-                <button id="btn-verify-all-cancel"
-                    class="flex-1 py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hover:bg-[#EEEDDE] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                    Cancel
-                </button>
+                <button id="btn-verify-all-submit" class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed" disabled>Approve All</button>
+                <button id="btn-verify-all-cancel" class="flex-1 py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all">Cancel</button>
             </div>
         </div>
     </div>
-
 </body>
-
 </html>

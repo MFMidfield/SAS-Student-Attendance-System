@@ -210,8 +210,8 @@ export function initAdminApprove(imageLogo, imageBander) {
         const backdrop = document.getElementById('backdrop-confirm');
         confirmModal.classList.remove('hidden');
         if (confirmContent) {
-            confirmContent.classList.remove('scale-out');
-            confirmContent.classList.add('scale-in');
+            confirmContent.classList.remove('fade-out');
+            confirmContent.classList.add('fade-in');
         }
         if (backdrop) {
             backdrop.classList.remove('backdrop-fade-out');
@@ -233,14 +233,14 @@ export function initAdminApprove(imageLogo, imageBander) {
         const confirmContent = confirmModal.querySelector('.confirm-content');
         const backdrop = document.getElementById('backdrop-confirm');
         if (confirmContent && backdrop) {
-            confirmContent.classList.remove('scale-in');
-            confirmContent.classList.add('scale-out');
+            confirmContent.classList.remove('fade-in');
+            confirmContent.classList.add('fade-out');
             backdrop.classList.remove('backdrop-fade-in');
             backdrop.classList.add('backdrop-fade-out');
             setTimeout(() => {
                 confirmModal.classList.add('hidden');
-                confirmContent.classList.remove('scale-out');
-                confirmContent.classList.add('scale-in');
+                confirmContent.classList.remove('fade-out');
+                confirmContent.classList.add('fade-in');
                 backdrop.classList.remove('backdrop-fade-out');
             }, 300);
         } else {
@@ -255,7 +255,7 @@ export function initAdminApprove(imageLogo, imageBander) {
         // Reset ring
         if (countdownCircle) countdownCircle.style.strokeDashoffset = '0';
         if (countdownNumber) countdownNumber.textContent = '3';
-        if (countdownLabel) countdownLabel.textContent = 'กรุณารอ...';
+        if (countdownLabel) countdownLabel.textContent = 'กรุณาอ่านข้อมูล...';
 
         countdownTimer = setInterval(() => {
             secondsLeft--;
@@ -605,8 +605,8 @@ export function initAdminApprove(imageLogo, imageBander) {
         const backdrop = document.getElementById('backdrop-verify-all');
         verifyAllModal.classList.remove('hidden');
         if (content) {
-            content.classList.remove('scale-out');
-            content.classList.add('scale-in');
+            content.classList.remove('fade-out');
+            content.classList.add('fade-in');
         }
         if (backdrop) {
             backdrop.classList.remove('backdrop-fade-out');
@@ -627,14 +627,14 @@ export function initAdminApprove(imageLogo, imageBander) {
         const content = verifyAllModal.querySelector('.verify-all-content');
         const backdrop = document.getElementById('backdrop-verify-all');
         if (content && backdrop) {
-            content.classList.remove('scale-in');
-            content.classList.add('scale-out');
+            content.classList.remove('fade-in');
+            content.classList.add('fade-out');
             backdrop.classList.remove('backdrop-fade-in');
             backdrop.classList.add('backdrop-fade-out');
             setTimeout(() => {
                 verifyAllModal.classList.add('hidden');
-                content.classList.remove('scale-out');
-                content.classList.add('scale-in');
+                content.classList.remove('fade-out');
+                content.classList.add('fade-in');
                 backdrop.classList.remove('backdrop-fade-out');
             }, 300);
         } else {
@@ -648,7 +648,7 @@ export function initAdminApprove(imageLogo, imageBander) {
 
         if (verifyAllCountdownCircle) verifyAllCountdownCircle.style.strokeDashoffset = '0';
         if (verifyAllCountdownNumber) verifyAllCountdownNumber.textContent = '5';
-        if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'กรุณารอ...';
+        if (verifyAllCountdownLabel) verifyAllCountdownLabel.textContent = 'กรุณาอ่านข้อมูล...';
 
         verifyAllCountdownTimer = setInterval(() => {
             secondsLeft--;

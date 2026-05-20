@@ -576,7 +576,42 @@ create policy "Staff and Leaders can insert verification logs" on public.attenda
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 
-
+do $$ 
+declare 
+    day_idx int2;
+    -- กำหนดห้องที่ต้องการใน Array
+    target_rooms text[] := array['4/9', '5/9', '6/9'];
+    room_name text;
+begin
+    -- วนลูปวันจันทร์ (1) ถึง ศุกร์ (5)
+    for day_idx in 1..5 loop
+        -- วนลูปตามรายชื่อห้องที่กำหนดไว้
+        foreach room_name in array target_rooms loop
+            
+            insert into public.schedule (
+                subject_name,
+                period,
+                room,
+                teacher_name,
+                day_of_week,
+                start_time,
+                end_time,
+                grade_level
+            )
+            values (
+                'Homeroom',
+                0,
+                room_name,
+                'Teacher Name', -- สามารถเปลี่ยนเป็นชื่อครูประจำชั้นแต่ละห้องได้
+                day_idx,
+                '07:45:00',
+                '08:20:00',
+                null
+            );
+            
+        end loop;
+    end loop;
+end $$;
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------

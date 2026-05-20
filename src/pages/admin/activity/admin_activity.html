@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Management - Lunar PJ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
+
+    <div id="main-card"
+        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+
+        <!-- Top Accent Bar -->
+        <div class="w-full h-2 bg-gradient-to-r from-[#B29B58] via-[#73CB8F] to-[#5B8DEF]"></div>
+
+        <!-- Header Section -->
+        <div class="relative px-5 pt-5 pb-4">
+            <div class="flex items-center gap-4">
+                <!-- Avatar -->
+                <div
+                    class="h-14 w-14 shrink-0 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden rounded-sm">
+                    <img id="student-image" src="" alt="Admin Profile" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Name -->
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Activity Management</p>
+                    <h1 id="student-name" class="text-xl font-bold text-[#1E1E1E] tracking-tight truncate"
+                        style="-webkit-text-stroke: 0.3px #1E1E1E;">Loading...</h1>
+                </div>
+
+                <!-- Page Icon -->
+                <div class="shrink-0 bg-[#B29B58] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
+
+        <!-- Banner Image (hidden but kept for JS compatibility) -->
+        <img id="bander-image" src="" alt="" class="hidden">
+
+        <!-- Add Event Button -->
+        <div class="px-5 pt-4 pb-2">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">School Events</span>
+                <button id="btn-add-event"
+                    class="px-3 py-1.5 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-[10px] font-bold text-[#1E1E1E] uppercase tracking-wider cursor-pointer transition-all">
+                    + Add Event
+                </button>
+            </div>
+        </div>
+
+        <!-- Event List Container -->
+        <div class="px-5 pb-3">
+            <div id="event-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+
+                <!-- Sample Event 1 -->
+                <div class="bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden">
+                    <div class="flex items-stretch">
+                        <!-- Date Badge -->
+                        <div class="w-16 shrink-0 bg-[#5B8DEF] border-r-2 border-[#1E1E1E] flex flex-col items-center justify-center p-2">
+                            <span class="text-[8px] font-black text-[#1E1E1E]/60 uppercase">MAY</span>
+                            <span class="text-xl font-black text-[#1E1E1E] leading-tight">15</span>
+                            <span class="text-[8px] font-black text-[#1E1E1E]/60 uppercase">THU</span>
+                        </div>
+                        <!-- Event Content -->
+                        <div class="flex-1 p-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-black text-[#1E1E1E] uppercase tracking-wide truncate">Sports Day 2026</p>
+                                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 mt-0.5">08:00 - 16:00 • Sports Field</p>
+                                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 mt-1 line-clamp-2">Annual sports competition for all students. Includes track and field, basketball, and football tournaments.</p>
+                                </div>
+                                <div class="flex gap-1 shrink-0">
+                                    <button class="w-7 h-7 bg-[#FEB729]/30 border border-[#1E1E1E]/30 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="w-7 h-7 bg-[#D96C6C]/30 border border-[#1E1E1E]/30 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Event 2 -->
+                <div class="bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden">
+                    <div class="flex items-stretch">
+                        <!-- Date Badge -->
+                        <div class="w-16 shrink-0 bg-[#73CB8F] border-r-2 border-[#1E1E1E] flex flex-col items-center justify-center p-2">
+                            <span class="text-[8px] font-black text-[#1E1E1E]/60 uppercase">MAY</span>
+                            <span class="text-xl font-black text-[#1E1E1E] leading-tight">22</span>
+                            <span class="text-[8px] font-black text-[#1E1E1E]/60 uppercase">THU</span>
+                        </div>
+                        <!-- Event Content -->
+                        <div class="flex-1 p-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-black text-[#1E1E1E] uppercase tracking-wide truncate">Science Fair</p>
+                                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 mt-0.5">09:00 - 15:00 • Main Hall</p>
+                                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 mt-1 line-clamp-2">Student science project exhibition. Each class presents one project. Judges from local university.</p>
+                                </div>
+                                <div class="flex gap-1 shrink-0">
+                                    <button class="w-7 h-7 bg-[#FEB729]/30 border border-[#1E1E1E]/30 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="w-7 h-7 bg-[#D96C6C]/30 border border-[#1E1E1E]/30 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Event 3 -->
+                <div class="bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden">
+                    <div class="flex items-stretch">
+                        <!-- Date Badge -->
+                        <div class="w-16 shrink-0 bg-[#E46F20] border-r-2 border-[#1E1E1E] flex flex-col items-center justify-center p-2">
+                            <span class="text-[8px] font-black text-[#1E1E1E]/60 uppercase">JUN</span>
+                            <span class="text-xl font-black text-[#1E1E1E] leading-tight">05</span>
+                            <span class="text-[8px] font-black text-[#1E1E1E]/60 uppercase">THU</span>
+                        </div>
+                        <!-- Event Content -->
+                        <div class="flex-1 p-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-black text-[#1E1E1E] uppercase tracking-wide truncate">Cultural Festival</p>
+                                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 mt-0.5">08:30 - 17:00 • Entire Campus</p>
+                                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 mt-1 line-clamp-2">Traditional Thai cultural performances, food stalls, and art exhibitions organized by all departments.</p>
+                                </div>
+                                <div class="flex gap-1 shrink-0">
+                                    <button class="w-7 h-7 bg-[#FEB729]/30 border border-[#1E1E1E]/30 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="w-7 h-7 bg-[#D96C6C]/30 border border-[#1E1E1E]/30 flex items-center justify-center cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Coming Soon Notice -->
+        <div class="px-5 pb-4">
+            <div class="bg-[#FEB729]/20 border-2 border-[#1E1E1E] p-3 text-center shadow-[3px_3px_0px_#1E1E1E]">
+                <p class="text-[10px] font-black text-[#1E1E1E]/60 uppercase tracking-widest">🚧 Preview Only — Feature Coming Soon</p>
+            </div>
+        </div>
+
+        <!-- Bottom Accent -->
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#5B8DEF] via-[#73CB8F] to-[#B29B58]"></div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="fade-in w-full max-w-[450px] mt-4">
+        <button id="btn-back"
+            class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span class="text-sm tracking-wider">Back to Dashboard</span>
+        </button>
+    </div>
+
+</body>
+
+</html>

@@ -45,26 +45,43 @@
 ## 🚀 การเริ่มต้นใช้งาน (Getting Started)
 
 ### สิ่งที่ต้องมี
+- [Node.js](https://nodejs.org/) (แนะนำเวอร์ชัน LTS)
+- บัญชีผู้ใช้ [Supabase](https://supabase.com/)
 - เว็บเบราว์เซอร์ที่ทันสมัย
-- โปรเจกต์ [Supabase](https://supabase.com/)
 
-### การติดตั้ง
+### 1. การตั้งค่าฐานข้อมูล (Supabase)
+ก่อนจะเริ่มรันแอปพลิเคชัน คุณต้องตั้งค่าฐานข้อมูลใน Supabase ก่อน:
+1. สร้างโปรเจกต์ใหม่ใน **Supabase Dashboard**
+2. ไปที่เมนู **SQL Editor** ที่แถบเมนูด้านซ้าย
+3. เปิดไฟล์ [SUPABASE_SETUP.sql](file:///c:/Users/MFMid/Dokumente/mytask/Code/lunar-pj/SUPABASE_SETUP.sql) ใน Repository นี้
+4. คัดลอกเนื้อหาทั้งหมดในสคริปต์ แล้ววางลงใน SQL Editor ของ Supabase
+5. กดปุ่ม **Run** เพื่อสร้างตาราง (Tables), Trigger, และ RLS Policies ทั้งหมด
+6. (เพิ่มเติม) ในส่วน **Authentication > Providers** ตรวจสอบให้แน่ใจว่า "Email" เปิดใช้งานอยู่
+
+### 2. ขั้นตอนการติดตั้ง
 1. Clone repository:
    ```bash
    git clone https://github.com/your-username/lunar-pj.git
+   cd lunar-pj
    ```
-2. ตั้งค่าการเชื่อมต่อ Supabase:
-   สร้างไฟล์ `src/lib/supabaseClient.js` พร้อมใส่ข้อมูลของคุณ:
-   ```javascript
-   import { createClient } from '@supabase/supabase-js'
-   const supabaseUrl = 'YOUR_SUPABASE_URL'
-   const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'
-   export const supabase = createClient(supabaseUrl, supabaseKey)
-   ```
-3. รันผ่าน local development server (เช่น Vite หรือ Live Server):
+2. ติดตั้ง Dependencies:
    ```bash
-   npm run dev
+   npm install
    ```
+3. ตั้งค่า Environment Variables:
+   สร้างไฟล์ `.env` ไว้ที่ Root directory ของโปรเจกต์ และใส่ URL/Key ของ Supabase:
+   ```env
+   VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+   VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+   ```
+   *คุณสามารถหาค่าเหล่านี้ได้ใน Supabase Dashboard ที่เมนู Project Settings > API*
+
+### 3. การรันโปรเจกต์
+เริ่มต้นการทำงานของ Development Server ด้วย Vite:
+```bash
+npm run dev
+```
+โดยปกติแอปพลิเคชันจะเปิดที่ URL: `http://localhost:5173`
 
 ---
 

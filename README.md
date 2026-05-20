@@ -45,26 +45,43 @@ This project follows a **Neubrutalist** aesthetic:
 ## 🚀 Getting Started
 
 ### Prerequisites
+- [Node.js](https://nodejs.org/) (Recommended: LTS version)
+- A [Supabase](https://supabase.com/) account.
 - A modern web browser.
-- A [Supabase](https://supabase.com/) project.
 
-### Installation
+### 1. Database Setup (Supabase)
+Before running the application, you must set up your Supabase database:
+1. Create a new project in your **Supabase Dashboard**.
+2. Navigate to the **SQL Editor** in the left sidebar.
+3. Open the [SUPABASE_SETUP.sql](file:///c:/Users/MFMid/Dokumente/mytask/Code/lunar-pj/SUPABASE_SETUP.sql) file from this repository.
+4. Copy the entire content of the script and paste it into the Supabase SQL Editor.
+5. Click **Run** to create the tables, triggers, and RLS policies.
+6. (Optional) In the **Authentication > Providers** section, ensure "Email" is enabled.
+
+### 2. Installation
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/lunar-pj.git
+   cd lunar-pj
    ```
-2. Configure your Supabase environment:
-   Create a `src/lib/supabaseClient.js` file with your credentials:
-   ```javascript
-   import { createClient } from '@supabase/supabase-js'
-   const supabaseUrl = 'YOUR_SUPABASE_URL'
-   const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'
-   export const supabase = createClient(supabaseUrl, supabaseKey)
-   ```
-3. Run with a local development server (like Vite or Live Server):
+2. Install dependencies:
    ```bash
-   npm run dev
+   npm install
    ```
+3. Configure Environment Variables:
+   Create a `.env` file in the root directory and add your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+   VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+   ```
+   *You can find these in your Supabase Dashboard under Project Settings > API.*
+
+### 3. Running Locally
+Start the development server using Vite:
+```bash
+npm run dev
+```
+The application will usually be available at `http://localhost:5173`.
 
 ---
 
