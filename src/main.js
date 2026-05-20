@@ -9,25 +9,53 @@ import bander from './assets/bander/Blue-Archive-new-recruitment-system_News_FI-
 import LandingPage from './main.html?raw'
 import LoginPage from './auth/login.html?raw'
 import RegisterPage from './auth/register.html?raw'
+
 import Student from './pages/student/attendance/student.html?raw'
 import StudentDashBoard from './pages/student/dashboard/student_dashboard.html?raw'
+import StudentSchedule from './pages/student/schedule/student_schedule.html?raw'
 import StudentSetting from './pages/student/setting/student_setting.html?raw'
+
+import AdminUserEdit from './pages/admin/user/admin_userEdit.html?raw'
+import AdminDashBoard from './pages/admin/dashboard/admin_dashboard.html?raw'
+import AdminSetting from './pages/admin/setting/admin_setting.html?raw'
+import AdminSchedule from './pages/admin/schedule/admin_schedule.html?raw'
+import AdminLogs from './pages/admin/admin_logs/admin_logs.html?raw'
+import AdminVerifyLogs from './pages/admin/attendance_verify_logs/admin_verify_logs.html?raw'
+import AdminApprove from './pages/admin/attendance_approve/admin_approve.html?raw'
 
 // import function
 import { initRegister } from './auth/register.js'
 import { initLogin } from './auth/login.js'
+
 import { initStudent } from './pages/student/attendance/student.js'
 import { initStudentDashBoard } from './pages/student/dashboard/student_dashboard.js'
+import { initStudentSchedule } from './pages/student/schedule/student_schedule.js'
 import { initStudentSetting } from './pages/student/setting/student_setting.js'
+
+import { initAdminSetting } from './pages/admin/setting/admin_setting.js'
+import { initAdminUserEdit } from './pages/admin/user/admin_userEdit.js'
+import { initAdminDashBoard } from './pages/admin/dashboard/admin_dashboard.js'
+import { initAdminSchedule } from './pages/admin/schedule/admin_schedule.js'
+import { initAdminLogs } from './pages/admin/admin_logs/admin_logs.js'
+import { initAdminApprove } from './pages/admin/attendance_approve/admin_approve.js'
+import { initAdminVerifyLogs } from './pages/admin/attendance_verify_logs/admin_verify_logs.js'
 
 // 3. กำหนด Route Map
 const ROUTES = {
     '':          { template: LandingPage,    init: null,           auth: false },
     '#login':    { template: LoginPage,      init: initLogin,      auth: false },
     '#register': { template: RegisterPage,   init: initRegister,   auth: false },
-    '#student':  { template: Student, init: () => initStudent(logo, bander), auth: true },
-    '#student-dashboard': { template: StudentDashBoard, init: () => initStudentDashBoard(logo, bander), auth: true },
-    '#student-setting': { template: StudentSetting, init: () => initStudentSetting(logo, bander), auth: true },
+    '#student':  { template: Student, init: () => initStudent(logo, bander), auth: true, allowedRoles: ['student'] },
+    '#student-dashboard': { template: StudentDashBoard, init: () => initStudentDashBoard(logo, bander), auth: true, allowedRoles: ['student'] },
+    '#student-schedule': { template: StudentSchedule, init: () => initStudentSchedule(logo, bander), auth: true, allowedRoles: ['student'] },
+    '#student-setting': { template: StudentSetting, init: () => initStudentSetting(logo, bander), auth: true, allowedRoles: ['student'] },
+    '#admin-user-edit': { template: AdminUserEdit, init: () => initAdminUserEdit(logo, bander), auth: true, allowedRoles: ['admin'] },
+    '#admin-setting': { template: AdminSetting, init: () => initAdminSetting(logo, bander), auth: true, allowedRoles: ['admin'] },
+    '#admin-dashboard': { template: AdminDashBoard, init: () => initAdminDashBoard(logo, bander), auth: true, allowedRoles: ['admin'] },
+    '#admin-schedule': { template: AdminSchedule, init: () => initAdminSchedule(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-logs': { template: AdminLogs, init: () => initAdminLogs(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-verify-logs': { template: AdminVerifyLogs, init: () => initAdminVerifyLogs(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-approve': { template: AdminApprove, init: () => initAdminApprove(logo, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
 };
 async function render() {
     const app = document.querySelector('#app');
@@ -45,10 +73,30 @@ async function render() {
         window.location.hash = '#login'; 
         return;
     }
-    // 2. ถ้ามี Session แล้วแต่จะเข้าหน้า Login/Register -> ไปหน้า Dashboard
-    if (session && (hash === '#login' || hash === '#register' || hash === '')) {
-        window.location.hash = '#student-dashboard';
-        return;
+
+    if (session) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+        const userRole = profile ? profile.role : 'student';
+
+        // 2. ถ้ามี Session แล้วแต่จะเข้าหน้า Login/Register -> ไปหน้า Default ตาม Role
+        if (hash === '#login' || hash === '#register' || hash === '') {
+            if (userRole === 'admin') window.location.hash = '#admin-dashboard';
+            else if (userRole === 'student') window.location.hash = '#student-dashboard';
+            // teacher page yet to be created, fallback to login/logout or a placeholder
+            else window.location.hash = '#login';
+            return;
+        }
+
+        // 3. ตรวจสอบ Role (ไม่ให้เข้าหน้าของ Role อื่น)
+        if (route.allowedRoles && !route.allowedRoles.includes(userRole)) {
+            if (userRole === 'admin') window.location.hash = '#admin-dashboard';
+            else if (userRole === 'student') window.location.hash = '#student-dashboard';
+            else {
+                await supabase.auth.signOut();
+                window.location.hash = '#login';
+            }
+            return;
+        }
     }
     // --- การ Render หน้าเว็บ ---
     app.innerHTML = route.template;

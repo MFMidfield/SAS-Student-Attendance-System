@@ -5,7 +5,7 @@ export function initLogin() {
     const msgElement = document.getElementById('msg')
     const btnBack = document.getElementById('btn-back')
 
-    if(btnBack){
+    if (btnBack) {
         btnBack.addEventListener('click', () => {
             window.location.hash = ''
         })
@@ -57,7 +57,7 @@ export function initLogin() {
         if (hasEmpty) {
             msgElement.textContent = 'Please fill in all fields.'
             msgElement.className = 'text-red-500 text-center font-bold'
-            
+
             // หน่วงเวลา 2 วินาทีแล้วกลับเป็นสีเดิม
             setTimeout(() => {
                 fields.forEach(field => {
@@ -67,7 +67,7 @@ export function initLogin() {
                 });
                 msgElement.textContent = '';
             }, 2000);
-            
+
             return
         }
 
@@ -86,7 +86,7 @@ export function initLogin() {
 
             if (error) {
                 // แสดงข้อความจาก Supabase (เช่น "Invalid login credentials")
-                msgElement.textContent = error.message 
+                msgElement.textContent = error.message
                 msgElement.className = 'text-red-500 text-center font-bold'
                 console.error('Login Error:', error.message)
             } else {
@@ -99,10 +99,16 @@ export function initLogin() {
                 // [NEW] Routing based on Role
                 if (role === 'student') {
                     setTimeout(() => window.location.hash = '#student-dashboard', 1000)
+                    console.log('role:', role)
                 } else if (role === 'leader') {
                     setTimeout(() => window.location.hash = '#leader', 1000)
+                    console.log('role:', role)
                 } else if (role === 'teacher') {
                     setTimeout(() => window.location.hash = '#teacher', 1000)
+                    console.log('role:', role)
+                } else if (role === 'admin') {
+                    setTimeout(() => window.location.hash = '#admin-dashboard', 1000)
+                    console.log('role:', role)
                 } else {
                     console.log('Unknown role:', role)
                 }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance - Neubrutalism</title>
+    <title>Settings - Lunar PJ</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
@@ -20,71 +20,154 @@
     <div id="main-card"
         class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
 
-        <div class="relative w-full h-64 bg-[#1E1E1E] overflow-hidden border-b-4 border-[#1E1E1E]">
-            <img id="bander-image" src="" alt="Student Profile" class="w-full h-full object-cover">
-        </div>
+        <!-- Top Accent Bar -->
+        <div class="w-full h-2 bg-gradient-to-r from-[#B29B58] via-[#B08968] to-[#D96C6C]"></div>
 
-        <div class="relative -mt-23 px-6 mb-6">
-            <div class="flex flex-row max-w-[450px] justify-between">
-                <div
-                    class="h-28 w-28 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-center overflow-hidden relative z-10">
+        <!-- Header Section -->
+        <div class="relative px-5 pt-5 pb-4">
+            <div class="flex items-center gap-4">
+                <!-- Avatar (large for settings) -->
+                <div class="h-16 w-16 shrink-0 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden rounded-sm">
                     <img id="student-image" src="" alt="Student Profile" class="w-full h-full object-cover">
                 </div>
-                <div
-                    class="bg-[#FFFFFF] w-[260px] mt-auto border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] px-4 p-2 text-center relative z-10">
-                    <span id="student-name" class="text-[#1E1E1E] text-xl font-black uppercase tracking-wider"
-                        style="-webkit-text-stroke: 0.5px #1E1E1E;">Loading...</span>
+
+                <!-- Name + Role -->
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Settings</p>
+                    <h1 id="student-name" class="text-xl font-bold text-[#1E1E1E] tracking-tight truncate"
+                        style="-webkit-text-stroke: 0.3px #1E1E1E;">Loading...</h1>
+                    <p id="student-role" class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-wider">Student</p>
+                </div>
+
+                <!-- Page Icon -->
+                <div class="shrink-0 bg-[#B29B58] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-4">
-            <div class="px-6 space-y-4">
+        <!-- Banner Image (hidden but kept for JS compatibility) -->
+        <img id="bander-image" src="" alt="" class="hidden">
+
+        <!-- Divider -->
+        <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
+
+        <!-- Profile Info Section -->
+        <div class="px-5 pt-4 pb-2">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Profile Info</span>
+            </div>
+
+            <div class="bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden">
+                <!-- Email -->
+                <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1E1E1E]/15">
+                    <div class="w-8 h-8 shrink-0 bg-[#5B8DEF]/20 border border-[#1E1E1E]/30 flex items-center justify-center">
+                        <span class="text-sm">📧</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">Email</p>
+                        <p id="info-email" class="text-sm font-bold text-[#1E1E1E] truncate">Loading...</p>
+                    </div>
+                </div>
+                <!-- Student ID -->
+                <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1E1E1E]/15">
+                    <div class="w-8 h-8 shrink-0 bg-[#219653]/20 border border-[#1E1E1E]/30 flex items-center justify-center">
+                        <span class="text-sm">🆔</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">Student ID</p>
+                        <p id="info-stu-id" class="text-sm font-bold text-[#1E1E1E] truncate">Loading...</p>
+                    </div>
+                </div>
+                <!-- Class -->
+                <div class="flex items-center gap-3 px-4 py-3">
+                    <div class="w-8 h-8 shrink-0 bg-[#FEB729]/20 border border-[#1E1E1E]/30 flex items-center justify-center">
+                        <span class="text-sm">🏫</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">Class</p>
+                        <p id="info-class" class="text-sm font-bold text-[#1E1E1E] truncate">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="px-5 pt-3 pb-5">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Actions</span>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Logout Button -->
                 <button id="btn-logout"
-                    class="flex-1 py-3 mb-6 w-full bg-[#D96C6C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-xl tracking-wider font-black transition-all">
-                    Log Out
+                    class="w-full flex items-center gap-3 p-3.5 bg-[#D96C6C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold transition-all">
+                    <div class="w-10 h-10 shrink-0 bg-white/30 border-2 border-[#1E1E1E] flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-sm font-bold uppercase tracking-wider block">Log Out</span>
+                        <span class="text-[10px] font-bold opacity-60">Sign out of your account</span>
+                    </div>
                 </button>
             </div>
         </div>
+
+        <!-- Bottom Accent -->
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#D96C6C] via-[#B08968] to-[#B29B58]"></div>
     </div>
 
-    <div class="fade-in flex flex-row justify-end items-center w-full max-w-[450px] mt-6">
-        <div class="w-full">
-            <button id="btn-back"
-                class="flex flex-row justify-center items-center w-full p-4 h-15 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-2xl font-black uppercase transition-all">
-                <span class="text-[#1E1E1E] text-xl font-black uppercase tracking-wider"
-                    style="-webkit-text-stroke: 1px #1E1E1E;">Back</span></button>
-        </div>
+    <!-- Back Button -->
+    <div class="fade-in w-full max-w-[450px] mt-4">
+        <button id="btn-back"
+            class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span class="text-sm tracking-wider">Back to Dashboard</span>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="fade-in w-full max-w-[450px] mt-3 text-center">
+        <p class="text-[#1E1E1E]/30 text-[10px] font-bold">Lunar PJ v1.0 — © 2026 Lunar PJ Team</p>
     </div>
 
     <!-- Logout Confirmation Modal -->
     <div id="logout-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <!-- Backdrop with Blur -->
         <div id="logout-backdrop" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in"></div>
-        
+
         <!-- Modal Content -->
-        <div class="relative w-full max-w-[450px] bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-8 flex flex-col items-center text-center gap-6 fade-in">
-            <div class="bg-[#D96C6C] border-2 border-[#1E1E1E] p-4 shadow-[4px_4px_0px_#1E1E1E]">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
+        <div class="relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-8 flex flex-col items-center text-center gap-5 fade-in">
+
+            <!-- Icon -->
+            <div class="bg-[#D96C6C] border-2 border-[#1E1E1E] p-4 shadow-[3px_3px_0px_#1E1E1E]">
+                <svg class="w-10 h-10" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                 </svg>
             </div>
 
-            <div class="space-y-2">
-                <h2 class="text-2xl font-black uppercase tracking-tight text-[#1E1E1E]">log out?</h2>
-                <p class="text-[#1E1E1E] font-bold opacity-70">Closing in <span id="logout-timer" class="text-[#D96C6C]">10</span> seconds</p>
+            <!-- Text -->
+            <div class="space-y-1">
+                <h2 class="text-2xl font-black uppercase tracking-tight text-[#1E1E1E]">Log Out?</h2>
+                <p class="text-[#1E1E1E] text-sm font-bold opacity-60">Auto-closing in <span id="logout-timer" class="text-[#D96C6C] font-black text-base">10</span>s</p>
             </div>
 
-            <div class="flex flex-row w-full gap-4">
-                <button id="btn-confirm-logout" 
-                    class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-black uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                    Confirm
+            <!-- Buttons -->
+            <div class="flex flex-row w-full gap-3">
+                <button id="btn-confirm-logout"
+                    class="flex-1 py-3 bg-[#D96C6C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
+                    ✓ Log Out
                 </button>
-                <button id="btn-cancel-logout" 
-                    class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-black uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                    Cancel
+                <button id="btn-cancel-logout"
+                    class="flex-1 py-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all text-sm tracking-wider">
+                    ✕ Cancel
                 </button>
             </div>
         </div>

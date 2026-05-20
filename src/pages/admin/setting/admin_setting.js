@@ -1,46 +1,22 @@
 import { supabase } from '../../../lib/supabaseClient.js'
 import { showToast } from '../../../lib/ui.js'
 
-export function initStudentSetting(imageLogo, imageBander) {
+export function initAdminSetting(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
     const logoutBtn = document.getElementById('btn-logout');
     const studentImage = document.getElementById('student-image');
     const banderImage = document.getElementById('bander-image');
     const studentNameElem = document.getElementById('student-name');
-    const studentRoleElem = document.getElementById('student-role');
-    const infoEmail = document.getElementById('info-email');
-    const infoStuId = document.getElementById('info-stu-id');
-    const infoClass = document.getElementById('info-class');
 
-    // Fetch user name from metadata and profile info
-    const fetchUserInfo = async () => {
+    // Fetch user name from metadata
+    const fetchUserName = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.user_metadata && studentNameElem) {
             const { firstname, lastname } = user.user_metadata;
             studentNameElem.textContent = `${firstname} ${lastname}`;
         }
-
-        // Populate email
-        if (user && infoEmail) {
-            infoEmail.textContent = user.email || '—';
-        }
-
-        // Fetch profile details
-        if (user) {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role, stu_id, class_id')
-                .eq('id', user.id)
-                .single();
-
-            if (profile) {
-                if (studentRoleElem) studentRoleElem.textContent = profile.role || 'Student';
-                if (infoStuId) infoStuId.textContent = profile.stu_id || '—';
-                if (infoClass) infoClass.textContent = profile.class_id || '—';
-            }
-        }
     };
-    fetchUserInfo();
+    fetchUserName();
 
     if (studentImage && imageLogo) {
         studentImage.src = imageLogo;

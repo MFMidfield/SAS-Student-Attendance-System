@@ -44,8 +44,10 @@ export function initRegister() {
             if (!element.value || element.value.trim() === "") {
                 element.classList.add('border-red-500');
                 element.classList.remove('border-[#1E1E1E]');
+                element.classList.add('shake-animation');
                 hasEmpty = true;
             } else {
+                element.classList.remove('shake-animation');
                 element.classList.remove('border-red-500');
                 element.classList.add('border-[#1E1E1E]');
             }
@@ -71,6 +73,7 @@ export function initRegister() {
                 fields.forEach(field => {
                     const element = document.getElementById(field.id);
                     element.classList.remove('border-red-500');
+                    element.classList.remove('shake-animation');
                     element.classList.add('border-[#1E1E1E]');
                 });
                 msgElement.textContent = '';
@@ -118,7 +121,6 @@ export function initRegister() {
             return
         }
 
-        //แก้ในอนาคต
         // lastname, class_id, stu_id
         const { data, error } = await supabase.auth.signUp({
             email: email,
