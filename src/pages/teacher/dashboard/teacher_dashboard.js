@@ -6,7 +6,7 @@ export function initTeacherDashBoard(imageLogo, imageBander) {
     const activityBtn = document.getElementById('btn-activity')
     const settingBtn = document.getElementById('btn-setting')
     const approveBtn = document.getElementById('btn-approve')
-    const verifyLogsBtn = document.getElementById('btn-verify-logs')
+
     const studentImage = document.getElementById('student-image');
     const studentNameElem = document.getElementById('student-name');
 
@@ -68,9 +68,10 @@ export function initTeacherDashBoard(imageLogo, imageBander) {
 
         // Verified attendance logs (today, this class)
         const { count: verifiedCount } = await supabase
-            .from('attendance_verify')
+            .from('attendance_logs')
             .select('*', { count: 'exact', head: true })
             .eq('class_id_record', userClassId)
+            .in('verification_status', ['approved', 'rejected'])
             .gte('created_at', todayStart.toISOString())
             .lte('created_at', todayEnd.toISOString());
         if (statVerified) statVerified.textContent = verifiedCount ?? 0;
@@ -87,11 +88,7 @@ export function initTeacherDashBoard(imageLogo, imageBander) {
             window.location.hash = '#teacher-user';
         });
     }
-    if (verifyLogsBtn) {
-        verifyLogsBtn.addEventListener('click', () => {
-            window.location.hash = '#teacher-verify-logs';
-        });
-    }
+
     if (approveBtn) {
         approveBtn.addEventListener('click', () => {
             window.location.hash = '#teacher-approve';

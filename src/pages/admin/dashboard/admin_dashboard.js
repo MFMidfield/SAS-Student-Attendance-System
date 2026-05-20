@@ -49,8 +49,9 @@ export function initAdminDashBoard(imageLogo, imageBander) {
 
         // Verified attendance logs (today)
         const { count: verifiedCount } = await supabase
-            .from('attendance_verify')
+            .from('attendance_logs')
             .select('*', { count: 'exact', head: true })
+            .in('verification_status', ['approved', 'rejected'])
             .gte('created_at', todayStart.toISOString())
             .lte('created_at', todayEnd.toISOString());
         if (statVerified) statVerified.textContent = verifiedCount ?? 0;

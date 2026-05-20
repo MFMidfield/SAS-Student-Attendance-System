@@ -151,7 +151,14 @@ export function initAdminApprove(imageLogo, imageBander) {
         if (noteStudentId) noteStudentId.textContent = item.stu_id_record || '-';
         if (noteClass) noteClass.textContent = item.class_id_record || '-';
         if (noteDate) noteDate.textContent = dateStr;
-        if (document.getElementById('note-subject')) document.getElementById('note-subject').textContent = item.subject || '-';
+        if (document.getElementById('note-subject')) {
+            let detailText = item.subject || '-';
+            if (['sick', 'personal', 'activity'].includes(item.status)) {
+                const scopeNames = { 'full_day': 'All Day', 'morning': 'Morning', 'afternoon': 'Afternoon' };
+                detailText = scopeNames[item.leave_scope] || 'All Day';
+            }
+            document.getElementById('note-subject').textContent = detailText;
+        }
         if (noteContent) noteContent.textContent = item.note?.trim() || '(ไม่มีหมายเหตุ)';
 
         if (noteStatusSelect) {
@@ -431,6 +438,12 @@ export function initAdminApprove(imageLogo, imageBander) {
             const timeStr = date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
             const hasNote = item.note && item.note.trim() !== '' && item.note.trim() !== '-';
 
+            let detailText = item.subject || 'Homeroom';
+            if (['sick', 'personal', 'activity'].includes(item.status)) {
+                const scopeNames = { 'full_day': 'All Day', 'morning': 'Morning', 'afternoon': 'Afternoon' };
+                detailText = scopeNames[item.leave_scope] || 'All Day';
+            }
+
             const isPending = !item.verification_status || item.verification_status === 'pending';
             const isApproved = item.verification_status === 'approved';
             const isRejected = item.verification_status === 'rejected';
@@ -478,7 +491,7 @@ export function initAdminApprove(imageLogo, imageBander) {
                         ${item.firstname_record || ''} ${item.lastname_record || ''}
                     </div>
                     <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
-                        รหัส ${item.stu_id_record || '-'}${verifierInfo}
+                        รหัส ${item.stu_id_record || '-'} <span class="opacity-40">|</span> ${detailText}${verifierInfo}
                     </div>
                 </div>
                 <button class="view-btn w-12 shrink-0 flex flex-col items-center justify-center gap-1 border-l-2 border-[#1E1E1E] ${btnClass} transition-colors" title="${btnText}" ${btnDisabled ? 'disabled' : ''}>

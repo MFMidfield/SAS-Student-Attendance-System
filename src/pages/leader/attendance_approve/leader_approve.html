@@ -27,7 +27,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Leader Portal</p>
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Verify & Approve</p>
                     <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Attendance Approve</h1>
                 </div>
             </div>
@@ -49,15 +49,17 @@
                 <svg class="w-4 h-4 absolute right-3 top-3 text-[#1E1E1E]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
         </div>
-        <!-- Verify All Button -->
-        <div class="px-5 pb-2">
-            <button id="btn-verify-all" class="w-full py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hidden">✓ Verify All</button>
-        </div>
         <!-- Log List -->
         <div class="px-5 pb-4">
-            <div id="schedule-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1 pb-4">
-                <div class="bg-white border-2 border-[#1E1E1E] p-4 text-center shadow-[3px_3px_0px_#1E1E1E]">
-                    <p class="text-sm font-bold text-[#1E1E1E]/40 uppercase">Loading...</p>
+            <div id="schedule-list" class="max-h-[400px] overflow-y-auto pr-1 pb-4">
+                <div id="logs-container" class="space-y-3">
+                    <div class="bg-white border-2 border-[#1E1E1E] p-4 text-center shadow-[3px_3px_0px_#1E1E1E]">
+                        <p class="text-sm font-bold text-[#1E1E1E]/40 uppercase">Loading...</p>
+                    </div>
+                </div>
+                <!-- Verify All Button (Inside scroll list at bottom) -->
+                <div id="verify-all-container" class="mt-4 hidden">
+                    <button id="btn-verify-all" class="w-full py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all">✓ Verify All Pending</button>
                 </div>
             </div>
         </div>
@@ -98,7 +100,13 @@
                 </div>
                 <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E] flex flex-col justify-between">
                     <p class="text-[9px] font-bold uppercase opacity-50 mb-1">สถานะ</p>
-                    <span id="note-status" class="inline-block px-3 py-1 border-2 border-[#1E1E1E] text-xs font-bold uppercase shadow-[2px_2px_0px_#1E1E1E] bg-gray-200">-</span>
+                    <select id="note-status-select" class="w-full px-2 py-1 border-2 border-[#1E1E1E] text-xs font-bold uppercase shadow-[2px_2px_0px_#1E1E1E] bg-white focus:outline-none cursor-pointer">
+                        <option value="none">NONE</option>
+                        <option value="present">มาเรียน</option>
+                        <option value="sick">ลาป่วย</option>
+                        <option value="personal">ลากิจ</option>
+                        <option value="activity">กิจกรรม</option>
+                    </select>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-2.5">
@@ -145,6 +153,11 @@
                 <p class="text-[9px] font-bold uppercase opacity-50 mb-1">นักเรียน</p>
                 <p id="confirm-student-name" class="text-sm font-black">-</p>
             </div>
+            
+            <div id="confirm-reason-container" class="w-full hidden">
+                <p class="text-[10px] font-bold uppercase text-[#1E1E1E] mb-1">เหตุผลการไม่อนุมัติ <span class="text-[#E25C5C]">*</span></p>
+                <textarea id="confirm-reason-input" rows="2" placeholder="กรุณาระบุเหตุผล..." class="w-full p-2 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-xs font-bold focus:outline-none resize-none transition-all"></textarea>
+            </div>
             <div class="flex gap-3 w-full">
                 <button id="btn-confirm-submit" class="flex-1 py-3 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all bg-gray-300 text-gray-500 cursor-not-allowed" disabled>Submit</button>
                 <button id="btn-confirm-cancel" class="flex-1 py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all">Cancel</button>
@@ -186,5 +199,37 @@
         </div>
     </div>
 
+    <!-- Reject Detail Modal -->
+    <div id="modal-reject-detail" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="backdrop-reject-detail" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in cursor-pointer"></div>
+        <div class="modal-content relative w-full max-w-[380px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-4 fade-in">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-[#E25C5C] border-2 border-[#1E1E1E] p-2 shadow-[3px_3px_0px_#1E1E1E]">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <h2 class="text-base font-black uppercase tracking-wider">Rejection Detail</h2>
+                </div>
+                <button id="btn-reject-detail-close" class="w-8 h-8 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[2px_2px_0px_#1E1E1E] font-bold text-sm transition-colors">✕</button>
+            </div>
+            
+            <div class="border-2 border-[#1E1E1E] bg-[#E25C5C]/10 p-4 shadow-[2px_2px_0px_#E25C5C]">
+                <p class="text-[10px] font-bold uppercase text-[#E25C5C] mb-2">เหตุผลที่ไม่อนุมัติ</p>
+                <p id="reject-reason-text" class="text-sm font-bold leading-relaxed whitespace-pre-wrap text-[#1E1E1E] italic">--</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2.5">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ผู้ตรวจสอบ</p>
+                    <p id="reject-verifier-name" class="text-sm font-black text-[#1E1E1E]">--</p>
+                    <p id="reject-verifier-role" class="text-[10px] font-bold opacity-60 uppercase">--</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">เวลาที่ตรวจสอบ</p>
+                    <p id="reject-verify-time" class="text-sm font-black text-[#1E1E1E]">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
