@@ -98,7 +98,7 @@ export function initLogin() {
 
                 // [NEW] Routing based on Role
                 if (role === 'student') {
-                    setTimeout(() => window.location.hash = '#student', 1000)
+                    setTimeout(() => window.location.hash = '#student-dashboard', 1000)
                 } else if (role === 'leader') {
                     setTimeout(() => window.location.hash = '#leader', 1000)
                 } else if (role === 'teacher') {

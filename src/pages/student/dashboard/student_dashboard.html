@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance - Neubrutalism</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
+
+    <div id="main-card"
+        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+
+        <!-- <div class="relative w-full h-64 bg-[#1E1E1E] overflow-hidden border-b-4 border-[#1E1E1E]">
+            <img id="bander-image" src="" alt="Student Profile" class="w-full h-full object-cover">
+        </div> -->
+
+        <div class="relative mb-6 w-full border-b-2">
+            <div class="flex flex-row w-full">
+
+                <div class="h-17 w-17 shrink-0 bg-[#FFFFFF] border-r-2 border-[#1E1E1E] text-center overflow-hidden relative z-10">
+                    <img id="student-image" src="" alt="Student Profile" class="w-full h-full object-cover">
+                </div>
+
+                <div
+                    class="flex-1 border-[#1E1E1E] px-4 p-2 flex justify-center items-center relative z-10">
+                    <span id="student-name" class="text-[#1E1E1E] text-xl font-black uppercase tracking-wider"
+                        style="-webkit-text-stroke: 0.5px #1E1E1E;">Loading...</span>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="px-6 space-y-4">
+            <div id="status-history"
+                class="flex flex-col justify-center items-center py-3 mb-6 w-full h-70 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-xl tracking-wider font-black transition-all">
+                <p>stat bar</p>
+            </div>
+        </div>
+        <div class="px-6 space-y-4">
+            <button id="btn-attendance"
+                class="flex-1 py-3 mb-6 w-full bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-xl tracking-wider font-black transition-all">
+                Attendance
+            </button>
+        </div>
+        <div class="px-6 space-y-4">
+            <button id="btn-schedule"
+                class="flex-1 py-3 mb-6 w-full bg-[#FEB729] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-xl tracking-wider font-black transition-all">
+                Schedule
+            </button>
+        </div>
+        <div class="px-6 space-y-4">
+            <button id="btn-activity"
+                class="flex-1 py-3 mb-6 w-full bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-xl tracking-wider font-black transition-all">
+                Activity
+            </button>
+        </div>
+        <div class="px-6 space-y-4">
+            <button id="btn-setting"
+                class="flex-1 py-3 mb-6 w-full bg-[#B29B58] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] text-xl tracking-wider font-black transition-all">
+                Setting
+            </button>
+        </div>
+    </div>
+</body>
+
+</html>

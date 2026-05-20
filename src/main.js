@@ -1,25 +1,33 @@
 import './style.css'
 import { supabase } from './lib/supabaseClient' // ไฟล์ที่คุณตั้งค่า supabase client ไว้
 
+//import asset
+import logo from './assets/logo/Memorial_Lobby_Mika_(Swimsuit) (1).png'
+import bander from './assets/bander/Blue-Archive-new-recruitment-system_News_FI-750x392 1.png'
+
 // import template
 import LandingPage from './main.html?raw'
 import LoginPage from './auth/login.html?raw'
 import RegisterPage from './auth/register.html?raw'
-import StudentDashboard from './pages/student/student.html?raw'
-import logo from './assets/logo/Memorial_Lobby_Mika_(Swimsuit) (1).png'
-import bander from './assets/bander/Blue-Archive-new-recruitment-system_News_FI-750x392 1.png'
+import Student from './pages/student/attendance/student.html?raw'
+import StudentDashBoard from './pages/student/dashboard/student_dashboard.html?raw'
+import StudentSetting from './pages/student/setting/student_setting.html?raw'
 
 // import function
 import { initRegister } from './auth/register.js'
 import { initLogin } from './auth/login.js'
-import { initStudent } from './pages/student/student.js'
+import { initStudent } from './pages/student/attendance/student.js'
+import { initStudentDashBoard } from './pages/student/dashboard/student_dashboard.js'
+import { initStudentSetting } from './pages/student/setting/student_setting.js'
 
 // 3. กำหนด Route Map
 const ROUTES = {
     '':          { template: LandingPage,    init: null,           auth: false },
     '#login':    { template: LoginPage,      init: initLogin,      auth: false },
     '#register': { template: RegisterPage,   init: initRegister,   auth: false },
-    '#student':  { template: StudentDashboard, init: () => initStudent(logo, bander), auth: true },
+    '#student':  { template: Student, init: () => initStudent(logo, bander), auth: true },
+    '#student-dashboard': { template: StudentDashBoard, init: () => initStudentDashBoard(logo, bander), auth: true },
+    '#student-setting': { template: StudentSetting, init: () => initStudentSetting(logo, bander), auth: true },
 };
 async function render() {
     const app = document.querySelector('#app');
@@ -39,7 +47,7 @@ async function render() {
     }
     // 2. ถ้ามี Session แล้วแต่จะเข้าหน้า Login/Register -> ไปหน้า Dashboard
     if (session && (hash === '#login' || hash === '#register' || hash === '')) {
-        window.location.hash = '#student';
+        window.location.hash = '#student-dashboard';
         return;
     }
     // --- การ Render หน้าเว็บ ---
