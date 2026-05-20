@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabaseClient.js'
+import { escapeHTML } from "../../../lib/ui";
 
 export function initStudentDashBoard(imageLogo, imageBander) {
     const attendanceBtn = document.getElementById('btn-attendance')
@@ -151,14 +152,14 @@ export function initStudentDashBoard(imageLogo, imageBander) {
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                        <p class="font-black text-xs text-[#1E1E1E] truncate uppercase">${item.subject_name}</p>
+                        <p class="font-black text-xs text-[#1E1E1E] truncate uppercase">${escapeHTML(item.subject_name)}</p>
                         <span class="px-1.5 py-0.5 bg-[#219653] text-[8px] font-black text-white uppercase rounded-sm animate-pulse">Now</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                          <svg class="w-2.5 h-2.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase truncate">${item.teacher_name}</p>
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase truncate">${escapeHTML(item.teacher_name)}</p>
                     </div>
                 </div>
                 <div class="shrink-0 text-right">

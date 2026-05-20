@@ -69,7 +69,7 @@ export function initStudentSetting(imageLogo, imageBander) {
             const backdrop = document.getElementById('logout-backdrop');
 
             if (modalContent && backdrop) {
-                // เริ่ม Fade-out ทั้งเนื้อหาและ Backdrop
+                // Start Fade-out for both content and backdrop
                 modalContent.classList.remove('fade-in');
                 modalContent.classList.add('fade-out');
 
@@ -79,7 +79,7 @@ export function initStudentSetting(imageLogo, imageBander) {
                 setTimeout(() => {
                     modal.classList.add('hidden');
 
-                    // Reset classes สำหรับครั้งต่อไป
+                    // Reset classes for next time
                     modalContent.classList.remove('fade-out');
                     modalContent.classList.add('fade-in');
 
@@ -152,7 +152,7 @@ export function initStudentSetting(imageLogo, imageBander) {
     const cropImageElem = document.getElementById('avatar-crop-image');
     const avatarPlaceholder = document.getElementById('avatar-placeholder');
 
-    let cropperInstance = null; // เก็บ instance ของ Cropper.js
+    let cropperInstance = null; // Store Cropper.js instance
 
     // --- Modal helpers ---
     const openAvatarModal = () => {
@@ -161,7 +161,7 @@ export function initStudentSetting(imageLogo, imageBander) {
 
     const closeAvatarModal = () => {
         if (avatarModal) avatarModal.classList.add('hidden');
-        // ทำลาย Cropper และรีเซ็ตทุกอย่าง
+        // Destroy Cropper and reset everything
         if (cropperInstance) {
             cropperInstance.destroy();
             cropperInstance = null;
@@ -182,19 +182,19 @@ export function initStudentSetting(imageLogo, imageBander) {
         if (saveModal) saveModal.classList.add('hidden');
     };
 
-    // --- เปิด Modal เมื่อกดปุ่ม Change Avatar ---
+    // --- Open Modal when Change Avatar button is clicked ---
     if (changeAvatarBtn) {
         changeAvatarBtn.addEventListener('click', openAvatarModal);
     }
 
-    // --- กดปุ่ม Select Image ให้เปิด File Picker ---
+    // --- Trigger File Picker when Select Image button is clicked ---
     if (btnSelectImage) {
         btnSelectImage.addEventListener('click', () => {
             if (avatarInput) avatarInput.click();
         });
     }
 
-    // --- เมื่อเลือกไฟล์รูปภาพ ---
+    // --- When a file is selected ---
     if (avatarInput) {
         avatarInput.addEventListener('change', (e) => {
             const files = e.target.files;
@@ -202,33 +202,33 @@ export function initStudentSetting(imageLogo, imageBander) {
 
             const file = files[0];
 
-            // ตรวจสอบว่าเป็นรูปภาพหรือไม่
+            // Check if it's an image
             if (!file.type.startsWith('image/')) {
-                showToast('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+                showToast('Please select an image file only', 'error');
                 avatarInput.value = '';
                 return;
             }
 
-            // ทำลาย Cropper เก่า (ถ้ามี)
+            // Destroy old Cropper (if any)
             if (cropperInstance) {
                 cropperInstance.destroy();
                 cropperInstance = null;
             }
 
-            // สร้าง URL จากไฟล์และแสดงรูปใน Crop Area
+            // Create URL from file and show image in Crop Area
             const imageUrl = URL.createObjectURL(file);
             cropImageElem.src = imageUrl;
             cropImageElem.style.opacity = '1';
 
-            // ซ่อน Placeholder
+            // Hide Placeholder
             if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
 
-            // เริ่มต้น Cropper.js (ใช้ Cropper จาก CDN ที่โหลดไว้ใน HTML)
+            // Initialize Cropper.js (using Cropper from CDN loaded in HTML)
             cropperInstance = new Cropper(cropImageElem, {
-                aspectRatio: 1,       // บังคับ 1:1 (สี่เหลี่ยมจัตุรัส)
-                viewMode: 1,          // กรอบ crop ไม่หลุดนอกรูป
-                dragMode: 'move',     // ลากเลื่อนรูปได้ (ไม่ใช่ลากกรอบ)
-                autoCropArea: 0.85,   // เริ่มต้น crop 85% ของพื้นที่
+                aspectRatio: 1,       // Force 1:1 (square)
+                viewMode: 1,          // Crop box cannot exceed image bounds
+                dragMode: 'move',     // Drag to move image (not crop box)
+                autoCropArea: 0.85,   // Default crop area 85%
                 responsive: true,
                 restore: false,
                 guides: true,
@@ -241,23 +241,23 @@ export function initStudentSetting(imageLogo, imageBander) {
         });
     }
 
-    // --- กด Cancel ปิด Avatar Modal ---
+    // --- Cancel button to close Avatar Modal ---
     if (cancelAvatarBtn) {
         cancelAvatarBtn.addEventListener('click', closeAvatarModal);
     }
 
-    // --- กด Save เปิด Confirm Modal ---
+    // --- Save button to open Confirm Modal ---
     if (saveAvatarBtn) {
         saveAvatarBtn.addEventListener('click', () => {
             if (!cropperInstance) {
-                showToast('กรุณาเลือกรูปภาพก่อน', 'error');
+                showToast('Please select an image first', 'error');
                 return;
             }
             openSaveModal();
         });
     }
 
-    // --- กด Confirm Save → Crop + Upload + บันทึกลง DB ---
+    // --- Confirm Save → Crop + Upload + Save to DB ---
     if (confirmSaveBtn) {
         confirmSaveBtn.addEventListener('click', async () => {
             if (!cropperInstance) {
@@ -265,17 +265,17 @@ export function initStudentSetting(imageLogo, imageBander) {
                 return;
             }
 
-            // Disable ปุ่มระหว่างอัปโหลด
+            // Disable button during upload
             confirmSaveBtn.disabled = true;
             confirmSaveBtn.textContent = 'Uploading...';
 
             try {
-                // 1. ดึงข้อมูล User ที่ล็อกอินอยู่
+                // 1. Get current logged in user info
                 const { data: { user } } = await supabase.auth.getUser();
-                if (!user) throw new Error('ไม่พบข้อมูลผู้ใช้ กรุณาล็อกอินใหม่');
+                if (!user) throw new Error('User info not found. Please log in again.');
                 const userId = user.id;
 
-                // 2. Crop รูปภาพเป็น Canvas ขนาด 500x500px
+                // 2. Crop image as Canvas 500x500px
                 const canvas = cropperInstance.getCroppedCanvas({
                     width: 500,
                     height: 500,
@@ -283,16 +283,16 @@ export function initStudentSetting(imageLogo, imageBander) {
                     imageSmoothingQuality: 'high',
                 });
 
-                // 3. แปลง Canvas เป็น Blob (ไฟล์ JPEG)
+                // 3. Convert Canvas to Blob (JPEG file)
                 const blob = await new Promise((resolve) => {
                     canvas.toBlob(resolve, 'image/jpeg', 0.9);
                 });
 
-                // 4. กำหนดชื่อไฟล์และ path สำหรับ Storage
+                // 4. Define filename and path for Storage
                 const fileName = `${userId}_${Date.now()}.jpg`;
                 const filePath = `${userId}/${fileName}`;
 
-                // 5. อัปโหลดรูปขึ้น Supabase Storage (bucket: avatars)
+                // 5. Upload image to Supabase Storage (bucket: avatars)
                 const { error: uploadError } = await supabase.storage
                     .from('avatars')
                     .upload(filePath, blob, {
@@ -302,13 +302,13 @@ export function initStudentSetting(imageLogo, imageBander) {
 
                 if (uploadError) throw uploadError;
 
-                // 6. ดึง Public URL ของรูปที่อัปโหลด
+                // 6. Get Public URL of uploaded image
                 const { data: publicUrlData } = supabase.storage
                     .from('avatars')
                     .getPublicUrl(filePath);
                 const imageUrl = publicUrlData.publicUrl;
 
-                // 7. ตรวจสอบว่า user มี avatar ใน user_assets อยู่แล้วหรือยัง
+                // 7. Check if user already has an avatar in user_assets
                 const { data: existingAsset } = await supabase
                     .from('user_assets')
                     .select('id')
@@ -317,14 +317,14 @@ export function initStudentSetting(imageLogo, imageBander) {
                     .maybeSingle();
 
                 if (existingAsset) {
-                    // อัปเดต URL ของ record เดิม
+                    // Update URL of existing record
                     const { error: updateError } = await supabase
                         .from('user_assets')
                         .update({ url: imageUrl })
                         .eq('id', existingAsset.id);
                     if (updateError) throw updateError;
                 } else {
-                    // สร้าง record ใหม่
+                    // Create new record
                     const { error: insertError } = await supabase
                         .from('user_assets')
                         .insert({
@@ -335,29 +335,29 @@ export function initStudentSetting(imageLogo, imageBander) {
                     if (insertError) throw insertError;
                 }
 
-                // 8. อัปเดตรูปโปรไฟล์บนหน้าทันที
+                // 8. Update profile picture on page immediately
                 if (studentImage) {
                     studentImage.src = imageUrl;
                 }
 
-                showToast('อัปเดตรูปโปรไฟล์สำเร็จ!');
+                showToast('Profile picture updated successfully!');
 
-                // 9. ปิด Modal ทั้งหมดและเคลียร์ข้อมูล
+                // 9. Close all modals and clear data
                 closeSaveModal();
                 closeAvatarModal();
 
             } catch (error) {
                 console.error('Upload error:', error);
-                showToast(error.message || 'เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+                showToast(error.message || 'Error occurred during upload', 'error');
             } finally {
-                // Reset ปุ่ม
+                // Reset button
                 confirmSaveBtn.disabled = false;
                 confirmSaveBtn.textContent = '✓ Confirm';
             }
         });
     }
 
-    // --- กด Cancel Save ปิด Confirm Modal ---
+    // --- Cancel Save to close Confirm Modal ---
     if (cancelSaveBtn) {
         cancelSaveBtn.addEventListener('click', closeSaveModal);
     }

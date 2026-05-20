@@ -351,7 +351,7 @@ export function initStudent(imageLogo, imageBander) {
             const backdrop = document.getElementById('backdrop');
 
             if (modalContent && backdrop) {
-                // เริ่ม Fade-out ทั้งเนื้อหาและ Backdrop
+                // Start Fade-out for both content and backdrop
                 modalContent.classList.remove('fade-in');
                 modalContent.classList.add('fade-out');
 
@@ -361,7 +361,7 @@ export function initStudent(imageLogo, imageBander) {
                 setTimeout(() => {
                     modal.classList.add('hidden');
 
-                    // Reset classes สำหรับครั้งต่อไป
+                    // Reset classes for next time
                     modalContent.classList.remove('fade-out');
                     modalContent.classList.add('fade-in');
 
@@ -379,7 +379,7 @@ export function initStudent(imageLogo, imageBander) {
     };
 
     const handleSubmit = async () => {
-        // 1. ดึง ID ของคนปัจจุบัน
+        // 1. Get current user ID
         const { data: { user } } = await supabase.auth.getUser();
         const status = currentStatus;
         const reason = reasonBox.value || "-";
@@ -397,7 +397,7 @@ export function initStudent(imageLogo, imageBander) {
         }
 
         if (user) {
-            // 2. บันทึกลงตาราง Log
+            // 2. Save to Log table
             const selectedDate = ['sick', 'personal', 'activity'].includes(status) 
                 ? (dateInput?.value || new Date().toISOString().split('T')[0])
                 : new Date().toISOString().split('T')[0];

@@ -8,7 +8,7 @@ import pfdefault from './assets/Default_profile.jpg'
 import LandingPage from './main.html?raw'
 import LoginPage from './auth/login/login.html?raw'
 import RegisterPage from './auth/register/register.html?raw'
-import ParentCheckPage from './auth/parent_check/parent_check.html?raw'
+import ParentCheckPage from './pages/parent_check/parent_check.html?raw'
 
 import Student from './pages/student/attendance/student.html?raw'
 import StudentDashBoard from './pages/student/dashboard/student_dashboard.html?raw'
@@ -48,7 +48,7 @@ import NetworkErrorPage from './pages/error/network_error.html?raw'
 // import function
 import { initRegister } from './auth/register/register.js'
 import { initLogin } from './auth/login/login.js'
-import { initParentCheck } from './auth/parent_check/parent_check.js'
+import { initParentCheck } from './pages/parent_check/parent_check.js'
 
 import { initStudent } from './pages/student/attendance/student.js'
 import { initStudentDashBoard } from './pages/student/dashboard/student_dashboard.js'

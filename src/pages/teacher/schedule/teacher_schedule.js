@@ -1,5 +1,5 @@
 import { supabase } from "../../../lib/supabaseClient";
-import { showToast } from "../../../lib/ui";
+import { showToast, escapeHTML } from "../../../lib/ui";
 
 export function initTeacherSchedule(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
@@ -29,7 +29,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
     let Timer;
     let deleteTimer;
     let userRole = 'student'; // Default role
-    let userClassId = null; // เก็บ class_id ของนักเรียน (เช่น "4/9")
+    let userClassId = null; // Store student class_id (e.g. "4/9")
 
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
@@ -65,7 +65,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // ดึง Role และ class_id จากตาราง profiles
+        // Fetch Role and class_id from profiles table
         const { data: profile } = await supabase
             .from('profiles')
             .select('role, class_id')
@@ -76,7 +76,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
             userRole = profile.role;
             userClassId = profile.class_id;
 
-            // แสดงปุ่ม Add และตัวกรองห้อง เฉพาะเมื่อเป็น admin หรือ teacher เท่านั้น
+            // Show Add button and room filter only for admin or teacher
             if (userRole === 'admin' || userRole === 'teacher') {
                 if (addBtn) addBtn.classList.remove('hidden');
                 if (roomFilter) roomFilter.classList.remove('hidden');
@@ -118,7 +118,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
         if (mode === 'edit' && data) {
             modalTitle.textContent = 'Edit Schedule';
             editIdInput.value = data.id;
-            // แปลงตัวเลข 0-6 กลับเป็นชื่อวันสำหรับ Select
+            // Convert numbers 0-6 back to day names for Select
             const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             dayInput.value = days[data.day_of_week];
             periodInput.value = data.period;
@@ -128,13 +128,13 @@ export function initTeacherSchedule(imageLogo, imageBander) {
             classIdInput.value = data.room;
             teacherNameInput.value = data.teacher_name;
 
-            // --- ข้อจำกัดสำหรับวิชาพิเศษ (Period 0 หรือ Homeroom) ---
+            // --- Restrictions for special subjects (Period 0 or Homeroom) ---
             const isSpecial = (data.period === 0 || (data.subject_name || '').toLowerCase() === 'homeroom');
 
             if (isSpecial) {
-                // ห้ามลบ
+                // Prohibit deletion
                 if (deleteBtn) deleteBtn.classList.add('hidden');
-                // ล็อคฟิลด์สำคัญ
+                // Lock important fields
                 dayInput.disabled = true;
                 periodInput.disabled = true;
                 startTimeInput.disabled = true;
@@ -142,14 +142,14 @@ export function initTeacherSchedule(imageLogo, imageBander) {
                 subjectInput.disabled = true;
                 classIdInput.disabled = true;
 
-                // เพิ่มสไตล์เพื่อให้ดูเหมือนถูกล็อค
+                // Add styles to look locked
                 [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
                     el.classList.add('opacity-50', 'cursor-not-allowed');
                 });
             } else {
-                // แสดงปุ่ม Delete เมื่ออยู่ในโหมด Edit ปกติ
+                // Show Delete button in normal Edit mode
                 if (deleteBtn) deleteBtn.classList.remove('hidden');
-                // ปลดล็อคฟิลด์
+                // Unlock fields
                 [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
                     el.disabled = false;
                     el.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -161,20 +161,20 @@ export function initTeacherSchedule(imageLogo, imageBander) {
             // Reset fields
             [startTimeInput, endTimeInput, subjectInput, classIdInput, teacherNameInput].forEach(i => i.value = '');
             
-            // ปลดล็อคฟิลด์ทั้งหมดสำหรับโหมด Add
+            // Unlock all fields for Add mode
             [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
                 el.disabled = false;
                 el.classList.remove('opacity-50', 'cursor-not-allowed');
             });
 
-            // ถ้าเป็น Teacher ให้ล็อคฟิลด์ห้องเป็นห้องของตัวเอง
+            // If Teacher, lock room field to their own room
             if (userRole === 'teacher') {
                 classIdInput.value = userClassId;
                 classIdInput.disabled = true;
                 classIdInput.classList.add('opacity-50', 'cursor-not-allowed');
             }
 
-            // ซ่อนปุ่ม Delete เมื่ออยู่ในโหมด Add
+            // Hide Delete button in Add mode
             if (deleteBtn) deleteBtn.classList.add('hidden');
         }
     };
@@ -210,12 +210,12 @@ export function initTeacherSchedule(imageLogo, imageBander) {
         const currentFilter = roomFilter ? roomFilter.value : 'all';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
 
-        // --- กรองข้อมูลตามห้องที่เลือก ---
+        // --- Filter by selected room ---
         let filteredData = currentFilter === 'all'
             ? allSchedulesData
             : allSchedulesData.filter(item => item.room === currentFilter);
 
-        // --- กรองตามคำค้นหา (วิชา, ผู้สอน, ห้อง, คาบ) ---
+        // --- Filter by search term (subject, teacher, room, period) ---
         if (searchTerm) {
             filteredData = filteredData.filter(item => {
                 const subject = (item.subject_name || '').toLowerCase();
@@ -230,7 +230,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
             });
         }
 
-        // --- กรองตามวันที่เลือก ---
+        // --- Filter by selected day ---
         if (selectedDayFilter !== 'all') {
             const dayNum = parseInt(selectedDayFilter);
             filteredData = filteredData.filter(item => item.day_of_week === dayNum);
@@ -262,10 +262,10 @@ export function initTeacherSchedule(imageLogo, imageBander) {
                         ${item.start_time.substring(0, 5)} - ${item.end_time.substring(0, 5)}
                     </div>
                     <div class="px-3 py-2 border-b-2 border-[#1E1E1E] font-bold text-md leading-tight truncate">
-                        ${item.subject_name}
+                        ${escapeHTML(item.subject_name)}
                     </div>
                     <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
-                        ${item.teacher_name} (${item.room})
+                        ${escapeHTML(item.teacher_name)} (${escapeHTML(item.room)})
                     </div>
                 </div>
                 ${canManage ? `
@@ -289,7 +289,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
 
         let query = supabase.from('schedule').select('*');
 
-        // นักเรียน หรือ ครู ให้ดึงเฉพาะตารางของห้องตัวเอง (เทียบกับคอลัมน์ room ใน schedule)
+        // Student or Teacher: fetch only their own room's schedule (compare with room column)
         if ((userRole === 'student' || userRole === 'teacher') && userClassId) {
             query = query.eq('room', userClassId);
         }
@@ -305,7 +305,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
 
         allSchedulesData = data || [];
 
-        // --- อัปเดตตัวเลือกห้อง (Room Filter) ---
+        // --- Update Room Filter options ---
         if (userRole === 'admin') {
             const currentFilter = roomFilter.value;
             const rooms = [...new Set(allSchedulesData.map(item => item.room))].filter(Boolean);
@@ -318,7 +318,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
             });
             roomFilter.value = currentFilter;
         } else {
-            // ถ้าเป็น Teacher ไม่ต้องโชว์ตัวกรองห้อง
+            // If Teacher, no need to show room filter
             if (roomFilter) roomFilter.classList.add('hidden');
         }
 
@@ -427,7 +427,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
         btn.addEventListener('click', () => {
             selectedDayFilter = btn.getAttribute('data-day');
             
-            // อัปเดต UI ของปุ่ม
+            // Update button UI
             dayFilterBtns.forEach(b => {
                 b.classList.remove('bg-[#F2C00F]');
                 b.classList.add('bg-white');
@@ -447,7 +447,7 @@ export function initTeacherSchedule(imageLogo, imageBander) {
         }
     });
 
-    // เริ่มต้นระบบ: เช็คสิทธิ์ก่อน แล้วค่อยดึงข้อมูล
+    // Initializing: Check permissions first, then fetch data
     const init = async () => {
         await checkUserPermissions();
         await fetchSchedules();

@@ -21,7 +21,7 @@
                     <svg class="w-8 h-8" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">ผู้ปกครอง</p>
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Parent</p>
                     <h1 class="text-2xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Parent Check</h1>
                 </div>
                 <div class="shrink-0 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] p-2.5">
@@ -34,16 +34,16 @@
         <!-- Search Section -->
         <div class="px-5 pt-4 pb-2">
             <div class="flex items-center gap-2 mb-3">
-                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">ค้นหานักเรียน</span>
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Search Student</span>
             </div>
             <div class="space-y-3">
                 <div>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">รหัสนักเรียน</p>
-                    <input type="text" id="stu-id-input" placeholder="กรอกรหัสนักเรียน 5 หลัก" maxlength="5" inputmode="numeric" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Student ID</p>
+                    <input type="text" id="stu-id-input" placeholder="Enter 5-digit Student ID" maxlength="5" inputmode="numeric" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
                 </div>
                 <button id="btn-search" class="w-full py-3 bg-[#5B8DEF] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    ค้นหา
+                    Search
                 </button>
             </div>
         </div>
@@ -51,27 +51,27 @@
         <!-- Mock Student Info -->
         <div id="student-result" class="px-5 pt-3 pb-2">
             <div class="flex items-center gap-2 mb-3">
-                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">ข้อมูลนักเรียน</span>
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Student Information</span>
             </div>
             <div class="bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden">
                 <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1E1E1E]/15">
                     <div class="w-8 h-8 shrink-0 bg-[#5B8DEF]/20 border border-[#1E1E1E]/30 flex items-center justify-center"><span class="text-sm">👤</span></div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">ชื่อ-นามสกุล</p>
-                        <p class="text-sm font-bold text-[#1E1E1E]">สมชาย ใจดี</p>
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">Full Name</p>
+                        <p class="text-sm font-bold text-[#1E1E1E]">John Doe</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1E1E1E]/15">
                     <div class="w-8 h-8 shrink-0 bg-[#219653]/20 border border-[#1E1E1E]/30 flex items-center justify-center"><span class="text-sm">🆔</span></div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">รหัสนักเรียน</p>
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">Student ID</p>
                         <p class="text-sm font-bold text-[#1E1E1E]">12345</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 px-4 py-3">
                     <div class="w-8 h-8 shrink-0 bg-[#FEB729]/20 border border-[#1E1E1E]/30 flex items-center justify-center"><span class="text-sm">🏫</span></div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">ห้องเรียน</p>
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider">Classroom</p>
                         <p class="text-sm font-bold text-[#1E1E1E]">M.5/9</p>
                     </div>
                 </div>
@@ -81,28 +81,28 @@
         <!-- Monthly Summary Stats -->
         <div class="px-5 pt-3 pb-2">
             <div class="flex items-center gap-2 mb-3">
-                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">สรุปประจำเดือน พ.ค.</span>
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">May Monthly Summary</span>
             </div>
             <div class="grid grid-cols-4 gap-2">
                 <div class="bg-[#219653]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
                     <div class="flex justify-center m-1"><svg class="h-5 w-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
                     <p class="text-lg font-black text-[#1E1E1E]">18</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">มาเรียน</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Present</p>
                 </div>
                 <div class="bg-[#5B8DEF]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
                     <div class="flex justify-center m-1"><svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
                     <p class="text-lg font-black text-[#1E1E1E]">2</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">กิจกรรม</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Activity</p>
                 </div>
                 <div class="bg-[#E25C5C]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
                     <div class="flex justify-center m-1"><svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
                     <p class="text-lg font-black text-[#1E1E1E]">1</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">ลาป่วย</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Sick</p>
                 </div>
                 <div class="bg-[#B08968]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
                     <div class="flex justify-center m-1"><svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
                     <p class="text-lg font-black text-[#1E1E1E]">1</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">ลากิจ</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Personal</p>
                 </div>
             </div>
         </div>
@@ -110,68 +110,68 @@
         <!-- Subject Breakdown -->
         <div class="px-5 pt-3 pb-2">
             <div class="flex items-center justify-between gap-2 mb-3">
-                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">แยกตามรายวิชา</span>
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">By Subject</span>
                 <select class="px-2 py-1 bg-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-[9px] font-bold focus:outline-none cursor-pointer uppercase appearance-none">
-                    <option>ทุกวิชา</option>
-                    <option>คณิตศาสตร์</option>
-                    <option>วิทยาศาสตร์</option>
-                    <option>ภาษาอังกฤษ</option>
-                    <option>ภาษาไทย</option>
+                    <option>All Subjects</option>
+                    <option>Mathematics</option>
+                    <option>Science</option>
+                    <option>English</option>
+                    <option>Thai</option>
                 </select>
             </div>
             <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                 <!-- Subject 1 -->
                 <div class="flex items-center gap-3 p-3 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E]">
                     <div class="w-10 h-10 shrink-0 border-2 border-[#1E1E1E] bg-[#F2C00F] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center">
-                        <span class="text-[9px] font-black">คณิต</span>
+                        <span class="text-[9px] font-black">Math</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-black text-xs text-[#1E1E1E] uppercase">คณิตศาสตร์</p>
+                        <p class="font-black text-xs text-[#1E1E1E] uppercase">Mathematics</p>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#219653]/20 border border-[#1E1E1E]/20">มา 8</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#E25C5C]/20 border border-[#1E1E1E]/20">ป่วย 1</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#B08968]/20 border border-[#1E1E1E]/20">กิจ 0</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#219653]/20 border border-[#1E1E1E]/20">Present 8</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#E25C5C]/20 border border-[#1E1E1E]/20">Sick 1</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#B08968]/20 border border-[#1E1E1E]/20">Leave 0</span>
                         </div>
                     </div>
                     <div class="text-right shrink-0">
                         <p class="text-xs font-black text-[#219653]">89%</p>
-                        <p class="text-[8px] font-bold text-[#1E1E1E]/30">เข้าเรียน</p>
+                        <p class="text-[8px] font-bold text-[#1E1E1E]/30">Attendance</p>
                     </div>
                 </div>
                 <!-- Subject 2 -->
                 <div class="flex items-center gap-3 p-3 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E]">
                     <div class="w-10 h-10 shrink-0 border-2 border-[#1E1E1E] bg-[#5B8DEF] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center">
-                        <span class="text-[9px] font-black text-white">วิทย์</span>
+                        <span class="text-[9px] font-black text-white">Sci</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-black text-xs text-[#1E1E1E] uppercase">วิทยาศาสตร์</p>
+                        <p class="font-black text-xs text-[#1E1E1E] uppercase">Science</p>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#219653]/20 border border-[#1E1E1E]/20">มา 6</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#E25C5C]/20 border border-[#1E1E1E]/20">ป่วย 0</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#B08968]/20 border border-[#1E1E1E]/20">กิจ 1</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#219653]/20 border border-[#1E1E1E]/20">Present 6</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#E25C5C]/20 border border-[#1E1E1E]/20">Sick 0</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#B08968]/20 border border-[#1E1E1E]/20">Leave 1</span>
                         </div>
                     </div>
                     <div class="text-right shrink-0">
                         <p class="text-xs font-black text-[#219653]">86%</p>
-                        <p class="text-[8px] font-bold text-[#1E1E1E]/30">เข้าเรียน</p>
+                        <p class="text-[8px] font-bold text-[#1E1E1E]/30">Attendance</p>
                     </div>
                 </div>
                 <!-- Subject 3 -->
                 <div class="flex items-center gap-3 p-3 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E]">
                     <div class="w-10 h-10 shrink-0 border-2 border-[#1E1E1E] bg-[#E46F20] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center">
-                        <span class="text-[9px] font-black text-white">อังกฤษ</span>
+                        <span class="text-[9px] font-black text-white">Eng</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-black text-xs text-[#1E1E1E] uppercase">ภาษาอังกฤษ</p>
+                        <p class="font-black text-xs text-[#1E1E1E] uppercase">English</p>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#219653]/20 border border-[#1E1E1E]/20">มา 4</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#5B8DEF]/20 border border-[#1E1E1E]/20">กิจกรรม 2</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#E25C5C]/20 border border-[#1E1E1E]/20">ป่วย 0</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#219653]/20 border border-[#1E1E1E]/20">Present 4</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#5B8DEF]/20 border border-[#1E1E1E]/20">Activity 2</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.5 bg-[#E25C5C]/20 border border-[#1E1E1E]/20">Sick 0</span>
                         </div>
                     </div>
                     <div class="text-right shrink-0">
                         <p class="text-xs font-black text-[#219653]">100%</p>
-                        <p class="text-[8px] font-bold text-[#1E1E1E]/30">เข้าเรียน</p>
+                        <p class="text-[8px] font-bold text-[#1E1E1E]/30">Attendance</p>
                     </div>
                 </div>
             </div>

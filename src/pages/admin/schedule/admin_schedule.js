@@ -1,5 +1,6 @@
 import { supabase } from "../../../lib/supabaseClient";
-import { showToast } from "../../../lib/ui";
+import { showToast, escapeHTML } from "../../../lib/ui";
+import { importCSV } from "../../../lib/import.js";
 
 export function initAdminSchedule(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
@@ -29,7 +30,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
     let Timer;
     let deleteTimer;
     let userRole = 'student'; // Default role
-    let userClassId = null; // เก็บ class_id ของนักเรียน (เช่น "4/9")
+    let userClassId = null; // Store student class_id (e.g. "4/9")
 
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
@@ -41,6 +42,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
     const scheduleList = document.getElementById('schedule-list');
     const roomFilter = document.getElementById('room-filter');
     const searchFilter = document.getElementById('search-filter');
+    const importBtn = document.getElementById('btn-import');
     const dayFilterBtns = document.querySelectorAll('.day-filter-btn');
 
     let selectedDayFilter = '1';
@@ -50,6 +52,20 @@ export function initAdminSchedule(imageLogo, imageBander) {
     const deleteTimerDisplay = document.getElementById('delete-timer');
     const confirmDeleteBtn = document.getElementById('btn-confirm-delete');
     const cancelDeleteBtn = document.getElementById('btn-cancel-delete');
+
+    // Import Modal Elements
+    const modalImport = document.getElementById('modal-import');
+    const closeImportBtn = document.getElementById('btn-close-import');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('import-file-input');
+    const processImportBtn = document.getElementById('btn-process-import');
+    const downloadTemplateBtn = document.getElementById('btn-download-template');
+    const previewBody = document.getElementById('import-preview-body');
+    const previewCount = document.getElementById('preview-count');
+    const importStep1 = document.getElementById('import-step-1');
+    const importStep2 = document.getElementById('import-step-2');
+
+    let importedData = [];
 
     // Fields
     const dayInput = document.getElementById('days');
@@ -65,7 +81,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // ดึง Role และ class_id จากตาราง profiles
+        // Fetch Role and class_id from profiles table
         const { data: profile } = await supabase
             .from('profiles')
             .select('role, class_id')
@@ -76,9 +92,10 @@ export function initAdminSchedule(imageLogo, imageBander) {
             userRole = profile.role;
             userClassId = profile.class_id;
 
-            // แสดงปุ่ม Add และตัวกรองห้อง เฉพาะเมื่อเป็น admin หรือ teacher เท่านั้น
+            // Show Add button and room filter only for admin or teacher
             if (userRole === 'admin' || userRole === 'teacher') {
                 if (addBtn) addBtn.classList.remove('hidden');
+                if (importBtn) importBtn.classList.remove('hidden');
                 if (roomFilter) roomFilter.classList.remove('hidden');
             }
         }
@@ -118,7 +135,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
         if (mode === 'edit' && data) {
             modalTitle.textContent = 'Edit Schedule';
             editIdInput.value = data.id;
-            // แปลงตัวเลข 0-6 กลับเป็นชื่อวันสำหรับ Select
+            // Convert numbers 0-6 back to day names for Select
             const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             dayInput.value = days[data.day_of_week];
             periodInput.value = data.period;
@@ -128,13 +145,13 @@ export function initAdminSchedule(imageLogo, imageBander) {
             classIdInput.value = data.room;
             teacherNameInput.value = data.teacher_name;
 
-            // --- ข้อจำกัดสำหรับวิชาพิเศษ (Period 0 หรือ Homeroom) ---
+            // --- Restrictions for special subjects (Period 0 or Homeroom) ---
             const isSpecial = (data.period === 0 || (data.subject_name || '').toLowerCase() === 'homeroom');
 
             if (isSpecial) {
-                // ห้ามลบ
+                // Prohibit deletion
                 if (deleteBtn) deleteBtn.classList.add('hidden');
-                // ล็อคฟิลด์สำคัญ
+                // Lock important fields
                 dayInput.disabled = true;
                 periodInput.disabled = true;
                 startTimeInput.disabled = true;
@@ -142,14 +159,14 @@ export function initAdminSchedule(imageLogo, imageBander) {
                 subjectInput.disabled = true;
                 classIdInput.disabled = true;
 
-                // เพิ่มสไตล์เพื่อให้ดูเหมือนถูกล็อค
+                // Add styles to look locked
                 [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
                     el.classList.add('opacity-50', 'cursor-not-allowed');
                 });
             } else {
-                // แสดงปุ่ม Delete เมื่ออยู่ในโหมด Edit ปกติ
+                // Show Delete button in normal Edit mode
                 if (deleteBtn) deleteBtn.classList.remove('hidden');
-                // ปลดล็อคฟิลด์
+                // Unlock fields
                 [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
                     el.disabled = false;
                     el.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -161,13 +178,13 @@ export function initAdminSchedule(imageLogo, imageBander) {
             // Reset fields
             [startTimeInput, endTimeInput, subjectInput, classIdInput, teacherNameInput].forEach(i => i.value = '');
             
-            // ปลดล็อคฟิลด์ทั้งหมดสำหรับโหมด Add
+            // Unlock all fields for Add mode
             [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
                 el.disabled = false;
                 el.classList.remove('opacity-50', 'cursor-not-allowed');
             });
 
-            // ซ่อนปุ่ม Delete เมื่ออยู่ในโหมด Add
+            // Hide Delete button in Add mode
             if (deleteBtn) deleteBtn.classList.add('hidden');
         }
     };
@@ -203,12 +220,12 @@ export function initAdminSchedule(imageLogo, imageBander) {
         const currentFilter = roomFilter ? roomFilter.value : 'all';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
 
-        // --- กรองข้อมูลตามห้องที่เลือก ---
+        // --- Filter by selected room ---
         let filteredData = currentFilter === 'all'
             ? allSchedulesData
             : allSchedulesData.filter(item => item.room === currentFilter);
 
-        // --- กรองตามคำค้นหา (วิชา, ผู้สอน, ห้อง, คาบ) ---
+        // --- Filter by search term (subject, teacher, room, period) ---
         if (searchTerm) {
             filteredData = filteredData.filter(item => {
                 const subject = (item.subject_name || '').toLowerCase();
@@ -223,7 +240,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
             });
         }
 
-        // --- กรองตามวันที่เลือก ---
+        // --- Filter by selected day ---
         if (selectedDayFilter !== 'all') {
             const dayNum = parseInt(selectedDayFilter);
             filteredData = filteredData.filter(item => item.day_of_week === dayNum);
@@ -255,10 +272,10 @@ export function initAdminSchedule(imageLogo, imageBander) {
                         ${item.start_time.substring(0, 5)} - ${item.end_time.substring(0, 5)}
                     </div>
                     <div class="px-3 py-2 border-b-2 border-[#1E1E1E] font-bold text-md leading-tight truncate">
-                        ${item.subject_name}
+                        ${escapeHTML(item.subject_name)}
                     </div>
                     <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
-                        ${item.teacher_name} (${item.room})
+                        ${escapeHTML(item.teacher_name)} (${escapeHTML(item.room)})
                     </div>
                 </div>
                 ${canManage ? `
@@ -282,7 +299,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
 
         let query = supabase.from('schedule').select('*');
 
-        // ถ้านักเรียน ให้ดึงเฉพาะตารางของห้องตัวเอง (เทียบกับคอลัมน์ room ใน schedule)
+        // Student: fetch only their own room's schedule (compare with room column)
         if (userRole === 'student' && userClassId) {
             query = query.eq('room', userClassId);
         }
@@ -298,7 +315,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
 
         allSchedulesData = data || [];
 
-        // --- อัปเดตตัวเลือกห้อง (Room Filter) ---
+        // --- Update Room Filter options ---
         const currentFilter = roomFilter.value;
         const rooms = [...new Set(allSchedulesData.map(item => item.room))].filter(Boolean);
         roomFilter.innerHTML = '<option value="all">ALL ROOMS</option>';
@@ -410,12 +427,184 @@ export function initAdminSchedule(imageLogo, imageBander) {
     if (roomFilter) roomFilter.addEventListener('change', renderSchedules);
     if (searchFilter) searchFilter.addEventListener('input', renderSchedules);
 
+    /*
+    // --- Import Flow ---
+    const openImportModal = () => {
+        if (!modalImport) return;
+        modalImport.classList.remove('hidden');
+        resetImportModal();
+    };
+
+    const closeImportModal = () => {
+        if (!modalImport) return;
+        modalImport.classList.add('hidden');
+    };
+
+    const resetImportModal = () => {
+        importStep1.classList.remove('hidden');
+        importStep2.classList.add('hidden');
+        processImportBtn.classList.add('hidden');
+        previewBody.innerHTML = '';
+        fileInput.value = '';
+        importedData = [];
+    };
+
+    const handleFileSelect = async (file) => {
+        try {
+            const data = await importCSV(file);
+            if (!data || data.length === 0) {
+                showToast("No data found in file", "error");
+                return;
+            }
+
+            importedData = data;
+            renderImportPreview();
+            importStep1.classList.add('hidden');
+            importStep2.classList.remove('hidden');
+            processImportBtn.classList.remove('hidden');
+        } catch (error) {
+            showToast(error.message, "error");
+        }
+    };
+
+    const renderImportPreview = () => {
+        previewBody.innerHTML = '';
+        previewCount.textContent = importedData.length;
+
+        importedData.slice(0, 10).forEach(row => {
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-[#1E1E1E]/10";
+            tr.innerHTML = `
+                <td class="p-2">${row.Day || row.day || '-'}</td>
+                <td class="p-2">${row.Period || row.period || '-'}</td>
+                <td class="p-2 truncate max-w-[100px]">${row.Subject || row.subject_name || row.subject || '-'}</td>
+                <td class="p-2">${row.Room || row.room || '-'}</td>
+                <td class="p-2 truncate max-w-[100px]">${row.Teacher || row.teacher_name || row.teacher || '-'}</td>
+                <td class="p-2">${row.Start || row.start_time || '-'} - ${row.End || row.end_time || '-'}</td>
+            `;
+            previewBody.appendChild(tr);
+        });
+
+        if (importedData.length > 10) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td colspan="6" class="p-2 text-center opacity-50 italic">... and ${importedData.length - 10} more rows</td>`;
+            previewBody.appendChild(tr);
+        }
+    };
+
+    const processImport = async () => {
+        const daysMap = { "sunday": 0, "monday": 1, "tuesday": 2, "wednesday": 3, "thursday": 4, "friday": 5, "saturday": 6, "sun": 0, "mon": 1, "tue": 2, "wed": 3, "thu": 4, "fri": 5, "sat": 6 };
+        
+        const formattedData = importedData.map(row => {
+            const dayStr = (row.Day || row.day || "").toString().toLowerCase();
+            const dayNum = daysMap[dayStr] !== undefined ? daysMap[dayStr] : parseInt(dayStr);
+            
+            return {
+                subject_name: row.Subject || row.subject_name || row.subject,
+                day_of_week: dayNum,
+                period: parseInt(row.Period || row.period),
+                start_time: row.Start || row.start_time || row["Start Time"],
+                end_time: row.End || row.end_time || row["End Time"],
+                room: (row.Room || row.room || "").toString(),
+                teacher_name: row.Teacher || row.teacher_name || row.teacher
+            };
+        }).filter(item => !isNaN(item.day_of_week) && !isNaN(item.period) && item.room);
+
+        if (formattedData.length === 0) {
+            showToast("No valid data to import", "error");
+            return;
+        }
+
+        processImportBtn.disabled = true;
+        processImportBtn.textContent = "Importing...";
+
+        // Use upsert with conflict on (day_of_week, period, room)
+        // Note: This requires a unique constraint on these columns in the DB.
+        // If not present, it will just insert.
+        const { error } = await supabase
+            .from('schedule')
+            .upsert(formattedData, { onConflict: 'day_of_week,period,room' });
+
+        if (error) {
+            console.error("Import error:", error);
+            showToast("Import failed: " + error.message, "error");
+        } else {
+            showToast(`Imported ${formattedData.length} records successfully!`, "success");
+            closeImportModal();
+            fetchSchedules();
+        }
+
+        processImportBtn.disabled = false;
+        processImportBtn.textContent = "Confirm Import";
+    };
+
+    if (importBtn) importBtn.addEventListener('click', openImportModal);
+    if (closeImportBtn) closeImportBtn.addEventListener('click', closeImportModal);
+    if (processImportBtn) processImportBtn.addEventListener('click', processImport);
+
+    if (dropZone) {
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-[#F2C00F]', 'bg-[#F2C00F]/10');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-[#F2C00F]', 'bg-[#F2C00F]/10');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-[#F2C00F]', 'bg-[#F2C00F]/10');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFileSelect(file);
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFileSelect(file);
+        });
+    }
+
+    if (downloadTemplateBtn) {
+        downloadTemplateBtn.addEventListener('click', () => {
+            const templateData = [
+                {
+                    "Day": "Monday",
+                    "Period": 1,
+                    "Subject": "Core Mathematics",
+                    "Room": "4/9",
+                    "Teacher": "John Doe",
+                    "Start": "08:30",
+                    "End": "09:20"
+                },
+                {
+                    "Day": "Tuesday",
+                    "Period": 2,
+                    "Subject": "Physics",
+                    "Room": "5/9",
+                    "Teacher": "Jane Smith",
+                    "Start": "09:20",
+                    "End": "10:10"
+                }
+            ];
+
+            const worksheet = XLSX.utils.json_to_sheet(templateData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule Template");
+            
+            // Export to XLSX
+            XLSX.writeFile(workbook, "schedule_template.xlsx");
+        });
+    }
+    */
+
     // --- Day Filter Event Listeners ---
     dayFilterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             selectedDayFilter = btn.getAttribute('data-day');
             
-            // อัปเดต UI ของปุ่ม
+            // Update button UI
             dayFilterBtns.forEach(b => {
                 b.classList.remove('bg-[#F2C00F]');
                 b.classList.add('bg-white');
@@ -435,7 +624,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
         }
     });
 
-    // เริ่มต้นระบบ: เช็คสิทธิ์ก่อน แล้วค่อยดึงข้อมูล
+    // Initializing: Check permissions first, then fetch data
     const init = async () => {
         await checkUserPermissions();
         await fetchSchedules();

@@ -6,24 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Attendance - Neubrutalism</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
         body {
             font-family: 'M PLUS Rounded 1c', sans-serif;
-        }
-
-        /* Responsive for 375x667 (iPhone 6/7/8) */
-        @media (max-height: 670px) {
-            #main-card {
-                max-height: 95vh;
-                display: flex;
-                flex-direction: column;
-            }
-
-            #schedule-list {
-                max-height: 320px !important;
-            }
         }
     </style>
 </head>
@@ -61,6 +49,9 @@
                 <button id="btn-add" class="px-4 py-2 bg-[#F2C00F] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hidden">
                     + Add
                 </button>
+                <!-- <button id="btn-import" class="px-4 py-2 bg-[#F2994A] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hidden">
+                    Import
+                </button> -->
             </div>
             <div class="w-full relative mb-3">
                 <input type="text" id="search-filter" placeholder="Search schedule..." class="w-full px-4 py-2.5 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none placeholder-[#1E1E1E]/30 transition-all">
@@ -193,7 +184,7 @@
 
             <div class="relative w-full text-left">
                 <label class="text-[10px] font-bold uppercase ml-1">Teacher's Name</label>
-                <input type="text" id="teacherName" placeholder="Enter teacher name"
+                <input type="text" id="teacherName" placeholder="Enter teacher name" maxlength="100"
                     class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-[#1E1E1E] font-bold focus:outline-none">
             </div>
 
@@ -233,6 +224,67 @@
                     class="flex-1 py-2 bg-[#E25C5C] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-white font-bold uppercase active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">Delete</button>
                 <button id="btn-cancel-delete"
                     class="flex-1 py-2 bg-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Import CSV Modal -->
+    <div id="modal-import" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="backdrop-import" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md"></div>
+        <div class="relative w-full max-w-[600px] max-h-[90vh] overflow-y-auto bg-[#EEEDDE] border-4 border-[#1E1E1E] shadow-[8px_8px_0px_#1E1E1E] p-8 flex flex-col gap-6 fade-in">
+            <div class="flex items-center gap-4">
+                <div class="bg-[#F2994A] border-2 border-[#1E1E1E] p-3 shadow-[4px_4px_0px_#1E1E1E]">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold uppercase tracking-wider">Import Schedule</h2>
+            </div>
+
+            <div id="import-step-1" class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <p class="text-sm font-bold opacity-70 italic">Select a CSV or Excel file to preview data.</p>
+                    <button id="btn-download-template" class="text-[10px] font-bold text-[#F2994A] underline hover:text-[#1E1E1E] transition-colors">
+                        Download Template
+                    </button>
+                </div>
+                <div id="drop-zone" class="border-4 border-dashed border-[#1E1E1E]/20 p-10 flex flex-col items-center justify-center gap-4 hover:border-[#F2994A] transition-colors cursor-pointer">
+                    <svg class="w-12 h-12 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <p class="text-xs font-bold uppercase opacity-50">Click to upload or drag & drop</p>
+                    <input type="file" id="import-file-input" class="hidden" accept=".csv, .xlsx, .xls">
+                </div>
+            </div>
+
+            <div id="import-step-2" class="hidden flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <p class="text-xs font-bold uppercase opacity-50">Data Preview (<span id="preview-count">0</span> rows)</p>
+                    <p class="text-[10px] text-red-500 font-bold uppercase animate-pulse">* Duplicate records will be replaced</p>
+                </div>
+                <div class="overflow-x-auto border-2 border-[#1E1E1E]">
+                    <table class="w-full text-left text-[10px] font-bold">
+                        <thead class="bg-[#1E1E1E] text-white uppercase">
+                            <tr>
+                                <th class="p-2">Day</th>
+                                <th class="p-2">Period</th>
+                                <th class="p-2">Subject</th>
+                                <th class="p-2">Room</th>
+                                <th class="p-2">Teacher</th>
+                                <th class="p-2">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="import-preview-body" class="bg-white">
+                            <!-- Preview rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-2">
+                <button id="btn-process-import" class="flex-1 py-3 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hidden">
+                    Confirm Import
+                </button>
+                <button id="btn-close-import" class="flex-1 py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>

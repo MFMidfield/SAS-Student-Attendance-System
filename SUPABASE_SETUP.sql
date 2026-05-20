@@ -1,7 +1,7 @@
 -- ========================================================
 -- LUNAR PROJECT: SUPABASE DATABASE SETUP SCRIPT
 -- Consolidated from SQL History for a fresh setup.
--- Last Updated: 2026-05-12
+-- Last Updated: 2026-05-14
 -- ========================================================
 
 -- 1. EXTENSIONS
@@ -13,11 +13,11 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   email text unique,
-  stu_id text unique,
-  firstname text,
-  lastname text,
-  class_id text default 'N/A',
-  role text default 'student',
+  stu_id varchar(20) unique,
+  firstname varchar(100),
+  lastname varchar(100),
+  class_id varchar(20) default 'N/A',
+  role varchar(50) default 'student',
   created_at timestamptz default now() not null,
   updated_at timestamptz default now(),
   
@@ -28,41 +28,43 @@ create table if not exists public.profiles (
 create table if not exists public.attendance_logs (
   id uuid default gen_random_uuid() primary key,
   student_id uuid references public.profiles(id) on delete cascade,
-  stu_id_record text,
-  firstname_record text,
-  lastname_record text,
-  class_id_record text,
-  status text,                   -- ค่าแรกจากนักเรียน
-  note text default '-',         -- หมายเหตุจากนักเรียน
-  subject text default '-',
+  stu_id_record varchar(20),
+  firstname_record varchar(100),
+  lastname_record varchar(100),
+  class_id_record varchar(20),
+  status text,                   -- Initial status from student
+  note varchar(500) default '-', -- Note from student
+  subject varchar(100) default '-',
   leave_scope text default 'period', -- 'period', 'full_day', 'morning', 'afternoon'
   
-  -- Verification Fields (Added for Unified Logic)
-  final_status text,             -- ค่าที่ครูสรุป
+  -- Verification Fields
+  final_status text,             -- Final status decided by staff
   verification_status text default 'pending', -- 'pending', 'approved', 'rejected'
-  teacher_note text,             -- หมายเหตุจากครู
+  teacher_note varchar(500),     -- Note from staff
   verified_by uuid references public.profiles(id),
   verified_at timestamptz,
   
-  attendance_date date default current_date not null, -- วันที่เข้าเรียน/วันที่ลา
-  created_at timestamptz default now() not null
+  attendance_date date default current_date not null,
+  created_at timestamptz default now() not null,
+  
+  constraint check_leave_scope check (leave_scope in ('period', 'full_day', 'morning', 'afternoon'))
 );
 
--- 2.4 Schedule Table
+-- 2.3 Schedule Table
 create table if not exists public.schedule (
   id uuid default gen_random_uuid() primary key,
-  subject_name text not null,
+  subject_name varchar(100) not null,
   period int2,
-  room text,
-  teacher_name text,
+  room varchar(50),
+  teacher_name varchar(100),
   day_of_week int2 check (day_of_week between 0 and 6),
   start_time time not null,
   end_time time not null,
-  grade_level text,
+  grade_level varchar(20),
   created_at timestamptz default now()
 );
 
--- 2.5 User Assets
+-- 2.4 User Assets
 create table if not exists public.user_assets (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
@@ -71,16 +73,16 @@ create table if not exists public.user_assets (
   created_at timestamptz default now()
 );
 
--- 2.6 School Activities
+-- 2.5 School Activities
 create table if not exists public.school_activities (
   id uuid default gen_random_uuid() primary key,
-  title text not null,
-  description text,
-  location text,
+  title varchar(255) not null,
+  description varchar(1000),
+  location varchar(255),
   activity_date date not null,
   start_time time not null,
   end_time time not null,
-  organizer text default 'โรงเรียน',
+  organizer varchar(100) default 'โรงเรียน',
   created_at timestamptz default now(),
   constraint check_times check (start_time < end_time)
 );
@@ -130,7 +132,8 @@ create or replace function public.sync_role_to_auth()
 returns trigger language plpgsql security definer set search_path = auth, public as $$
 begin
   update auth.users
-  set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) || jsonb_build_object('role', new.role)
+  set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) 
+    || jsonb_build_object('role', new.role, 'class_id', new.class_id)
   where id = new.id;
   return new;
 end;
@@ -138,7 +141,7 @@ $$;
 
 drop trigger if exists on_profile_role_update on public.profiles;
 create trigger on_profile_role_update
-  after insert or update of role on public.profiles
+  after insert or update on public.profiles
   for each row execute procedure public.sync_role_to_auth();
 
 -- 3.4 Snapshot Student Info on Attendance Log
@@ -159,6 +162,24 @@ create trigger before_attendance_insert
   before insert on public.attendance_logs
   for each row execute procedure public.copy_student_info_to_log();
 
+-- 3.5 Prevent Unauthorized Role Updates
+create or replace function public.restrict_role_update() 
+returns trigger as $$
+begin
+  if old.role is distinct from new.role then
+    if (auth.jwt() -> 'user_metadata' ->> 'role') is distinct from 'admin' then
+      raise exception 'ไม่อนุญาตให้เปลี่ยนระดับสิทธิ์ (role) ด้วยตัวเอง';
+    end if;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists prevent_unauthorized_role_update on public.profiles;
+create trigger prevent_unauthorized_role_update
+  before update on public.profiles
+  for each row execute procedure public.restrict_role_update();
+
 -- 4. ROW LEVEL SECURITY (RLS)
 
 alter table public.profiles enable row level security;
@@ -174,48 +195,75 @@ create policy "Users view own profile" on public.profiles for select using (auth
 drop policy if exists "Users update own profile" on public.profiles;
 create policy "Users update own profile" on public.profiles for update using (auth.uid() = id);
 
-drop policy if exists "Admins view all profiles" on public.profiles;
-create policy "Admins view all profiles" on public.profiles for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin' );
+drop policy if exists "Admins view everything" on public.profiles;
+create policy "Admins view everything" on public.profiles for select to authenticated 
+using ( ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin' );
 
 drop policy if exists "Admins update any profile" on public.profiles;
-create policy "Admins update any profile" on public.profiles for update using ( (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin' );
+create policy "Admins update any profile" on public.profiles for update to authenticated 
+using ( ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin' );
+
+drop policy if exists "Teacher and Leader can view same class profiles" on public.profiles;
+create policy "Teacher and Leader can view same class profiles" on public.profiles for select to authenticated
+using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['teacher', 'leader'])
+  and ((auth.jwt() -> 'user_metadata'::text) ->> 'class_id'::text) = class_id
+);
 
 -- 4.2 Attendance Logs Policies
 drop policy if exists "Students insert own logs" on public.attendance_logs;
-create policy "Students insert own logs" on public.attendance_logs for insert with check (auth.uid() = student_id);
+create policy "Students insert own logs" on public.attendance_logs for insert with check (
+  auth.uid() = student_id 
+  and verification_status = 'pending'
+);
 
 drop policy if exists "Students view own logs" on public.attendance_logs;
 create policy "Students view own logs" on public.attendance_logs for select using (auth.uid() = student_id);
 
 drop policy if exists "Staff view all logs" on public.attendance_logs;
-create policy "Staff view all logs" on public.attendance_logs for select using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
+create policy "Staff view all logs" on public.attendance_logs for select using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher', 'leader'])
+);
 
 drop policy if exists "Staff update logs" on public.attendance_logs;
-create policy "Staff update logs" on public.attendance_logs for update using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
+create policy "Staff update logs" on public.attendance_logs for update using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher', 'leader'])
+);
 
 drop policy if exists "Staff delete logs" on public.attendance_logs;
-create policy "Staff delete logs" on public.attendance_logs for delete using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher', 'leader') );
+create policy "Staff delete logs" on public.attendance_logs for delete using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher', 'leader'])
+);
 
--- 4.4 Schedule Policies
+-- 4.3 Schedule Policies
 drop policy if exists "Public view schedule" on public.schedule;
 create policy "Public view schedule" on public.schedule for select using (true);
 
-drop policy if exists "Admins manage schedule" on public.schedule;
-create policy "Admins manage schedule" on public.schedule for all using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher') );
+drop policy if exists "Admins and Teachers can manage schedules" on public.schedule;
+create policy "Admins and Teachers can manage schedules" on public.schedule for all using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher'])
+);
 
--- 4.5 School Activities Policies
+-- 4.4 School Activities Policies
 drop policy if exists "Anyone can view activities" on public.school_activities;
 create policy "Anyone can view activities" on public.school_activities for select using (true);
 
 drop policy if exists "Staff can manage activities" on public.school_activities;
-create policy "Staff can manage activities" on public.school_activities for all using ( (auth.jwt() -> 'user_metadata' ->> 'role') in ('admin', 'teacher') );
+create policy "Staff can manage activities" on public.school_activities for all using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher'])
+);
 
--- 4.6 User Assets Policies
+-- 4.5 User Assets Policies
 drop policy if exists "Anyone can view assets" on public.user_assets;
 create policy "Anyone can view assets" on public.user_assets for select using (true);
 
 drop policy if exists "Users manage own assets" on public.user_assets;
 create policy "Users manage own assets" on public.user_assets for all using (auth.uid() = user_id);
+
+drop policy if exists "Admins manage all assets" on public.user_assets;
+create policy "Admins manage all assets" on public.user_assets for all using (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin'
+);
 
 -- 5. STORAGE BUCKETS (Managed via SQL)
 insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true) on conflict (id) do nothing;

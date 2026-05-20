@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,28 +8,51 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
-        body { font-family: 'M PLUS Rounded 1c', sans-serif; }
-        @media (max-height: 670px) {
-            #main-card { max-height: 95vh; display: flex; flex-direction: column; }
-            #schedule-list { max-height: 320px !important; }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
         }
-        .countdown-ring { transform: rotate(-90deg); }
-        .countdown-ring circle { transition: stroke-dashoffset 1s linear; }
+
+        @media (max-height: 670px) {
+            #main-card {
+                max-height: 95vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #schedule-list {
+                max-height: 320px !important;
+            }
+        }
+
+        .countdown-ring {
+            transform: rotate(-90deg);
+        }
+
+        .countdown-ring circle {
+            transition: stroke-dashoffset 1s linear;
+        }
     </style>
 </head>
+
 <body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
-    <div id="main-card" class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+    <div id="main-card"
+        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
         <!-- Top Accent Bar -->
-        <div class="w-full h-2 bg-gradient-to-r from-[#73CB8F] via-[#5B8DEF] to-[#F2C00F]"></div>
+        <div class="w-full h-2 bg-gradient-to-r from-[#FFC5AB] via-[#FF8C8C] to-[#FF8A54]"></div>
         <!-- Header -->
         <div class="relative px-5 pt-5 pb-4">
             <div class="flex items-center gap-4">
-                <div class="shrink-0 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
-                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <div class="shrink-0 bg-[#F5D1BF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">History & Archive</p>
-                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Attendance Logs</h1>
+                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight"
+                        style="-webkit-text-stroke: 0.3px #1E1E1E;">Attendance Logs</h1>
                 </div>
             </div>
         </div>
@@ -39,16 +63,23 @@
                 <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Filters & Export</span>
             </div>
             <div class="flex gap-2 mb-3">
-                <button id="btn-export" class="px-3 py-2 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none cursor-pointer flex items-center gap-2 hover:bg-[#73CB8F] transition-colors">
+                <button id="btn-export"
+                    class="px-3 py-2 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none cursor-pointer flex items-center gap-2 hover:bg-[#73CB8F] transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Export
                 </button>
             </div>
             <div class="w-full relative">
-                <input type="text" id="search-filter" placeholder="Search by Name, ID..." class="w-full px-4 py-2.5 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none placeholder-[#1E1E1E]/30 transition-all">
-                <svg class="w-4 h-4 absolute right-3 top-3 text-[#1E1E1E]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-filter" placeholder="Search by Name, ID..."
+                    class="w-full px-4 py-2.5 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none placeholder-[#1E1E1E]/30 transition-all">
+                <svg class="w-4 h-4 absolute right-3 top-3 text-[#1E1E1E]/40" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
             </div>
         </div>
         <!-- Log List -->
@@ -61,14 +92,112 @@
                 </div>
             </div>
         </div>
-        <div class="w-full h-1.5 bg-gradient-to-r from-[#F2C00F] via-[#5B8DEF] to-[#73CB8F]"></div>
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#FF8A54] via-[#FF8C8C] to-[#FFC5AB]"></div>
     </div>
     <!-- Back Button -->
     <div class="fade-in w-full max-w-[450px] mt-4">
-        <button id="btn-back" class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <button id="btn-back"
+            class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
             <span class="text-sm tracking-wider">Back to Dashboard</span>
         </button>
     </div>
+
+    <!-- Detail Modal -->
+    <div id="modal-note" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="backdrop-note"
+            class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in cursor-pointer"></div>
+        <div
+            class="modal-content relative w-full max-w-[420px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-4 fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-[#F2C00F] border-2 border-[#1E1E1E] p-2 shadow-[3px_3px_0px_#1E1E1E]">
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-base font-black uppercase tracking-wider">Log Details</h2>
+                </div>
+                <button id="btn-note-close"
+                    class="w-8 h-8 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[2px_2px_0px_#1E1E1E] font-bold text-sm transition-colors">✕</button>
+            </div>
+
+            <!-- Student Info Section -->
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Full Name</p>
+                    <p id="note-student-name" class="text-sm font-black leading-tight">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Student ID</p>
+                    <p id="note-student-id" class="text-sm font-black">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Room / Class</p>
+                    <p id="note-class" class="text-sm font-black">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Attendance Date</p>
+                    <p id="note-attendance-date" class="text-sm font-black">-</p>
+                </div>
+            </div>
+
+
+            <!-- Status Section -->
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="border-2 border-[#1E1E1E] bg-[#FFFFFF] p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Submitted Status</p>
+                    <p id="note-status" class="text-sm font-black uppercase">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-[#FFFFFF] p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Scope / Subject</p>
+                    <p id="note-subject" class="text-sm font-black leading-tight">-</p>
+                </div>
+            </div>
+
+
+            <!-- Verification Section -->
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Verification</p>
+                    <p id="note-verify-status" class="text-[10px] font-black uppercase">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Final Status</p>
+                    <p id="note-final-status" class="text-[10px] font-black uppercase">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Verified By</p>
+                    <p id="note-verified-by" class="text-[15px] font-black leading-tight">-</p>
+                </div>
+                <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                    <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Verified At</p>
+                    <p id="note-verified-at" class="text-[15px] font-black leading-tight">-</p>
+                </div>
+            </div>
+
+
+            <!-- Notes Section -->
+            <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Student Note</p>
+                <p id="note-content"
+                    class="text-[15px] font-bold leading-relaxed opacity-80 italic whitespace-pre-wrap">-</p>
+            </div>
+
+            <div class="border-2 border-[#1E1E1E] bg-white p-3 shadow-[2px_2px_0px_#1E1E1E]">
+                <p class="text-[9px] font-bold uppercase opacity-50 mb-1">Teacher's Note</p>
+                <p id="note-teacher"
+                    class="text-[15px] font-bold leading-relaxed opacity-80 italic whitespace-pre-wrap">-</p>
+            </div>
+            <button id="btn-cancel-verify"
+                class="w-full py-3 bg-white border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] font-black text-sm uppercase tracking-wider transition-all hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">Close</button>
+        </div>
+    </div>
+
+
 </body>
+
 </html>

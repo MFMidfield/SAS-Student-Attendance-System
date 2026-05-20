@@ -1,4 +1,5 @@
 import { supabase } from "../../../lib/supabaseClient";
+import { escapeHTML } from "../../../lib/ui";
 
 export function initTeacherUser(userAvatar, pfdefault) {
     const backBtn = document.getElementById('btn-back');
@@ -26,7 +27,7 @@ export function initTeacherUser(userAvatar, pfdefault) {
     const scheduleList = document.getElementById('schedule-list');
     const searchFilter = document.getElementById('search-filter');
 
-    let allUsersData = []; // เก็บข้อมูลผู้ใช้ทั้งหมด
+    let allUsersData = []; // Store all user data
 
     // --- Check Role & Permissions ---
     const checkUserPermissions = async () => {
@@ -49,7 +50,7 @@ export function initTeacherUser(userAvatar, pfdefault) {
     const renderUsers = () => {
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
 
-        // กรองตามคำค้นหา (ชื่อ, นามสกุล, รหัส)
+        // Filter by search term (firstname, lastname, stu_id)
         let filtered = searchTerm 
             ? allUsersData.filter(item => {
                 const fullName = `${item.firstname} ${item.lastname}`.toLowerCase();
@@ -82,10 +83,10 @@ export function initTeacherUser(userAvatar, pfdefault) {
                 </div>
                 <div class="flex-1 flex flex-col min-w-0">
                     <div class="px-3 py-1 border-b-2 border-[#1E1E1E] bg-[#EEEDDE]/50 text-[10px] font-bold truncate">
-                        ID: ${stuId} &nbsp;|&nbsp; Class: ${classId} |&nbsp; Role: ${item.role || 'N/A'}
+                        ID: ${escapeHTML(stuId)} &nbsp;|&nbsp; Class: ${escapeHTML(classId)} |&nbsp; Role: ${escapeHTML(item.role || 'N/A')}
                     </div>
                     <div class="px-3 py-2 font-bold text-[13px] leading-tight truncate">
-                        ${displayName}
+                        ${escapeHTML(displayName)}
                     </div>
                 </div>
             `;
