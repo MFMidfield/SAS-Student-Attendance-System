@@ -2,8 +2,7 @@ import './style.css'
 import { supabase } from './lib/supabaseClient' // ไฟล์ที่คุณตั้งค่า supabase client ไว้
 
 //import asset
-import logo from './assets/logo/Memorial_Lobby_Mika_(Swimsuit) (1).png'
-import bander from './assets/bander/Blue-Archive-new-recruitment-system_News_FI-750x392 1.png'
+import pfdefault from './assets/Default_profile.jpg'
 
 // import template
 import LandingPage from './main.html?raw'
@@ -25,6 +24,23 @@ import AdminVerifyLogs from './pages/admin/attendance_verify_logs/admin_verify_l
 import AdminApprove from './pages/admin/attendance_approve/admin_approve.html?raw'
 import AdminActivity from './pages/admin/activity/admin_activity.html?raw'
 
+import teacherDashBoard from './pages/teacher/dashboard/teacher_dashboard.html?raw'
+import teacherUser from './pages/teacher/user/teacher_user.html?raw'
+import teacherSetting from './pages/teacher/setting/teacher_setting.html?raw'
+import teacherSchedule from './pages/teacher/schedule/teacher_schedule.html?raw'
+import teacherVerifyLogs from './pages/teacher/attendance_verify_logs/teacher_verify_logs.html?raw'
+import teacherApprove from './pages/teacher/attendance_approve/teacher_approve.html?raw'
+import teacherActivity from './pages/teacher/activity/teacher_activity.html?raw'
+
+import LeaderDashBoard from './pages/leader/dashboard/leader_dashboard.html?raw'
+import LeaderUser from './pages/leader/user/leader_user.html?raw'
+import LeaderSetting from './pages/leader/setting/leader_setting.html?raw'
+import LeaderSchedule from './pages/leader/schedule/leader_schedule.html?raw'
+import LeaderVerifyLogs from './pages/leader/attendance_verify_logs/leader_verify_logs.html?raw'
+import LeaderApprove from './pages/leader/attendance_approve/leader_approve.html?raw'
+import LeaderActivity from './pages/leader/activity/leader_activity.html?raw'
+import LeaderAttendance from './pages/leader/attendance/leader_attendance.html?raw'
+
 // import function
 import { initRegister } from './auth/register/register.js'
 import { initLogin } from './auth/login/login.js'
@@ -44,24 +60,58 @@ import { initAdminApprove } from './pages/admin/attendance_approve/admin_approve
 import { initAdminVerifyLogs } from './pages/admin/attendance_verify_logs/admin_verify_logs.js'
 import { initAdminActivity } from './pages/admin/activity/admin_activity.js'
 
+import { initTeacherDashBoard } from './pages/teacher/dashboard/teacher_dashboard.js'
+import { initTeacherSetting } from './pages/teacher/setting/teacher_setting.js'
+import { initTeacherUser } from './pages/teacher/user/teacher_user.js'
+import { initTeacherSchedule } from './pages/teacher/schedule/teacher_schedule.js'
+import { initTeacherApprove } from './pages/teacher/attendance_approve/teacher_approve.js'
+import { initTeacherVerifyLogs } from './pages/teacher/attendance_verify_logs/teacher_verify_logs.js'
+import { initTeacherActivity } from './pages/teacher/activity/teacher_activity.js'
+
+import { initLeaderDashBoard } from './pages/leader/dashboard/leader_dashboard.js'
+import { initLeaderSetting } from './pages/leader/setting/leader_setting.js'
+import { initLeaderUser } from './pages/leader/user/leader_user.js'
+import { initLeaderSchedule } from './pages/leader/schedule/leader_schedule.js'
+import { initLeaderApprove } from './pages/leader/attendance_approve/leader_approve.js'
+import { initLeaderVerifyLogs } from './pages/leader/attendance_verify_logs/leader_verify_logs.js'
+import { initLeaderActivity } from './pages/leader/activity/leader_activity.js'
+import { initLeaderAttendance } from './pages/leader/attendance/leader_attendance.js'
+
 // 3. กำหนด Route Map
 const ROUTES = {
     '':          { template: LandingPage,    init: null,           auth: false },
     '#login':    { template: LoginPage,      init: initLogin,      auth: false },
     '#register': { template: RegisterPage,   init: initRegister,   auth: false },
     '#parent-check': { template: ParentCheckPage, init: initParentCheck, auth: false },
-    '#student':  { template: Student, init: (avatar) => initStudent(avatar, bander), auth: true, allowedRoles: ['student'] },
-    '#student-dashboard': { template: StudentDashBoard, init: (avatar) => initStudentDashBoard(avatar, bander), auth: true, allowedRoles: ['student'] },
-    '#student-schedule': { template: StudentSchedule, init: (avatar) => initStudentSchedule(avatar, bander), auth: true, allowedRoles: ['student'] },
-    '#student-setting': { template: StudentSetting, init: (avatar) => initStudentSetting(avatar, bander), auth: true, allowedRoles: ['student'] },
-    '#admin-user-edit': { template: AdminUserEdit, init: (avatar) => initAdminUserEdit(avatar, bander), auth: true, allowedRoles: ['admin'] },
-    '#admin-setting': { template: AdminSetting, init: (avatar) => initAdminSetting(avatar, bander), auth: true, allowedRoles: ['admin'] },
-    '#admin-dashboard': { template: AdminDashBoard, init: (avatar) => initAdminDashBoard(avatar, bander), auth: true, allowedRoles: ['admin'] },
-    '#admin-schedule': { template: AdminSchedule, init: (avatar) => initAdminSchedule(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-logs': { template: AdminLogs, init: (avatar) => initAdminLogs(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-verify-logs': { template: AdminVerifyLogs, init: (avatar) => initAdminVerifyLogs(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-approve': { template: AdminApprove, init: (avatar) => initAdminApprove(avatar, bander), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-activity': { template: AdminActivity, init: (avatar) => initAdminActivity(avatar, bander), auth: true, allowedRoles: ['admin'] },
+    '#student':  { template: Student, init: (avatar) => initStudent(avatar), auth: true, allowedRoles: ['student'] },
+    '#student-dashboard': { template: StudentDashBoard, init: (avatar) => initStudentDashBoard(avatar), auth: true, allowedRoles: ['student'] },
+    '#student-schedule': { template: StudentSchedule, init: (avatar) => initStudentSchedule(avatar), auth: true, allowedRoles: ['student'] },
+    '#student-setting': { template: StudentSetting, init: (avatar) => initStudentSetting(avatar), auth: true, allowedRoles: ['student'] },
+    '#admin-user-edit': { template: AdminUserEdit, init: (avatar, pfdefault) => initAdminUserEdit(avatar, pfdefault), auth: true, allowedRoles: ['admin'] },
+    '#admin-setting': { template: AdminSetting, init: (avatar) => initAdminSetting(avatar), auth: true, allowedRoles: ['admin'] },
+    '#admin-dashboard': { template: AdminDashBoard, init: (avatar) => initAdminDashBoard(avatar), auth: true, allowedRoles: ['admin'] },
+    '#admin-schedule': { template: AdminSchedule, init: (avatar) => initAdminSchedule(avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-logs': { template: AdminLogs, init: (avatar) => initAdminLogs(avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-verify-logs': { template: AdminVerifyLogs, init: (avatar) => initAdminVerifyLogs(avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-approve': { template: AdminApprove, init: (avatar) => initAdminApprove(avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-activity': { template: AdminActivity, init: (avatar) => initAdminActivity(avatar), auth: true, allowedRoles: ['admin'] },
+    '#teacher-dashboard': { template: teacherDashBoard, init: (avatar) => initTeacherDashBoard(avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-user': { template: teacherUser, init: (avatar, pfdefault) => initTeacherUser(avatar, pfdefault), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-setting': { template: teacherSetting, init: (avatar) => initTeacherSetting(avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-schedule': { template: teacherSchedule, init: (avatar) => initTeacherSchedule(avatar), auth: true, allowedRoles: ['teacher'] },
+
+    '#teacher-verify-logs': { template: teacherVerifyLogs, init: (avatar) => initTeacherVerifyLogs(avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-approve': { template: teacherApprove, init: (avatar) => initTeacherApprove(avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-activity': { template: teacherActivity, init: (avatar) => initTeacherActivity(avatar), auth: true, allowedRoles: ['teacher'] },
+
+    '#leader-dashboard': { template: LeaderDashBoard, init: (avatar) => initLeaderDashBoard(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-user': { template: LeaderUser, init: (avatar, pfdefault) => initLeaderUser(avatar, pfdefault), auth: true, allowedRoles: ['leader'] },
+    '#leader-setting': { template: LeaderSetting, init: (avatar) => initLeaderSetting(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-schedule': { template: LeaderSchedule, init: (avatar) => initLeaderSchedule(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-verify-logs': { template: LeaderVerifyLogs, init: (avatar) => initLeaderVerifyLogs(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-approve': { template: LeaderApprove, init: (avatar) => initLeaderApprove(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-activity': { template: LeaderActivity, init: (avatar) => initLeaderActivity(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-attendance': { template: LeaderAttendance, init: (avatar) => initLeaderAttendance(avatar), auth: true, allowedRoles: ['leader'] },
 };
 async function render() {
     const app = document.querySelector('#app');
@@ -74,7 +124,7 @@ async function render() {
     const route = ROUTES[hash] || ROUTES[''];
 
     // 1. เตรียมรูปโปรไฟล์ (Default คือ logo)
-    let userAvatarUrl = logo;
+    let userAvatarUrl = pfdefault;
 
     // --- ระบบ Auth Guard (ป้องกันการเข้าหน้าโดยไม่ได้รับอนุญาต) ---
     
@@ -104,6 +154,8 @@ async function render() {
         if (hash === '#login' || hash === '#register' || hash === '') {
             if (userRole === 'admin') window.location.hash = '#admin-dashboard';
             else if (userRole === 'student') window.location.hash = '#student-dashboard';
+            else if (userRole === 'teacher') window.location.hash = '#teacher-dashboard';
+            else if (userRole === 'leader') window.location.hash = '#leader-dashboard';
             // teacher page yet to be created, fallback to login/logout or a placeholder
             else window.location.hash = '#login';
             return;
@@ -125,7 +177,7 @@ async function render() {
     
     // รันฟังก์ชัน Setup ของหน้านั้นๆ (ถ้ามี)
     if (route.init) {
-        route.init(userAvatarUrl);
+        route.init(userAvatarUrl, pfdefault); 
     }
 }
 // Event Listeners

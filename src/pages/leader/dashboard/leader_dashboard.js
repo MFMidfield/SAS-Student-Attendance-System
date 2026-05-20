@@ -1,8 +1,8 @@
 import { supabase } from '../../../lib/supabaseClient.js'
 
-export function initAdminDashBoard(imageLogo, imageBander) {
+export function initLeaderDashBoard(imageLogo, imageBander) {
+    const attendanceBtn = document.getElementById('btn-attendance')
     const userEditBtn = document.getElementById('btn-user-edit')
-    const logsBtn = document.getElementById('btn-logs')
     const scheduleBtn = document.getElementById('btn-schedule')
     const activityBtn = document.getElementById('btn-activity')
     const settingBtn = document.getElementById('btn-setting')
@@ -21,20 +21,39 @@ export function initAdminDashBoard(imageLogo, imageBander) {
     };
     fetchUserName();
 
-    // Fetch admin summary stats
-    const fetchAdminStats = async () => {
-        const statUsers = document.getElementById('stat-users');
+    // Fetch leader summary stats (same logic as teacher)
+    const fetchLeaderStats = async () => {
+        const statUsers = document.getElementById('stat-total-users');
         const statPending = document.getElementById('stat-pending');
         const statVerified = document.getElementById('stat-verified');
-        const statClasses = document.getElementById('stat-classes');
+        const classroomLabel = document.getElementById('classroom-label');
 
-        // Total users
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile } = await supabase.from('profiles').select('class_id').eq('id', user.id).single();
+        const userClassId = profile ? profile.class_id : null;
+
+        if (!userClassId || userClassId === 'N/A') {
+            if (statUsers) statUsers.textContent = '0';
+            if (statPending) statPending.textContent = '0';
+            if (statVerified) statVerified.textContent = '0';
+            if (classroomLabel) classroomLabel.textContent = 'ROOM -';
+            return;
+        }
+
+        // Update classroom label
+        if (classroomLabel) classroomLabel.textContent = `ROOM ${userClassId}`;
+
+        // Total users (Students in this class)
         const { count: userCount } = await supabase
             .from('profiles')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .eq('class_id', userClassId)
+            .eq('role', 'student');
         if (statUsers) statUsers.textContent = userCount ?? 0;
 
-        // Pending attendance logs (today)
+        // Pending attendance logs (today, this class)
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date();
@@ -43,71 +62,60 @@ export function initAdminDashBoard(imageLogo, imageBander) {
         const { count: pendingCount } = await supabase
             .from('attendance_logs')
             .select('*', { count: 'exact', head: true })
+            .eq('class_id_record', userClassId)
             .gte('created_at', todayStart.toISOString())
             .lte('created_at', todayEnd.toISOString());
         if (statPending) statPending.textContent = pendingCount ?? 0;
 
-        // Verified attendance logs (today)
+        // Verified attendance logs (today, this class)
         const { count: verifiedCount } = await supabase
             .from('attendance_verify')
             .select('*', { count: 'exact', head: true })
+            .eq('class_id_record', userClassId)
             .gte('created_at', todayStart.toISOString())
             .lte('created_at', todayEnd.toISOString());
         if (statVerified) statVerified.textContent = verifiedCount ?? 0;
-
-        // Distinct classes
-        const { data: classData } = await supabase
-            .from('profiles')
-            .select('class_id');
-        if (classData && statClasses) {
-            const uniqueClasses = new Set(
-                classData
-                    .map(p => p.class_id)
-                    .filter(c => c && c !== 'N/A' && c !== '-')
-            );
-            statClasses.textContent = uniqueClasses.size;
-        }
     };
-    fetchAdminStats();
+    fetchLeaderStats();
 
     if (studentImage && imageLogo) {
         studentImage.src = imageLogo;
     }
 
-    // route
-    if (userEditBtn) {
-        userEditBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-user-edit';
+    // Navigation
+    if (attendanceBtn) {
+        attendanceBtn.addEventListener('click', () => {
+            window.location.hash = '#leader-attendance';
         });
     }
-    if (logsBtn) {
-        logsBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-logs';
+    if (userEditBtn) {
+        userEditBtn.addEventListener('click', () => {
+            window.location.hash = '#leader-user';
         });
     }
     if (verifyLogsBtn) {
         verifyLogsBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-verify-logs';
+            window.location.hash = '#leader-verify-logs';
         });
     }
     if (approveBtn) {
         approveBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-approve';
+            window.location.hash = '#leader-approve';
         });
     }
     if (scheduleBtn) {
         scheduleBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-schedule';
+            window.location.hash = '#leader-schedule';
         });
     }
     if (activityBtn) {
         activityBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-activity';
+            window.location.hash = '#leader-activity';
         });
     }
     if (settingBtn) {
         settingBtn.addEventListener('click', () => {
-            window.location.hash = '#admin-setting';
+            window.location.hash = '#leader-setting';
         });
     }
 }

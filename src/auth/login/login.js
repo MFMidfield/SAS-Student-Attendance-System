@@ -106,8 +106,8 @@ export function initLogin() {
                 msgElement.className = 'text-green-600 text-center font-bold text-sm'
                 if (role === 'student') setTimeout(() => window.location.hash = '#student-dashboard', 1000)
                 else if (role === 'admin') setTimeout(() => window.location.hash = '#admin-dashboard', 1000)
-                else if (role === 'leader') setTimeout(() => window.location.hash = '#leader', 1000)
-                else if (role === 'teacher') setTimeout(() => window.location.hash = '#teacher', 1000)
+                else if (role === 'leader') setTimeout(() => window.location.hash = '#leader-dashboard', 1000)
+                else if (role === 'teacher') setTimeout(() => window.location.hash = '#teacher-dashboard', 1000)
             }
         } catch (err) {
             msgElement.textContent = 'An unexpected error occurred.'

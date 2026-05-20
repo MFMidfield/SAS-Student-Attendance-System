@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Lunar PJ</title>
+    <title>Leader Dashboard - Lunar PJ</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
@@ -29,21 +29,21 @@
                 <!-- Avatar -->
                 <div
                     class="h-16 w-16 shrink-0 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] overflow-hidden rounded-sm">
-                    <img id="student-image" src="" alt="Admin Profile" class="w-full h-full object-cover">
+                    <img id="student-image" src="" alt="Leader Profile" class="w-full h-full object-cover">
                 </div>
 
                 <!-- Name + Greeting -->
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-[#1E1E1E]/60 uppercase tracking-wider">Admin Portal</p>
+                    <p class="text-sm font-bold text-[#1E1E1E]/60 uppercase tracking-wider">Leader Portal</p>
                     <h1 id="student-name" class="text-xl font-bold text-[#1E1E1E] tracking-tight truncate"
                         style="-webkit-text-stroke: 0.3px #1E1E1E;">Loading...</h1>
                 </div>
 
                 <!-- Role Badge -->
                 <div
-                    class="shrink-0 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] px-3 py-1.5 text-center">
-                    <p class="text-[10px] font-bold text-white uppercase leading-tight">ROLE</p>
-                    <p class="text-xs font-black text-white leading-tight uppercase">ADMIN</p>
+                    class="shrink-0 bg-[#FEB729] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] px-3 py-1.5 text-center">
+                    <p class="text-[10px] font-bold text-[#1E1E1E] uppercase leading-tight">ROLE</p>
+                    <p class="text-xs font-black text-[#1E1E1E] leading-tight uppercase">LEADER</p>
                 </div>
             </div>
         </div>
@@ -51,88 +51,75 @@
         <!-- Divider -->
         <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
 
-        <!-- Admin Summary Stats -->
+        <!-- Stats Overview (Classroom Specific) -->
         <div class="px-5 pt-4 pb-2">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">System Overview</span>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Classroom Overview</span>
+                <span id="classroom-label"
+                    class="text-[10px] font-bold bg-[#F2C00F] px-2 py-0.5 border border-[#1E1E1E] shadow-[1px_1px_0px_#1E1E1E]">ROOM
+                    -</span>
             </div>
 
-            <div class="grid grid-cols-4 gap-2">
-                <!-- Total Users -->
-                <div
-                    class="bg-[#5B8DEF]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center cursor-default">
-                    <div class="flex justify-center m-1">
-                        <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <p id="stat-users" class="text-lg font-black text-[#1E1E1E]">-</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Users</p>
+            <div class="grid grid-cols-3 gap-2">
+                <!-- Total Students -->
+                <div class="bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
+                    <p id="stat-total-users" class="text-lg font-black text-[#1E1E1E]">-</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase">Students</p>
                 </div>
                 <!-- Pending -->
-                <div
-                    class="bg-[#E46F20]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center cursor-default">
-                    <div class="flex justify-center m-1">
-                        <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
+                <div class="bg-[#F18B74]/20 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
                     <p id="stat-pending" class="text-lg font-black text-[#1E1E1E]">-</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Pending</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase">Pending</p>
                 </div>
-                <!-- Verified Today -->
-                <div
-                    class="bg-[#219653]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center cursor-default">
-                    <div class="flex justify-center m-1">
-                        <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
+                <!-- Verified -->
+                <div class="bg-[#73CB8F]/20 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center">
                     <p id="stat-verified" class="text-lg font-black text-[#1E1E1E]">-</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Verified</p>
-                </div>
-                <!-- Classes -->
-                <div
-                    class="bg-[#FEB729]/15 border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2 text-center cursor-default">
-                    <div class="flex justify-center m-1">
-                        <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <p id="stat-classes" class="text-lg font-black text-[#1E1E1E]">-</p>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/50 uppercase">Classes</p>
+                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase">Verified</p>
                 </div>
             </div>
         </div>
 
+        <!-- Divider -->
+        <div class="mx-5 mt-2 border-t-2 border-[#1E1E1E]/15"></div>
+
         <!-- Navigation Grid -->
-        <div class="px-5 pt-3 pb-2">
+        <div class="px-5 pt-4 pb-2">
             <div class="flex items-center gap-2 mb-3">
-                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Management</span>
+                <span class="text-xs font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Quick Actions</span>
             </div>
 
+
             <div class="grid grid-cols-2 gap-3">
-                <!-- User Management -->
-                <button id="btn-user-edit"
+                <!-- Attendance Card -->
+                <button id="btn-attendance"
                     class="fade-in flex flex-col items-center gap-2 p-4 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
                     <div
                         class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Attendance</span>
+                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Check-in</span>
+                </button>
+                <!-- User Management -->
+                <button id="btn-user-edit"
+                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#FEB729] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
+                    <div
+                        class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                     </div>
                     <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Users</span>
-                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Manage accounts</span>
+                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Manage room</span>
                 </button>
 
                 <!-- Schedule Management -->
                 <button id="btn-schedule"
-                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#FEB729] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
+                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
                     <div
                         class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
@@ -142,20 +129,6 @@
                     </div>
                     <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Schedule</span>
                     <span class="text-[10px] font-bold text-[#1E1E1E]/50">Class timetable</span>
-                </button>
-
-                <!-- Pending Logs -->
-                <button id="btn-logs"
-                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#F18B74] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
-                    <div
-                        class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                    </div>
-                    <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Pending</span>
-                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Pending logs</span>
                 </button>
 
                 <!-- Attendance Verify Logs -->
@@ -169,18 +142,16 @@
                         </svg>
                     </div>
                     <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Verified</span>
-                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">View verified logs</span>
+                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Check history</span>
                 </button>
             </div>
         </div>
 
-        <!-- Second Row Navigation -->
         <div class="px-5 pt-2 pb-2">
             <div class="grid grid-cols-2 gap-3">
-
                 <!-- Attendance Approve -->
                 <button id="btn-approve"
-                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
+                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#B29B58] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
                     <div
                         class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
@@ -188,12 +159,12 @@
                         </svg>
                     </div>
                     <span class="text-sm font-bold text-[#1E1E1E] uppercase tracking-wider">Approve</span>
-                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Verify attendance</span>
+                    <span class="text-[10px] font-bold text-[#1E1E1E]/50">Check presence</span>
                 </button>
 
                 <!-- Activity -->
                 <button id="btn-activity"
-                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#B29B58] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
+                    class="fade-in flex flex-col items-center gap-2 p-4 bg-[#D96C6C] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] cursor-pointer group">
                     <div
                         class="w-12 h-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center group-hover:rotate-6 transition-transform duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
@@ -205,6 +176,7 @@
                 </button>
             </div>
         </div>
+
 
         <!-- Setting Row -->
         <div class="px-5 pt-2 pb-5">
@@ -222,13 +194,14 @@
             </button>
         </div>
 
+
         <!-- Bottom Accent -->
         <div class="w-full h-1.5 bg-gradient-to-r from-[#FEB729] via-[#E46F20] to-[#D96C6C]"></div>
     </div>
 
     <!-- Footer -->
     <div class="fade-in w-full max-w-[450px] mt-4 text-center">
-        <p class="text-[#1E1E1E]/40 text-xs font-bold">© 2026 Lunar PJ — Admin Portal</p>
+        <p class="text-[#1E1E1E]/40 text-xs font-bold">© 2026 Lunar PJ — Leader Portal</p>
     </div>
 
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verified Logs - Admin</title>
+    <title>Attendance Logs - Teacher</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
@@ -17,16 +17,16 @@
 <body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
     <div id="main-card" class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
         <!-- Top Accent Bar -->
-        <div class="w-full h-2 bg-gradient-to-r from-[#5B8DEF] via-[#73CB8F] to-[#219653]"></div>
+        <div class="w-full h-2 bg-gradient-to-r from-[#F18B74] via-[#E46F20] to-[#FEB729]"></div>
         <!-- Header -->
         <div class="relative px-5 pt-5 pb-4">
             <div class="flex items-center gap-4">
-                <div class="shrink-0 bg-[#5B8DEF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
-                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <div class="shrink-0 bg-[#F18B74] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Approved Records</p>
-                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Verify Logs</h1>
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Pending Records</p>
+                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Attendance Logs</h1>
                 </div>
             </div>
         </div>
@@ -49,13 +49,13 @@
         </div>
         <!-- Log List -->
         <div class="px-5 pb-4">
-            <div id="schedule-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1 pb-4">
+            <div id="schedule-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
                 <div class="bg-white border-2 border-[#1E1E1E] p-4 text-center shadow-[3px_3px_0px_#1E1E1E]">
                     <p class="text-sm font-bold text-[#1E1E1E]/40 uppercase">Loading...</p>
                 </div>
             </div>
         </div>
-        <div class="w-full h-1.5 bg-gradient-to-r from-[#219653] via-[#73CB8F] to-[#5B8DEF]"></div>
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#FEB729] via-[#E46F20] to-[#F18B74]"></div>
     </div>
     <!-- Back Button -->
     <div class="fade-in w-full max-w-[450px] mt-4">
@@ -64,16 +64,16 @@
             <span class="text-sm tracking-wider">Back to Dashboard</span>
         </button>
     </div>
-    <!-- Verified Record Modal -->
+    <!-- Note View Modal -->
     <div id="modal-note" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
         <div id="backdrop-note" class="absolute inset-0 bg-[#1E1E1E]/40 backdrop-blur-md backdrop-fade-in cursor-pointer"></div>
-        <div class="modal-content relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-4 fade-in max-h-[90vh] overflow-y-auto">
+        <div class="modal-content relative w-full max-w-[400px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[6px_6px_0px_#1E1E1E] p-6 flex flex-col gap-4 fade-in">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="bg-[#73CB8F] border-2 border-[#1E1E1E] p-2 shadow-[3px_3px_0px_#1E1E1E]">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <div class="bg-[#F2C00F] border-2 border-[#1E1E1E] p-2 shadow-[3px_3px_0px_#1E1E1E]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
-                    <h2 class="text-base font-black uppercase tracking-wider">Verified Record</h2>
+                    <h2 class="text-base font-black uppercase tracking-wider">บันทึกการเข้าเรียน</h2>
                 </div>
                 <button id="btn-note-close" class="w-8 h-8 flex items-center justify-center border-2 border-[#1E1E1E] bg-white shadow-[2px_2px_0px_#1E1E1E] font-bold text-sm transition-colors">✕</button>
             </div>
@@ -105,25 +105,9 @@
                     <p id="note-subject" class="text-sm font-black leading-tight">-</p>
                 </div>
             </div>
-            <div class="border-2 border-[#1E1E1E] bg-white p-4 shadow-[2px_2px_0px_#1E1E1E] min-h-[50px]">
+            <div class="border-2 border-[#1E1E1E] bg-white p-4 shadow-[2px_2px_0px_#1E1E1E] min-h-[60px]">
                 <p class="text-[9px] font-bold uppercase opacity-50 mb-2">หมายเหตุ</p>
                 <p id="note-content" class="text-sm font-bold leading-relaxed opacity-80 italic whitespace-pre-wrap">-</p>
-            </div>
-            <div class="border-2 border-[#1E1E1E] bg-[#73CB8F]/15 p-4 shadow-[2px_2px_0px_#1E1E1E]">
-                <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-4 h-4 text-[#219653]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    <p class="text-[10px] font-black uppercase tracking-wider text-[#219653]">Verification Info</p>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ยืนยันโดย</p>
-                        <p id="note-verified-by" class="text-sm font-black leading-tight">-</p>
-                    </div>
-                    <div>
-                        <p class="text-[9px] font-bold uppercase opacity-50 mb-1">ยืนยันเมื่อ</p>
-                        <p id="note-verified-at" class="text-sm font-black leading-tight">-</p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

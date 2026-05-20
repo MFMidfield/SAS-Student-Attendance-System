@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Teacher</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+
+        /* Responsive for 375x667 (iPhone 6/7/8) */
+        @media (max-height: 670px) {
+            #main-card {
+                max-height: 95vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #schedule-list {
+                max-height: 320px !important;
+                /* ปรับลดความสูงของรายการเพื่อให้พอดีหน้าจอ 667px */
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
+
+    <div id="main-card"
+        class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+
+        <!-- Top Accent Bar -->
+        <div class="w-full h-2 bg-gradient-to-r from-[#E46F20] via-[#F18B74] to-[#FEB729]"></div>
+        <!-- Header -->
+        <div class="relative px-5 pt-5 pb-4">
+            <div class="flex items-center gap-4">
+                <div class="shrink-0 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Classroom Members</p>
+                    <h1 class="text-xl font-bold text-[#1E1E1E] tracking-tight"
+                        style="-webkit-text-stroke: 0.3px #1E1E1E;">User Management</h1>
+                </div>
+            </div>
+        </div>
+        <div class="mx-5 border-t-2 border-[#1E1E1E]/15"></div>
+
+        <!-- Search Only -->
+        <div class="px-5 pt-4 pb-2">
+            <div class="w-full relative">
+                <input type="text" id="search-filter" placeholder="Search by Name, ID..."
+                    class="w-full px-4 py-2.5 bg-white border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[11px] font-bold focus:outline-none placeholder-[#1E1E1E]/30 transition-all">
+                <svg class="w-4 h-4 absolute right-3 top-3 text-[#1E1E1E]/40" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- User List Container -->
+        <div class="px-5 pb-4">
+            <div id="schedule-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-1 pb-4">
+                <div class="bg-white border-2 border-[#1E1E1E] p-4 text-center shadow-[3px_3px_0px_#1E1E1E]">
+                    <p class="text-sm font-bold text-[#1E1E1E]/40 uppercase">Loading users...</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#FEB729] via-[#F18B74] to-[#E46F20]"></div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="fade-in w-full max-w-[450px] mt-4">
+        <button id="btn-back"
+            class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hover:bg-[#E0DFD1]">
+            <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span class="text-sm tracking-wider">Back</span>
+        </button>
+    </div>
+
+</body>
+
+</html>

@@ -7,30 +7,6 @@ export function initStudentDashBoard(imageLogo, imageBander) {
     const settingBtn = document.getElementById('btn-setting')
     const studentImage = document.getElementById('student-image');
     const studentNameElem = document.getElementById('student-name');
-    const greetingText = document.getElementById('greeting-text');
-    const currentDay = document.getElementById('current-day');
-    const currentDate = document.getElementById('current-date');
-
-    // Set greeting based on time of day
-    const setGreeting = () => {
-        const hour = new Date().getHours();
-        let greeting = 'Good Morning';
-        if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
-        else if (hour >= 17 && hour < 21) greeting = 'Good Evening';
-        else if (hour >= 21 || hour < 5) greeting = 'Good Night';
-        if (greetingText) greetingText.textContent = greeting;
-    };
-
-    // Set current date display
-    const setDateDisplay = () => {
-        const now = new Date();
-        const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-        if (currentDay) currentDay.textContent = days[now.getDay()];
-        if (currentDate) currentDate.textContent = now.getDate().toString().padStart(2, '0');
-    };
-
-    setGreeting();
-    setDateDisplay();
 
     // Fetch user name from metadata
     const fetchUserName = async () => {
