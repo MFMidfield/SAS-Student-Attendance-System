@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Preview - Lunar PJ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-[#EEEDDE] text-[#1E1E1E] min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
+
+    <!-- DESKTOP SIDEBAR: Visible on PC/large screens (lg:flex) -->
+    <aside class="hidden lg:flex flex-col w-[300px] bg-[#EEEDDE] border-r-4 border-[#1E1E1E] h-screen sticky top-0 justify-between p-6 shrink-0 z-50">
+        <div class="flex flex-col gap-5 overflow-y-auto">
+            <!-- App Logo/Brand -->
+            <div class="flex items-center gap-3 border-2 border-[#1E1E1E] bg-[#FFFFFF] shadow-[3px_3px_0px_#1E1E1E] p-3 shrink-0">
+                <div class="w-8 h-8 rounded-sm bg-[#E46F20] border-2 border-[#1E1E1E] flex items-center justify-center font-black text-white">L</div>
+                <div>
+                    <h2 class="text-base font-black tracking-tight leading-none">Lunar PJ</h2>
+                    <span class="text-[9px] font-bold opacity-60">ADMINISTRATION</span>
+                </div>
+            </div>
+
+            <!-- Profile Widget -->
+            <div class="border-2 border-[#1E1E1E] bg-[#FFFFFF] shadow-[4px_4px_0px_#1E1E1E] p-4 flex flex-col gap-3 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="h-12 w-12 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] overflow-hidden rounded-sm shrink-0">
+                        <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=admin" alt="Admin Profile" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[9px] font-black text-[#E46F20] uppercase tracking-wider">Active Admin</p>
+                        <h3 class="text-sm font-bold truncate">Somchai Jaidee</h3>
+                    </div>
+                </div>
+                <div class="bg-[#E46F20] border-2 border-[#1E1E1E] py-1 text-center text-white text-[10px] font-black uppercase tracking-wider">
+                    ROLE: ADMIN
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Links (All management buttons moved here) -->
+            <nav class="flex flex-col gap-2">
+                <a href="#" class="flex items-center gap-3 p-2.5 bg-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-gray-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">
+                    <svg class="w-4 h-4 text-[#1E1E1E]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Dashboard Home
+                </a>
+                
+                <a href="#admin-users" class="flex items-center gap-3 p-2.5 bg-[#E46F20]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-[#E46F20]/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">
+                    <svg class="w-4 h-4 text-[#E46F20]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Users Management
+                </a>
+
+                <a href="#admin-schedule" class="flex items-center gap-3 p-2.5 bg-[#FEB729]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-[#FEB729]/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">
+                    <svg class="w-4 h-4 text-[#FEB729]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Class Timetable
+                </a>
+
+                <a href="#admin-approve" class="flex items-center gap-3 p-2.5 bg-[#73CB8F]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-[#73CB8F]/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">
+                    <svg class="w-4 h-4 text-[#219653]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Verify & Approve
+                </a>
+
+                <a href="#admin-activity" class="flex items-center gap-3 p-2.5 bg-[#B29B58]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-[#B29B58]/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">
+                    <svg class="w-4 h-4 text-[#B29B58]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    School Events
+                </a>
+
+                <a href="#admin-logs" class="flex items-center gap-3 p-2.5 bg-[#f5d1bf]/20 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-[#f5d1bf]/40 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">
+                    <svg class="w-4 h-4 text-[#d87c53]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Attendance Logs
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Bottom: Settings & Logout -->
+        <div class="flex flex-col gap-2 shrink-0">
+            <button class="flex items-center justify-center gap-2 w-full p-2.5 bg-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:bg-gray-100 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+            </button>
+            <button class="flex items-center justify-center gap-2 w-full p-2.5 bg-[#E25C5C] text-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase hover:brightness-110 cursor-pointer">
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <main class="flex-1 flex flex-col p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
+
+        <!-- MOBILE/TABLET HEADER & DROPDOWN NAV: Hidden on Desktop (lg:hidden) -->
+        <header class="lg:hidden flex flex-col border-2 border-[#1E1E1E] bg-white shadow-[4px_4px_0px_#1E1E1E] overflow-hidden mb-6">
+            <div class="w-full h-1.5 bg-gradient-to-r from-[#D96C6C] via-[#E46F20] to-[#FEB729]"></div>
+            <div class="p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] overflow-hidden rounded-sm shrink-0">
+                        <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=admin" alt="Admin Profile" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[9px] font-bold text-[#E46F20] uppercase tracking-widest leading-none">Admin Portal</span>
+                        <h1 class="text-sm font-black truncate mt-0.5">Somchai Jaidee</h1>
+                    </div>
+                </div>
+                
+                <!-- Hamburger Button -->
+                <button id="mobile-menu-toggle" class="p-2 border-2 border-[#1E1E1E] bg-[#EEEDDE] shadow-[2px_2px_0px_#1E1E1E] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu Dropdown (Toggled dynamically) -->
+            <div id="mobile-menu-dropdown" class="hidden border-t-2 border-[#1E1E1E] bg-[#EEEDDE] p-4 flex flex-col gap-2">
+                <a href="#" class="flex items-center gap-3 p-2.5 bg-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    Dashboard Home
+                </a>
+                <a href="#admin-users" class="flex items-center gap-3 p-2.5 bg-[#E46F20]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    Users Management
+                </a>
+                <a href="#admin-schedule" class="flex items-center gap-3 p-2.5 bg-[#FEB729]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    Class Timetable
+                </a>
+                <a href="#admin-approve" class="flex items-center gap-3 p-2.5 bg-[#73CB8F]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    Verify & Approve
+                </a>
+                <a href="#admin-activity" class="flex items-center gap-3 p-2.5 bg-[#B29B58]/10 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    School Events
+                </a>
+                <a href="#admin-logs" class="flex items-center gap-3 p-2.5 bg-[#f5d1bf]/20 border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    Attendance Logs
+                </a>
+                <a href="#admin-setting" class="flex items-center gap-3 p-2.5 bg-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase">
+                    Settings
+                </a>
+                <button class="w-full p-2.5 bg-[#E25C5C] text-white border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] font-bold text-xs uppercase text-center cursor-pointer">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- STATS SECTION -->
+        <section class="fade-in mb-6">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-black text-[#1E1E1E]/50 uppercase tracking-widest">System Metrics Overview</span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Total Users -->
+                <div class="bg-[#5B8DEF]/15 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] p-4 text-center cursor-default flex flex-col justify-between min-h-[110px] hover:translate-y-[-2px] transition-transform duration-200">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[9px] font-black text-[#5B8DEF] uppercase tracking-wider bg-white border border-[#1E1E1E] px-1.5 py-0.5">System</span>
+                        <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <p id="stat-users" class="text-2xl font-black text-[#1E1E1E] text-left mt-2">124</p>
+                    <p class="text-[10px] font-black text-[#1E1E1E]/50 text-left uppercase">Total Users</p>
+                </div>
+
+                <!-- Pending Attendance -->
+                <div class="bg-[#E46F20]/15 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] p-4 text-center cursor-default flex flex-col justify-between min-h-[110px] hover:translate-y-[-2px] transition-transform duration-200">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[9px] font-black text-[#E46F20] uppercase tracking-wider bg-white border border-[#1E1E1E] px-1.5 py-0.5">Approval</span>
+                        <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p id="stat-pending" class="text-2xl font-black text-[#1E1E1E] text-left mt-2">8</p>
+                    <p class="text-[10px] font-black text-[#1E1E1E]/50 text-left uppercase">Pending Review</p>
+                </div>
+
+                <!-- Verified Today -->
+                <div class="bg-[#219653]/15 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] p-4 text-center cursor-default flex flex-col justify-between min-h-[110px] hover:translate-y-[-2px] transition-transform duration-200">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[9px] font-black text-[#219653] uppercase tracking-wider bg-white border border-[#1E1E1E] px-1.5 py-0.5">Logs</span>
+                        <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p id="stat-verified" class="text-2xl font-black text-[#1E1E1E] text-left mt-2">92</p>
+                    <p class="text-[10px] font-black text-[#1E1E1E]/50 text-left uppercase">Verified Today</p>
+                </div>
+
+                <!-- Active Classes -->
+                <div class="bg-[#FEB729]/15 border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] p-4 text-center cursor-default flex flex-col justify-between min-h-[110px] hover:translate-y-[-2px] transition-transform duration-200">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[9px] font-black text-[#FEB729] uppercase tracking-wider bg-white border border-[#1E1E1E] px-1.5 py-0.5">Rooms</span>
+                        <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <p id="stat-classes" class="text-2xl font-black text-[#1E1E1E] text-left mt-2">12</p>
+                    <p class="text-[10px] font-black text-[#1E1E1E]/50 text-left uppercase">Active Rooms</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD BODY: (Layout grid splitting screen on PC/Tablet) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 items-start">
+
+            <!-- ROOM PERFORMANCE / CLASSROOM DATA: Main dashboard item (col-span-2) -->
+            <section class="lg:col-span-2 flex flex-col gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-[#1E1E1E]/50 uppercase tracking-widest">Room Performance & Attendance</span>
+                </div>
+
+                <div class="border-2 border-[#1E1E1E] bg-[#FFFFFF] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
+                    <!-- Table Title bar -->
+                    <div class="bg-[#EEEDDE] p-4 border-b-2 border-[#1E1E1E] flex justify-between items-center">
+                        <h3 class="text-sm font-black uppercase tracking-wider">Today's Attendance Rate</h3>
+                        <span class="text-[9px] font-black bg-white border-2 border-[#1E1E1E] px-2 py-0.5 shadow-[1.5px_1.5px_0px_#1E1E1E] uppercase">Real-time</span>
+                    </div>
+
+                    <!-- Room list -->
+                    <div class="divide-y-2 divide-[#1E1E1E]">
+                        <!-- Room Row 1 -->
+                        <div class="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 border-2 border-[#1E1E1E] bg-[#FEB729] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center text-xs font-black">4/9</span>
+                                <div>
+                                    <h4 class="text-xs font-black">Grade 10 - Science Room 1</h4>
+                                    <p class="text-[9px] font-bold opacity-50">Teacher: Somsri R.</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs font-black text-[#219653]">98% Present</div>
+                                <p class="text-[9px] font-bold opacity-50">28/29 Students</p>
+                            </div>
+                        </div>
+
+                        <!-- Room Row 2 -->
+                        <div class="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 border-2 border-[#1E1E1E] bg-[#FEB729] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center text-xs font-black">5/9</span>
+                                <div>
+                                    <h4 class="text-xs font-black">Grade 11 - Science Room 2</h4>
+                                    <p class="text-[9px] font-bold opacity-50">Teacher: Sommai J.</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs font-black text-[#E46F20]">89% Present</div>
+                                <p class="text-[9px] font-bold opacity-50">25/28 Students</p>
+                            </div>
+                        </div>
+
+                        <!-- Room Row 3 -->
+                        <div class="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 border-2 border-[#1E1E1E] bg-[#FEB729] shadow-[2px_2px_0px_#1E1E1E] flex items-center justify-center text-xs font-black">6/9</span>
+                                <div>
+                                    <h4 class="text-xs font-black">Grade 12 - Art & Math</h4>
+                                    <p class="text-[9px] font-bold opacity-50">Teacher: Kitti L.</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs font-black text-[#219653]">100% Present</div>
+                                <p class="text-[9px] font-bold opacity-50">30/30 Students</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LIVE ACTIVITY FEED (1 Column - Perfect for filling up PC screen space) -->
+            <section class="flex flex-col gap-4 h-full">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-[#1E1E1E]/50 uppercase tracking-widest">Recent Activity Log</span>
+                </div>
+
+                <div class="border-2 border-[#1E1E1E] bg-[#FFFFFF] shadow-[4px_4px_0px_#1E1E1E] p-4 flex flex-col gap-3 h-full min-h-[350px]">
+                    <div class="flex items-center justify-between border-b border-[#1E1E1E]/10 pb-2 mb-1 shrink-0">
+                        <span class="text-[10px] font-black text-[#E46F20] tracking-wider uppercase">Live Logs feed</span>
+                        <span class="w-2.5 h-2.5 bg-[#219653] rounded-full animate-pulse"></span>
+                    </div>
+
+                    <!-- Log Items -->
+                    <div class="flex flex-col gap-3 overflow-y-auto">
+                        <!-- Log item 1 -->
+                        <div class="flex flex-col gap-1 border-b-2 border-[#1E1E1E]/5 pb-3">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <span class="font-bold text-[#E46F20]">ROOM 4/9</span>
+                                <span class="font-bold opacity-40">10 mins ago</span>
+                            </div>
+                            <p class="text-xs font-bold leading-tight">
+                                <span class="font-black text-[#1E1E1E]">Anong Rakdee</span> checked present in <span class="text-[#219653] font-black">Physics</span>
+                            </p>
+                        </div>
+                        <!-- Log item 2 -->
+                        <div class="flex flex-col gap-1 border-b-2 border-[#1E1E1E]/5 pb-3">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <span class="font-bold text-[#E25C5C]">SICK LEAVE</span>
+                                <span class="font-bold opacity-40">25 mins ago</span>
+                            </div>
+                            <p class="text-xs font-bold leading-tight">
+                                <span class="font-black text-[#1E1E1E]">Kitti Somchai</span> submitted leave: <span class="italic font-bold opacity-75">"High fever and flu"</span>
+                            </p>
+                        </div>
+                        <!-- Log item 3 -->
+                        <div class="flex flex-col gap-1 border-b-2 border-[#1E1E1E]/5 pb-3">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <span class="font-bold text-[#FEB729]">TIMETABLE</span>
+                                <span class="font-bold opacity-40">1 hour ago</span>
+                            </div>
+                            <p class="text-xs font-bold leading-tight">
+                                <span class="font-black text-[#1E1E1E]">Teacher Somsri</span> updated period times for Room 5/9
+                            </p>
+                        </div>
+                        <!-- Log item 4 -->
+                        <div class="flex flex-col gap-1 border-b-2 border-[#1E1E1E]/5 pb-3">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <span class="font-bold text-[#5B8DEF]">ACTIVITY</span>
+                                <span class="font-bold opacity-40">2 hours ago</span>
+                            </div>
+                            <p class="text-xs font-bold leading-tight">
+                                Created new event: <span class="font-black text-[#1E1E1E]">"Campus Cleaning Day"</span> on 2026-05-25
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="fade-in w-full text-center mt-10 border-t border-[#1E1E1E]/10 pt-4 pb-6">
+            <p class="text-[#1E1E1E]/40 text-xs font-black uppercase tracking-wider">Lunar PJ Admin System — Version 1.2.0</p>
+        </footer>
+    </main>
+
+    <!-- Mobile Dropdown Navigation Handler -->
+    <script>
+        const menuToggle = document.getElementById('mobile-menu-toggle');
+        const menuDropdown = document.getElementById('mobile-menu-dropdown');
+        if (menuToggle && menuDropdown) {
+            menuToggle.addEventListener('click', () => {
+                menuDropdown.classList.toggle('hidden');
+            });
+        }
+    </script>
+
+</body>
+
+</html>

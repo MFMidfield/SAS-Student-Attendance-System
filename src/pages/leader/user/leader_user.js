@@ -106,7 +106,7 @@ export function initLeaderUser(userAvatar, pfdefault) {
             .select(`*, user_assets(url, asset_type)`);
 
         if ((userRole === 'leader' || userRole === 'teacher') && userClassId) {
-            query = query.eq('class_id', userClassId).eq('role', 'student');
+            query = query.eq('class_id', userClassId).in('role', ['leader', 'student']);
         }
 
         const { data, error } = await query.order('created_at', { ascending: true });

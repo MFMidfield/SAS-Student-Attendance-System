@@ -1,6 +1,5 @@
 import { supabase } from "../../../lib/supabaseClient";
 import { showToast, escapeHTML } from "../../../lib/ui";
-import { importCSV } from "../../../lib/import.js";
 
 export function initAdminSchedule(imageLogo, imageBander) {
     const backBtn = document.getElementById('btn-back');
@@ -27,10 +26,25 @@ export function initAdminSchedule(imageLogo, imageBander) {
     }
 
 
+    const periodTimes = {
+        "0": { start: "08:00", end: "08:30" },
+        "1": { start: "08:30", end: "09:20" },
+        "2": { start: "09:20", end: "10:10" },
+        "3": { start: "10:10", end: "11:00" },
+        "4": { start: "11:00", end: "11:50" },
+        "5": { start: "11:50", end: "12:40" },
+        "6": { start: "12:40", end: "13:30" },
+        "7": { start: "13:30", end: "14:20" },
+        "8": { start: "14:20", end: "15:10" },
+        "9": { start: "15:10", end: "16:00" },
+        "10": { start: "16:00", end: "16:50" }
+    };
+
     let Timer;
     let deleteTimer;
     let userRole = 'student'; // Default role
     let userClassId = null; // Store student class_id (e.g. "4/9")
+    let draftedSchedules = []; // Store multiple drafted schedules
 
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
@@ -42,10 +56,16 @@ export function initAdminSchedule(imageLogo, imageBander) {
     const scheduleList = document.getElementById('schedule-list');
     const roomFilter = document.getElementById('room-filter');
     const searchFilter = document.getElementById('search-filter');
-    const importBtn = document.getElementById('btn-import');
     const dayFilterBtns = document.querySelectorAll('.day-filter-btn');
 
+    // New Draft/Bulk Elements
+    const btnAddToTemp = document.getElementById('btn-add-to-temp');
+    const tempSection = document.getElementById('temp-list-section');
+    const tempScheduleList = document.getElementById('temp-schedule-list');
+    const tempCount = document.getElementById('temp-count');
+
     let selectedDayFilter = '1';
+    let selectedRoomFilter = null;
 
     // Delete Confirmation Elements
     const deleteConfirmModal = document.getElementById('modal-delete-confirm');
@@ -53,19 +73,6 @@ export function initAdminSchedule(imageLogo, imageBander) {
     const confirmDeleteBtn = document.getElementById('btn-confirm-delete');
     const cancelDeleteBtn = document.getElementById('btn-cancel-delete');
 
-    // Import Modal Elements
-    const modalImport = document.getElementById('modal-import');
-    const closeImportBtn = document.getElementById('btn-close-import');
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('import-file-input');
-    const processImportBtn = document.getElementById('btn-process-import');
-    const downloadTemplateBtn = document.getElementById('btn-download-template');
-    const previewBody = document.getElementById('import-preview-body');
-    const previewCount = document.getElementById('preview-count');
-    const importStep1 = document.getElementById('import-step-1');
-    const importStep2 = document.getElementById('import-step-2');
-
-    let importedData = [];
 
     // Fields
     const dayInput = document.getElementById('days');
@@ -75,6 +82,46 @@ export function initAdminSchedule(imageLogo, imageBander) {
     const subjectInput = document.getElementById('subject');
     const classIdInput = document.getElementById('class_id');
     const teacherNameInput = document.getElementById('teacherName');
+
+    const updateTimesForPeriod = () => {
+        const pVal = periodInput.value;
+        const timeSetup = periodTimes[pVal];
+        if (timeSetup) {
+            startTimeInput.value = timeSetup.start;
+            endTimeInput.value = timeSetup.end;
+            
+            const startDisplay = document.getElementById('start_time_display');
+            const endDisplay = document.getElementById('end_time_display');
+            if (startDisplay) startDisplay.textContent = timeSetup.start;
+            if (endDisplay) endDisplay.textContent = timeSetup.end;
+        }
+
+        // Lock subject check or auto-set Homeroom if period 0
+        if (pVal === '0') {
+            subjectInput.value = 'Homeroom';
+            subjectInput.disabled = true;
+            subjectInput.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            if (subjectInput.value === 'Homeroom') {
+                subjectInput.value = '';
+            }
+            subjectInput.disabled = false;
+            subjectInput.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    };
+
+    if (periodInput) {
+        periodInput.addEventListener('change', updateTimesForPeriod);
+    }
+
+    if (subjectInput) {
+        subjectInput.addEventListener('change', () => {
+            if (subjectInput.value.toLowerCase() === 'homeroom') {
+                periodInput.value = '0';
+                updateTimesForPeriod();
+            }
+        });
+    }
 
     // --- Check Role & Permissions ---
     const checkUserPermissions = async () => {
@@ -92,10 +139,9 @@ export function initAdminSchedule(imageLogo, imageBander) {
             userRole = profile.role;
             userClassId = profile.class_id;
 
-            // Show Add button and room filter only for admin or teacher
-            if (userRole === 'admin' || userRole === 'teacher') {
+            // Show Add button and room filter only for admin
+            if (userRole === 'admin') {
                 if (addBtn) addBtn.classList.remove('hidden');
-                if (importBtn) importBtn.classList.remove('hidden');
                 if (roomFilter) roomFilter.classList.remove('hidden');
             }
         }
@@ -126,6 +172,10 @@ export function initAdminSchedule(imageLogo, imageBander) {
             }
         }
         clearInterval(Timer);
+        // Clear drafts on close
+        draftedSchedules = [];
+        if (tempSection) tempSection.classList.add('hidden');
+        if (confirmBtn) confirmBtn.textContent = 'Save';
     };
 
     const openModal = (mode = 'add', data = null) => {
@@ -145,6 +195,12 @@ export function initAdminSchedule(imageLogo, imageBander) {
             classIdInput.value = data.room;
             teacherNameInput.value = data.teacher_name;
 
+            // Hide add to list in edit mode
+            if (btnAddToTemp) btnAddToTemp.classList.add('hidden');
+            if (confirmBtn) confirmBtn.textContent = 'Save';
+            draftedSchedules = [];
+            if (tempSection) tempSection.classList.add('hidden');
+
             // --- Restrictions for special subjects (Period 0 or Homeroom) ---
             const isSpecial = (data.period === 0 || (data.subject_name || '').toLowerCase() === 'homeroom');
 
@@ -154,32 +210,60 @@ export function initAdminSchedule(imageLogo, imageBander) {
                 // Lock important fields
                 dayInput.disabled = true;
                 periodInput.disabled = true;
-                startTimeInput.disabled = true;
-                endTimeInput.disabled = true;
                 subjectInput.disabled = true;
                 classIdInput.disabled = true;
 
                 // Add styles to look locked
-                [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
+                [dayInput, periodInput, subjectInput, classIdInput].forEach(el => {
                     el.classList.add('opacity-50', 'cursor-not-allowed');
                 });
             } else {
                 // Show Delete button in normal Edit mode
                 if (deleteBtn) deleteBtn.classList.remove('hidden');
                 // Unlock fields
-                [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
+                [dayInput, periodInput, subjectInput, classIdInput].forEach(el => {
                     el.disabled = false;
                     el.classList.remove('opacity-50', 'cursor-not-allowed');
                 });
             }
+
+            // Update time displays
+            const startDisplay = document.getElementById('start_time_display');
+            const endDisplay = document.getElementById('end_time_display');
+            const startVal = data.start_time ? data.start_time.substring(0, 5) : '--:--';
+            const endVal = data.end_time ? data.end_time.substring(0, 5) : '--:--';
+            if (startDisplay) startDisplay.textContent = startVal;
+            if (endDisplay) endDisplay.textContent = endVal;
         } else {
             modalTitle.textContent = 'Add Schedule';
             editIdInput.value = '';
             // Reset fields
-            [startTimeInput, endTimeInput, subjectInput, classIdInput, teacherNameInput].forEach(i => i.value = '');
+            [classIdInput, teacherNameInput].forEach(i => i.value = '');
             
+            // Set default period to 1
+            periodInput.value = "1";
+            const timeSetup = periodTimes["1"];
+            startTimeInput.value = timeSetup.start;
+            endTimeInput.value = timeSetup.end;
+
+            const startDisplay = document.getElementById('start_time_display');
+            const endDisplay = document.getElementById('end_time_display');
+            if (startDisplay) startDisplay.textContent = timeSetup.start;
+            if (endDisplay) endDisplay.textContent = timeSetup.end;
+
+            // Show add to list in add mode
+            if (btnAddToTemp) btnAddToTemp.classList.remove('hidden');
+            if (confirmBtn) confirmBtn.textContent = 'Save';
+            draftedSchedules = [];
+            if (tempSection) tempSection.classList.add('hidden');
+
+            // Unlock subject and auto-clear
+            subjectInput.value = '';
+            subjectInput.disabled = false;
+            subjectInput.classList.remove('opacity-50', 'cursor-not-allowed');
+
             // Unlock all fields for Add mode
-            [dayInput, periodInput, startTimeInput, endTimeInput, subjectInput, classIdInput].forEach(el => {
+            [dayInput, periodInput, classIdInput].forEach(el => {
                 el.disabled = false;
                 el.classList.remove('opacity-50', 'cursor-not-allowed');
             });
@@ -212,18 +296,63 @@ export function initAdminSchedule(imageLogo, imageBander) {
         return isAllValid;
     };
 
+    const renderTempList = () => {
+        if (!tempScheduleList) return;
+        
+        if (draftedSchedules.length === 0) {
+            if (tempSection) tempSection.classList.add('hidden');
+            if (confirmBtn) confirmBtn.textContent = 'Save';
+            return;
+        }
+
+        if (tempSection) tempSection.classList.remove('hidden');
+        
+        const count = draftedSchedules.length;
+        if (tempCount) tempCount.textContent = count;
+        if (confirmBtn) confirmBtn.textContent = `Insert All (${count})`;
+
+        tempScheduleList.innerHTML = '';
+        draftedSchedules.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between border-2 border-[#1E1E1E] p-2 bg-[#EEEDDE]/30 text-xs font-bold shadow-[2px_2px_0px_#1E1E1E] mb-2";
+            
+            const daysArray = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+            const dayName = daysArray[item.day_of_week] || "N/A";
+
+            row.innerHTML = `
+                <div class="flex-1 min-w-0 flex items-center gap-1.5">
+                    <span class="bg-[#F2C00F] px-1 border border-[#1E1E1E] text-[9px] font-black">${dayName} P.${item.period}</span>
+                    <span class="truncate font-bold text-[#1E1E1E]">${escapeHTML(item.subject_name)}</span>
+                    <span class="opacity-50 text-[10px] truncate">(${escapeHTML(item.room)})</span>
+                </div>
+                <button type="button" class="btn-remove-temp text-[#E25C5C] hover:bg-red-50 p-1 border border-[#1E1E1E] bg-white transition-colors cursor-pointer" data-index="${index}">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+            
+            row.querySelector('.btn-remove-temp').addEventListener('click', () => {
+                draftedSchedules.splice(index, 1);
+                renderTempList();
+            });
+
+            tempScheduleList.appendChild(row);
+        });
+    };
+
     let allSchedulesData = [];
 
     const renderSchedules = () => {
         if (!scheduleList) return;
 
-        const currentFilter = roomFilter ? roomFilter.value : 'all';
+        const currentFilter = roomFilter ? roomFilter.value : '';
         const searchTerm = searchFilter ? searchFilter.value.toLowerCase().trim() : '';
 
         // --- Filter by selected room ---
-        let filteredData = currentFilter === 'all'
-            ? allSchedulesData
-            : allSchedulesData.filter(item => item.room === currentFilter);
+        let filteredData = currentFilter
+            ? allSchedulesData.filter(item => item.room === currentFilter)
+            : allSchedulesData;
 
         // --- Filter by search term (subject, teacher, room, period) ---
         if (searchTerm) {
@@ -260,7 +389,7 @@ export function initAdminSchedule(imageLogo, imageBander) {
             const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
             const dayName = dayNames[item.day_of_week] || "N/A";
 
-            const canManage = (userRole === 'admin' || userRole === 'teacher');
+            const canManage = (userRole === 'admin');
 
             row.innerHTML = `
                 <div class="w-14 shrink-0 flex flex-col items-center justify-center border-r-2 border-[#1E1E1E] bg-[#F2C00F]">
@@ -299,8 +428,8 @@ export function initAdminSchedule(imageLogo, imageBander) {
 
         let query = supabase.from('schedule').select('*');
 
-        // Student: fetch only their own room's schedule (compare with room column)
-        if (userRole === 'student' && userClassId) {
+        // Student or Teacher: fetch only their own room's schedule
+        if ((userRole === 'student' || userRole === 'teacher') && userClassId) {
             query = query.eq('room', userClassId);
         }
 
@@ -316,16 +445,25 @@ export function initAdminSchedule(imageLogo, imageBander) {
         allSchedulesData = data || [];
 
         // --- Update Room Filter options ---
-        const currentFilter = roomFilter.value;
         const rooms = [...new Set(allSchedulesData.map(item => item.room))].filter(Boolean);
-        roomFilter.innerHTML = '<option value="all">ALL ROOMS</option>';
+        rooms.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+        roomFilter.innerHTML = '';
         rooms.forEach(room => {
             const option = document.createElement('option');
             option.value = room;
             option.textContent = `ROOM ${room}`;
             roomFilter.appendChild(option);
         });
-        roomFilter.value = currentFilter;
+
+        if (selectedRoomFilter === null) {
+            if (rooms.length > 0) {
+                selectedRoomFilter = rooms[0]; // default to lowest room
+            } else {
+                selectedRoomFilter = '';
+            }
+        }
+        roomFilter.value = selectedRoomFilter;
 
         renderSchedules();
     };
@@ -391,29 +529,51 @@ export function initAdminSchedule(imageLogo, imageBander) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const daysMap = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
-
-        const scheduleData = {
-            subject_name: subjectInput.value,
-            day_of_week: daysMap[dayInput.value],
-            period: parseInt(periodInput.value),
-            start_time: startTimeInput.value,
-            end_time: endTimeInput.value,
-            room: classIdInput.value,
-            teacher_name: teacherNameInput.value
-        };
-
         let result;
         if (editIdInput.value) {
+            const daysMap = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
+            let subjValue = subjectInput.value;
+            if (periodInput.value === '0' && (!subjValue || subjValue.trim() === '')) {
+                subjValue = 'Homeroom';
+            }
+            const scheduleData = {
+                subject_name: subjValue,
+                day_of_week: daysMap[dayInput.value],
+                period: parseInt(periodInput.value),
+                start_time: startTimeInput.value,
+                end_time: endTimeInput.value,
+                room: classIdInput.value,
+                teacher_name: teacherNameInput.value
+            };
             result = await supabase.from('schedule').update(scheduleData).eq('id', editIdInput.value);
         } else {
-            result = await supabase.from('schedule').insert([scheduleData]);
+            if (draftedSchedules.length > 0) {
+                result = await supabase.from('schedule').insert(draftedSchedules);
+            } else {
+                const daysMap = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
+                let subjValue = subjectInput.value;
+                if (periodInput.value === '0' && (!subjValue || subjValue.trim() === '')) {
+                    subjValue = 'Homeroom';
+                }
+                const scheduleData = {
+                    subject_name: subjValue,
+                    day_of_week: daysMap[dayInput.value],
+                    period: parseInt(periodInput.value),
+                    start_time: startTimeInput.value,
+                    end_time: endTimeInput.value,
+                    room: classIdInput.value,
+                    teacher_name: teacherNameInput.value
+                };
+                result = await supabase.from('schedule').insert([scheduleData]);
+            }
         }
 
         if (result.error) {
             showToast("Failed to save schedule", "error");
         } else {
-            showToast("Schedule saved successfully!", "success");
+            const savedCount = (!editIdInput.value && draftedSchedules.length > 0) ? draftedSchedules.length : 1;
+            showToast(savedCount > 1 ? `Successfully inserted ${savedCount} schedules!` : "Schedule saved successfully!", "success");
+            draftedSchedules = [];
             closeModal();
             fetchSchedules();
         }
@@ -424,180 +584,78 @@ export function initAdminSchedule(imageLogo, imageBander) {
     if (deleteBtn) deleteBtn.addEventListener('click', openDeleteConfirmModal);
     if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', handleActualDelete);
     if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteConfirm);
-    if (roomFilter) roomFilter.addEventListener('change', renderSchedules);
+    if (roomFilter) {
+        roomFilter.addEventListener('change', () => {
+            selectedRoomFilter = roomFilter.value;
+            renderSchedules();
+        });
+    }
     if (searchFilter) searchFilter.addEventListener('input', renderSchedules);
 
-    /*
-    // --- Import Flow ---
-    const openImportModal = () => {
-        if (!modalImport) return;
-        modalImport.classList.remove('hidden');
-        resetImportModal();
-    };
-
-    const closeImportModal = () => {
-        if (!modalImport) return;
-        modalImport.classList.add('hidden');
-    };
-
-    const resetImportModal = () => {
-        importStep1.classList.remove('hidden');
-        importStep2.classList.add('hidden');
-        processImportBtn.classList.add('hidden');
-        previewBody.innerHTML = '';
-        fileInput.value = '';
-        importedData = [];
-    };
-
-    const handleFileSelect = async (file) => {
-        try {
-            const data = await importCSV(file);
-            if (!data || data.length === 0) {
-                showToast("No data found in file", "error");
+    if (btnAddToTemp) {
+        btnAddToTemp.addEventListener('click', () => {
+            if (!validateFields()) {
+                showToast("Please fill in all fields before adding to list", "error");
                 return;
             }
 
-            importedData = data;
-            renderImportPreview();
-            importStep1.classList.add('hidden');
-            importStep2.classList.remove('hidden');
-            processImportBtn.classList.remove('hidden');
-        } catch (error) {
-            showToast(error.message, "error");
-        }
-    };
+            const daysMap = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
 
-    const renderImportPreview = () => {
-        previewBody.innerHTML = '';
-        previewCount.textContent = importedData.length;
+            let subjValue = subjectInput.value;
+            if (periodInput.value === '0' && (!subjValue || subjValue.trim() === '')) {
+                subjValue = 'Homeroom';
+            }
 
-        importedData.slice(0, 10).forEach(row => {
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-[#1E1E1E]/10";
-            tr.innerHTML = `
-                <td class="p-2">${row.Day || row.day || '-'}</td>
-                <td class="p-2">${row.Period || row.period || '-'}</td>
-                <td class="p-2 truncate max-w-[100px]">${row.Subject || row.subject_name || row.subject || '-'}</td>
-                <td class="p-2">${row.Room || row.room || '-'}</td>
-                <td class="p-2 truncate max-w-[100px]">${row.Teacher || row.teacher_name || row.teacher || '-'}</td>
-                <td class="p-2">${row.Start || row.start_time || '-'} - ${row.End || row.end_time || '-'}</td>
-            `;
-            previewBody.appendChild(tr);
-        });
-
-        if (importedData.length > 10) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td colspan="6" class="p-2 text-center opacity-50 italic">... and ${importedData.length - 10} more rows</td>`;
-            previewBody.appendChild(tr);
-        }
-    };
-
-    const processImport = async () => {
-        const daysMap = { "sunday": 0, "monday": 1, "tuesday": 2, "wednesday": 3, "thursday": 4, "friday": 5, "saturday": 6, "sun": 0, "mon": 1, "tue": 2, "wed": 3, "thu": 4, "fri": 5, "sat": 6 };
-        
-        const formattedData = importedData.map(row => {
-            const dayStr = (row.Day || row.day || "").toString().toLowerCase();
-            const dayNum = daysMap[dayStr] !== undefined ? daysMap[dayStr] : parseInt(dayStr);
-            
-            return {
-                subject_name: row.Subject || row.subject_name || row.subject,
-                day_of_week: dayNum,
-                period: parseInt(row.Period || row.period),
-                start_time: row.Start || row.start_time || row["Start Time"],
-                end_time: row.End || row.end_time || row["End Time"],
-                room: (row.Room || row.room || "").toString(),
-                teacher_name: row.Teacher || row.teacher_name || row.teacher
+            const scheduleData = {
+                subject_name: subjValue,
+                day_of_week: daysMap[dayInput.value],
+                period: parseInt(periodInput.value),
+                start_time: startTimeInput.value,
+                end_time: endTimeInput.value,
+                room: classIdInput.value,
+                teacher_name: teacherNameInput.value
             };
-        }).filter(item => !isNaN(item.day_of_week) && !isNaN(item.period) && item.room);
 
-        if (formattedData.length === 0) {
-            showToast("No valid data to import", "error");
-            return;
-        }
+            // Check duplicate in local draft
+            const isDuplicate = draftedSchedules.some(item => 
+                item.day_of_week === scheduleData.day_of_week && 
+                item.period === scheduleData.period && 
+                item.room === scheduleData.room
+            );
 
-        processImportBtn.disabled = true;
-        processImportBtn.textContent = "Importing...";
+            if (isDuplicate) {
+                showToast("This slot is already added to the draft list", "error");
+                return;
+            }
 
-        // Use upsert with conflict on (day_of_week, period, room)
-        // Note: This requires a unique constraint on these columns in the DB.
-        // If not present, it will just insert.
-        const { error } = await supabase
-            .from('schedule')
-            .upsert(formattedData, { onConflict: 'day_of_week,period,room' });
+            // Check duplicate in database loaded data
+            const isDuplicateInDb = allSchedulesData.some(item => 
+                item.day_of_week === scheduleData.day_of_week && 
+                item.period === scheduleData.period && 
+                item.room === scheduleData.room
+            );
 
-        if (error) {
-            console.error("Import error:", error);
-            showToast("Import failed: " + error.message, "error");
-        } else {
-            showToast(`Imported ${formattedData.length} records successfully!`, "success");
-            closeImportModal();
-            fetchSchedules();
-        }
+            if (isDuplicateInDb) {
+                showToast("This slot already exists in the timetable", "error");
+                return;
+            }
 
-        processImportBtn.disabled = false;
-        processImportBtn.textContent = "Confirm Import";
-    };
+            draftedSchedules.push(scheduleData);
+            showToast(`Added "${subjValue}" to draft list`, "success");
 
-    if (importBtn) importBtn.addEventListener('click', openImportModal);
-    if (closeImportBtn) closeImportBtn.addEventListener('click', closeImportModal);
-    if (processImportBtn) processImportBtn.addEventListener('click', processImport);
+            renderTempList();
 
-    if (dropZone) {
-        dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-[#F2C00F]', 'bg-[#F2C00F]/10');
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-[#F2C00F]', 'bg-[#F2C00F]/10');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-[#F2C00F]', 'bg-[#F2C00F]/10');
-            const file = e.dataTransfer.files[0];
-            if (file) handleFileSelect(file);
+            // Clear subject input
+            subjectInput.value = '';
+
+            // Auto-increment period
+            const currentPeriod = parseInt(periodInput.value);
+            if (currentPeriod < 10 && currentPeriod >= 0) {
+                periodInput.value = (currentPeriod + 1).toString();
+                updateTimesForPeriod();
+            }
         });
     }
-
-    if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) handleFileSelect(file);
-        });
-    }
-
-    if (downloadTemplateBtn) {
-        downloadTemplateBtn.addEventListener('click', () => {
-            const templateData = [
-                {
-                    "Day": "Monday",
-                    "Period": 1,
-                    "Subject": "Core Mathematics",
-                    "Room": "4/9",
-                    "Teacher": "John Doe",
-                    "Start": "08:30",
-                    "End": "09:20"
-                },
-                {
-                    "Day": "Tuesday",
-                    "Period": 2,
-                    "Subject": "Physics",
-                    "Room": "5/9",
-                    "Teacher": "Jane Smith",
-                    "Start": "09:20",
-                    "End": "10:10"
-                }
-            ];
-
-            const worksheet = XLSX.utils.json_to_sheet(templateData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule Template");
-            
-            // Export to XLSX
-            XLSX.writeFile(workbook, "schedule_template.xlsx");
-        });
-    }
-    */
 
     // --- Day Filter Event Listeners ---
     dayFilterBtns.forEach(btn => {
@@ -617,10 +675,22 @@ export function initAdminSchedule(imageLogo, imageBander) {
     });
 
     if (confirmBtn) confirmBtn.addEventListener('click', () => {
-        if (validateFields()) {
-            handleSave();
+        if (editIdInput.value) {
+            if (validateFields()) {
+                handleSave();
+            } else {
+                showToast("Please fill in all fields", "error");
+            }
         } else {
-            showToast("Please fill in all fields", "error");
+            if (draftedSchedules.length > 0) {
+                handleSave();
+            } else {
+                if (validateFields()) {
+                    handleSave();
+                } else {
+                    showToast("Please fill in all fields or add to list first", "error");
+                }
+            }
         }
     });
 

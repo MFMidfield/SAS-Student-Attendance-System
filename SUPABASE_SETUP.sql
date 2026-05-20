@@ -61,7 +61,8 @@ create table if not exists public.schedule (
   start_time time not null,
   end_time time not null,
   grade_level varchar(20),
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  constraint unique_schedule unique (day_of_week, period, room)
 );
 
 -- 2.4 User Assets
@@ -166,9 +167,9 @@ create trigger before_attendance_insert
 create or replace function public.restrict_role_update() 
 returns trigger as $$
 begin
-  if old.role is distinct from new.role then
+  if old.role is distinct from new.role or old.class_id is distinct from new.class_id or old.stu_id is distinct from new.stu_id then
     if (auth.jwt() -> 'user_metadata' ->> 'role') is distinct from 'admin' then
-      raise exception 'ไม่อนุญาตให้เปลี่ยนระดับสิทธิ์ (role) ด้วยตัวเอง';
+      raise exception 'ไม่อนุญาตให้แก้ไขข้อมูลสำคัญด้วยตัวเอง';
     end if;
   end if;
   return new;
@@ -197,17 +198,17 @@ create policy "Users update own profile" on public.profiles for update using (au
 
 drop policy if exists "Admins view everything" on public.profiles;
 create policy "Admins view everything" on public.profiles for select to authenticated 
-using ( ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin' );
+using ( (select role from public.profiles where id = auth.uid()) = 'admin' );
 
 drop policy if exists "Admins update any profile" on public.profiles;
 create policy "Admins update any profile" on public.profiles for update to authenticated 
-using ( ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin' );
+using ( (select role from public.profiles where id = auth.uid()) = 'admin' );
 
 drop policy if exists "Teacher and Leader can view same class profiles" on public.profiles;
 create policy "Teacher and Leader can view same class profiles" on public.profiles for select to authenticated
 using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['teacher', 'leader'])
-  and ((auth.jwt() -> 'user_metadata'::text) ->> 'class_id'::text) = class_id
+  (select role from public.profiles where id = auth.uid()) in ('teacher', 'leader')
+  and (select class_id from public.profiles where id = auth.uid()) = class_id
 );
 
 -- 4.2 Attendance Logs Policies
@@ -221,52 +222,61 @@ drop policy if exists "Students view own logs" on public.attendance_logs;
 create policy "Students view own logs" on public.attendance_logs for select using (auth.uid() = student_id);
 
 drop policy if exists "Staff view all logs" on public.attendance_logs;
-create policy "Staff view all logs" on public.attendance_logs for select using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher', 'leader'])
+create policy "Staff view all logs" on public.attendance_logs for select to authenticated using (
+  (select role from public.profiles where id = auth.uid()) in ('admin', 'teacher', 'leader')
 );
 
 drop policy if exists "Staff update logs" on public.attendance_logs;
-create policy "Staff update logs" on public.attendance_logs for update using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher', 'leader'])
+create policy "Staff update logs" on public.attendance_logs for update to authenticated using (
+  (select role from public.profiles where id = auth.uid()) in ('admin', 'teacher', 'leader')
 );
 
-drop policy if exists "Staff delete logs" on public.attendance_logs;
-create policy "Staff delete logs" on public.attendance_logs for delete using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher', 'leader'])
+drop policy if exists "Admin delete logs" on public.attendance_logs;
+create policy "Admin delete logs" on public.attendance_logs for delete to authenticated using (
+  (select role from public.profiles where id = auth.uid()) = 'admin'
 );
 
 -- 4.3 Schedule Policies
-drop policy if exists "Public view schedule" on public.schedule;
-create policy "Public view schedule" on public.schedule for select using (true);
+drop policy if exists "Auth view schedule" on public.schedule;
+create policy "Auth view schedule" on public.schedule for select to authenticated using (true);
 
 drop policy if exists "Admins and Teachers can manage schedules" on public.schedule;
-create policy "Admins and Teachers can manage schedules" on public.schedule for all using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher'])
+create policy "Admins and Teachers can manage schedules" on public.schedule for all to authenticated using (
+  (select role from public.profiles where id = auth.uid()) in ('admin', 'teacher')
 );
 
 -- 4.4 School Activities Policies
-drop policy if exists "Anyone can view activities" on public.school_activities;
-create policy "Anyone can view activities" on public.school_activities for select using (true);
+drop policy if exists "Auth view activities" on public.school_activities;
+create policy "Auth view activities" on public.school_activities for select to authenticated using (true);
 
 drop policy if exists "Staff can manage activities" on public.school_activities;
-create policy "Staff can manage activities" on public.school_activities for all using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = any (array['admin', 'teacher'])
+create policy "Staff can manage activities" on public.school_activities for all to authenticated using (
+  (select role from public.profiles where id = auth.uid()) in ('admin', 'teacher')
 );
 
 -- 4.5 User Assets Policies
 drop policy if exists "Anyone can view assets" on public.user_assets;
-create policy "Anyone can view assets" on public.user_assets for select using (true);
+create policy "Anyone can view assets" on public.user_assets for select to authenticated using (true);
 
 drop policy if exists "Users manage own assets" on public.user_assets;
-create policy "Users manage own assets" on public.user_assets for all using (auth.uid() = user_id);
+create policy "Users manage own assets" on public.user_assets for all to authenticated using (auth.uid() = user_id);
 
 drop policy if exists "Admins manage all assets" on public.user_assets;
-create policy "Admins manage all assets" on public.user_assets for all using (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'admin'
+create policy "Admins manage all assets" on public.user_assets for all to authenticated using (
+  (select role from public.profiles where id = auth.uid()) = 'admin'
 );
 
--- 5. STORAGE BUCKETS (Managed via SQL)
+-- 5. STORAGE BUCKETS AND POLICIES (Managed via SQL)
 insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true) on conflict (id) do nothing;
+
+drop policy if exists "Public Access" on storage.objects;
+create policy "Public Access" on storage.objects for select using ( bucket_id = 'avatars' );
+
+drop policy if exists "Auth Insert" on storage.objects;
+create policy "Auth Insert" on storage.objects for insert to authenticated with check ( bucket_id = 'avatars' );
+
+drop policy if exists "Auth Update" on storage.objects;
+create policy "Auth Update" on storage.objects for update to authenticated using ( bucket_id = 'avatars' );
 
 -- 6. SETUP COMPLETE
 -- ========================================================
