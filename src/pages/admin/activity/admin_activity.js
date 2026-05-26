@@ -115,7 +115,7 @@ export function initAdminActivity(imageLogo, imageBander) {
             div.innerHTML = `
                 <div class="flex items-stretch h-full">
                     <!-- Date Badge -->
-                    <div class="w-16 shrink-0 bg-[#F2C00F] border-r-2 border-[#1E1E1E] flex flex-col items-center justify-center p-2 group-hover/row:bg-[#1E1E1E] group-hover/row:text-white transition-colors">
+                    <div class="w-16 shrink-0 bg-[#F2C00F] border-r-2 border-[#1E1E1E] flex flex-col items-center justify-center p-2 group-hover/row:bg-[#F2C00F] group-hover/row:text-black transition-colors">
                         <span class="text-[8px] font-black uppercase opacity-60">${monthShort}</span>
                         <span class="text-xl font-black leading-tight">${dayNum}</span>
                         <span class="text-[8px] font-black uppercase opacity-60">${dayShort}</span>

@@ -429,7 +429,7 @@ export function initAdminLogs(imageLogo, imageBander) {
 
             let verifierInfo = '';
             if (!isPending && item.verifier) {
-                verifierInfo = ` <span class="opacity-40 mx-1">|</span> Verified by: ${item.verifier.firstname} (${item.verifier.role})`;
+                verifierInfo = `Verified by: ${escapeHTML(item.verifier.firstname)} (${escapeHTML(item.verifier.role)})`;
             }
 
             const row = document.createElement('div');
@@ -460,7 +460,7 @@ export function initAdminLogs(imageLogo, imageBander) {
                         ${escapeHTML(item.firstname_record || '')} ${escapeHTML(item.lastname_record || '')}
                     </div>
                     <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
-                        ID: ${escapeHTML(item.stu_id_record || '-')} <span class="opacity-40">|</span> ${escapeHTML(detailText)}${escapeHTML(verifierInfo)}
+                        ID: ${escapeHTML(item.stu_id_record || '-')} <span class="opacity-40">|</span> ${escapeHTML(detailText || 'Period')} <span class="opacity-40">|</span> ${escapeHTML(verifierInfo)}
                     </div>
                 </div>
                 <button class="view-btn w-12 shrink-0 flex flex-col items-center justify-center gap-1 border-l-2 border-[#1E1E1E] ${btnClass} transition-colors" title="${btnText}" ${btnDisabled ? 'disabled' : ''}>
