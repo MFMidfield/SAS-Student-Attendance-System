@@ -185,7 +185,7 @@ export function initStudentDashBoard(imageLogo, imageBander) {
     // route
     if (attendanceBtn) {
         attendanceBtn.addEventListener('click', () => {
-            window.location.hash = '#student';
+            window.location.hash = '#student-attendance';
         });
     }
     if (scheduleBtn) {
@@ -195,7 +195,7 @@ export function initStudentDashBoard(imageLogo, imageBander) {
     }
     if (activityBtn) {
         activityBtn.addEventListener('click', () => {
-            window.location.hash = '#student';
+            window.location.hash = '#student-attendance';
         });
     }
     if (settingBtn) {

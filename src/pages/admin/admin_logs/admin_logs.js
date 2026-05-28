@@ -112,7 +112,7 @@ export function initAdminLogs(imageLogo, imageBander) {
 
         // Student Info
         if (noteStudentName) noteStudentName.textContent = `${item.firstname_record || ''} ${item.lastname_record || ''}`.trim() || '-';
-        if (noteStudentId) noteStudentId.textContent = item.stu_id_record || '-';
+        if (noteStudentId) noteStudentId.textContent = (item.stu_id_record || '-') + ' | เลขที่: ' + (item.roll_no_record ?? '-');
         if (noteClass) noteClass.textContent = item.class_id_record || '-';
         if (noteAttendanceDate) noteAttendanceDate.textContent = item.attendance_date || '-';
 
@@ -460,7 +460,7 @@ export function initAdminLogs(imageLogo, imageBander) {
                         ${escapeHTML(item.firstname_record || '')} ${escapeHTML(item.lastname_record || '')}
                     </div>
                     <div class="px-3 py-1 text-[11px] font-bold opacity-60 italic truncate">
-                        ID: ${escapeHTML(item.stu_id_record || '-')} <span class="opacity-40">|</span> ${escapeHTML(detailText || 'Period')} <span class="opacity-40">|</span> ${escapeHTML(verifierInfo)}
+                        ID: ${escapeHTML(item.stu_id_record || '-')} <span class="opacity-40">|</span> No: ${escapeHTML(item.roll_no_record ?? '-')} <span class="opacity-40">|</span> ${escapeHTML(detailText || 'Period')} <span class="opacity-40">|</span> ${escapeHTML(verifierInfo)}
                     </div>
                 </div>
                 <button class="view-btn w-12 shrink-0 flex flex-col items-center justify-center gap-1 border-l-2 border-[#1E1E1E] ${btnClass} transition-colors" title="${btnText}" ${btnDisabled ? 'disabled' : ''}>
@@ -564,6 +564,7 @@ export function initAdminLogs(imageLogo, imageBander) {
                     created_at,
                     attendance_date,
                     stu_id_record,
+                    roll_no_record,
                     firstname_record,
                     lastname_record,
                     class_id_record,
@@ -597,6 +598,7 @@ export function initAdminLogs(imageLogo, imageBander) {
                     'Timestamp': new Date(log.created_at).toLocaleString('th-TH'),
                     'Attendance Date': log.attendance_date || '-',
                     'Student ID': log.stu_id_record || '-',
+                    'Roll Number': log.roll_no_record ?? '-',
                     'First Name': log.firstname_record || '-',
                     'Last Name': log.lastname_record || '-',
                     'Room': log.class_id_record || '-',

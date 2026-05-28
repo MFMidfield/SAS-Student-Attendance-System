@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Lunar PJ</title>
+    <title>Admin Register - Lunar PJ</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
@@ -13,18 +13,18 @@
 <body class="bg-[#EEEDDE] flex flex-col justify-center items-center min-h-screen p-4">
     <div id="register-card" class="fade-in relative w-full max-w-[450px] bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] overflow-hidden">
         <!-- Top Accent Bar -->
-        <div class="w-full h-2 bg-gradient-to-r from-[#73CB8F] via-[#5B8DEF] to-[#F2C00F]"></div>
+        <div class="w-full h-2 bg-gradient-to-r from-[#E46F20] via-[#5B8DEF] to-[#F2C00F]"></div>
         <!-- Header Section -->
         <div class="relative px-5 pt-5 pb-4">
             <div class="flex items-center gap-4">
-                <div class="shrink-0 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-3">
+                <div class="shrink-0 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] p-3">
                     <svg class="w-8 h-8" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Create Account</p>
-                    <h1 class="text-2xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Register</h1>
+                    <p class="text-[10px] font-bold text-[#1E1E1E]/50 uppercase tracking-widest">Admin Portal</p>
+                    <h1 class="text-2xl font-bold text-[#1E1E1E] tracking-tight" style="-webkit-text-stroke: 0.3px #1E1E1E;">Register Account</h1>
                 </div>
                 <div class="shrink-0 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[2px_2px_0px_#1E1E1E] p-2.5">
                     <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24">
@@ -54,25 +54,40 @@
                         <input type="text" id="lastname" placeholder="Last" required class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
                     </div>
                 </div>
+                
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Role</p>
+                        <select id="role" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold focus:outline-none appearance-none">
+                            <option value="student">Student</option>
+                            <option value="leader">Leader</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <p id="stu_id_label" class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Student ID</p>
+                        <input type="text" id="stu_id" placeholder="00000" required maxlength="20" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Class Room</p>
                         <select id="class_id" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E]/50 text-sm font-bold focus:outline-none appearance-none">
-                            <option value="">Select</option>
+                            <option value="">Select Room</option>
                             <option value="4/9">M.4/9</option>
                             <option value="5/9">M.5/9</option>
                             <option value="6/9">M.6/9</option>
+                            <option value="N/A">N/A</option>
                         </select>
                     </div>
                     <div>
-                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Student ID</p>
-                        <input type="text" id="stu_id" placeholder="00000" required maxlength="5" inputmode="numeric" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
+                        <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Roll Number</p>
+                        <input type="number" id="roll_no" placeholder="e.g. 1" min="0" required class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
                     </div>
                 </div>
-                <div>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Roll Number</p>
-                    <input type="number" id="roll_no" placeholder="Number" min="1" required class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
-                </div>
+
                 <div>
                     <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Password</p>
                     <input type="password" id="password" placeholder="••••••••" required pattern="^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.<>/?~` ]*$" title="English characters and special symbols only." class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
@@ -81,30 +96,18 @@
                     <p class="text-[9px] font-bold text-[#1E1E1E]/40 uppercase tracking-wider mb-1">Confirm Password</p>
                     <input type="password" id="confirm-password" placeholder="••••••••" required pattern="^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.<>/?~` ]*$" class="w-full p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] text-[#1E1E1E] text-sm font-bold placeholder-[#1E1E1E]/30 focus:outline-none">
                 </div>
-                <button type="button" id="register" class="w-full py-3.5 mt-1 bg-[#73CB8F] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                <button type="button" id="register" class="w-full py-3.5 mt-1 bg-[#E46F20] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-[2px] hover:bg-[#d85e13]">
                     <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    Confirm
+                    Confirm Registration
                 </button>
                 <p id="msg" class="text-center font-bold text-sm"></p>
             </form>
         </div>
-        <!-- Link to Login -->
-        <div class="px-5 pt-1 pb-5">
-            <a href="#login" class="w-full flex items-center gap-3 p-3 bg-[#FFFFFF] border-2 border-[#1E1E1E] shadow-[3px_3px_0px_#1E1E1E] transition-all cursor-pointer">
-                <div class="w-8 h-8 shrink-0 bg-[#F2C00F]/20 border border-[#1E1E1E]/30 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                </div>
-                <div class="flex-1">
-                    <span class="text-xs font-bold text-[#1E1E1E] uppercase tracking-wider">Already have an account?</span>
-                    <p class="text-[9px] font-bold text-[#1E1E1E]/40">Go to login page</p>
-                </div>
-            </a>
-        </div>
-        <div class="w-full h-1.5 bg-gradient-to-r from-[#F2C00F] via-[#5B8DEF] to-[#73CB8F]"></div>
+        <div class="w-full h-1.5 bg-gradient-to-r from-[#F2C00F] via-[#5B8DEF] to-[#E46F20]"></div>
     </div>
     <!-- Back Button -->
     <div class="fade-in w-full max-w-[450px] mt-4">
-        <button id="btn-back" class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all">
+        <button id="btn-back" class="flex items-center justify-center gap-2 w-full p-3.5 bg-[#EEEDDE] border-2 border-[#1E1E1E] shadow-[4px_4px_0px_#1E1E1E] text-[#1E1E1E] font-bold uppercase transition-all cursor-pointer active:translate-[2px] hover:bg-[#e1e0d2]">
             <svg class="w-5 h-5" fill="none" stroke="#1E1E1E" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             <span class="text-sm tracking-wider">Back</span>
         </button>
