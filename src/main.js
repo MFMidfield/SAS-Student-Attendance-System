@@ -8,37 +8,26 @@ import pfdefault from './assets/Default_profile.jpg'
 import LandingPage from './main.html?raw'
 import LoginPage from './auth/login/login.html?raw'
 import RegisterPage from './auth/register/register.html?raw'
+import AdminRegisterPage from './auth/admin_register/admin_register.html?raw'
 import ParentCheckPage from './pages/parent_check/parent_check.html?raw'
 
-import Student from './pages/student/attendance/student.html?raw'
+import SharedAttendancePage from './pages/shared/attendance/attendance.html?raw'
 import StudentDashBoard from './pages/student/dashboard/student_dashboard.html?raw'
-import StudentSchedule from './pages/student/schedule/student_schedule.html?raw'
-import StudentSetting from './pages/student/setting/student_setting.html?raw'
 
-import AdminUserEdit from './pages/admin/user/admin_userEdit.html?raw'
+import SharedSettingPage from './pages/shared/setting/setting.html?raw'
+import SharedSchedulePage from './pages/shared/schedule/schedule.html?raw'
+import SharedUserPage from './pages/shared/user/user.html?raw'
+import SharedApprovePage from './pages/shared/approve/approve.html?raw'
+import SharedActivityPage from './pages/shared/activity/activity.html?raw'
+
 import AdminDashBoard from './pages/admin/dashboard/admin_dashboard.html?raw'
-import AdminSetting from './pages/admin/setting/admin_setting.html?raw'
-import AdminSchedule from './pages/admin/schedule/admin_schedule.html?raw'
-import AdminApprove from './pages/admin/attendance_approve/admin_approve.html?raw'
-import AdminActivity from './pages/admin/activity/admin_activity.html?raw'
 import AdminLogs from './pages/admin/admin_logs/admin_logs.html?raw'
 
 import teacherDashBoard from './pages/teacher/dashboard/teacher_dashboard.html?raw'
-import teacherUser from './pages/teacher/user/teacher_user.html?raw'
-import teacherSetting from './pages/teacher/setting/teacher_setting.html?raw'
-import teacherSchedule from './pages/teacher/schedule/teacher_schedule.html?raw'
-
-import teacherApprove from './pages/teacher/attendance_approve/teacher_approve.html?raw'
-import teacherActivity from './pages/teacher/activity/teacher_activity.html?raw'
 
 import LeaderDashBoard from './pages/leader/dashboard/leader_dashboard.html?raw'
-import LeaderUser from './pages/leader/user/leader_user.html?raw'
-import LeaderSetting from './pages/leader/setting/leader_setting.html?raw'
-import LeaderSchedule from './pages/leader/schedule/leader_schedule.html?raw'
 
-import LeaderApprove from './pages/leader/attendance_approve/leader_approve.html?raw'
-import LeaderActivity from './pages/leader/activity/leader_activity.html?raw'
-import LeaderAttendance from './pages/leader/attendance/leader_attendance.html?raw'
+
 
 // import Error Pages
 import NotFoundPage from './pages/error/404.html?raw'
@@ -47,73 +36,63 @@ import NetworkErrorPage from './pages/error/network_error.html?raw'
 
 // import function
 import { initRegister } from './auth/register/register.js'
+import { initAdminRegister } from './auth/admin_register/admin_register.js'
 import { initLogin } from './auth/login/login.js'
 import { initParentCheck } from './pages/parent_check/parent_check.js'
 
-import { initStudent } from './pages/student/attendance/student.js'
+import { initAttendance } from './pages/shared/attendance/attendance.js'
 import { initStudentDashBoard } from './pages/student/dashboard/student_dashboard.js'
-import { initStudentSchedule } from './pages/student/schedule/student_schedule.js'
-import { initStudentSetting } from './pages/student/setting/student_setting.js'
 
-import { initAdminSetting } from './pages/admin/setting/admin_setting.js'
-import { initAdminUserEdit } from './pages/admin/user/admin_userEdit.js'
+import { initSetting } from './pages/shared/setting/setting.js'
+import { initSchedule } from './pages/shared/schedule/schedule.js'
+import { initUser } from './pages/shared/user/user.js'
+import { initApprove } from './pages/shared/approve/approve.js'
+import { initActivity } from './pages/shared/activity/activity.js'
+
 import { initAdminDashBoard } from './pages/admin/dashboard/admin_dashboard.js'
-import { initAdminSchedule } from './pages/admin/schedule/admin_schedule.js'
-import { initAdminApprove } from './pages/admin/attendance_approve/admin_approve.js'
 import { initAdminLogs } from './pages/admin/admin_logs/admin_logs.js'
-import { initAdminActivity } from './pages/admin/activity/admin_activity.js'
 
 import { initTeacherDashBoard } from './pages/teacher/dashboard/teacher_dashboard.js'
-import { initTeacherSetting } from './pages/teacher/setting/teacher_setting.js'
-import { initTeacherUser } from './pages/teacher/user/teacher_user.js'
-import { initTeacherSchedule } from './pages/teacher/schedule/teacher_schedule.js'
-import { initTeacherApprove } from './pages/teacher/attendance_approve/teacher_approve.js'
-
-import { initTeacherActivity } from './pages/teacher/activity/teacher_activity.js'
 
 import { initLeaderDashBoard } from './pages/leader/dashboard/leader_dashboard.js'
-import { initLeaderSetting } from './pages/leader/setting/leader_setting.js'
-import { initLeaderUser } from './pages/leader/user/leader_user.js'
-import { initLeaderSchedule } from './pages/leader/schedule/leader_schedule.js'
-import { initLeaderApprove } from './pages/leader/attendance_approve/leader_approve.js'
 
-import { initLeaderActivity } from './pages/leader/activity/leader_activity.js'
-import { initLeaderAttendance } from './pages/leader/attendance/leader_attendance.js'
+
 
 // 3. กำหนด Route Map
 const ROUTES = {
     '': { template: LandingPage, init: null, auth: false },
     '#login': { template: LoginPage, init: initLogin, auth: false },
     '#register': { template: RegisterPage, init: initRegister, auth: false },
+    '#admin-register': { template: AdminRegisterPage, init: initAdminRegister, auth: true, allowedRoles: ['admin'] },
+
     '#parent-check': { template: ParentCheckPage, init: initParentCheck, auth: false },
-    '#student': { template: Student, init: (avatar) => initStudent(avatar), auth: true, allowedRoles: ['student'] },
+    '#student-attendance': { template: SharedAttendancePage, init: (avatar) => initAttendance('student', avatar), auth: true, allowedRoles: ['student'] },
     '#student-dashboard': { template: StudentDashBoard, init: (avatar) => initStudentDashBoard(avatar), auth: true, allowedRoles: ['student'] },
-    '#student-schedule': { template: StudentSchedule, init: (avatar) => initStudentSchedule(avatar), auth: true, allowedRoles: ['student'] },
-    '#student-setting': { template: StudentSetting, init: (avatar) => initStudentSetting(avatar), auth: true, allowedRoles: ['student'] },
-    '#admin-user-edit': { template: AdminUserEdit, init: (avatar, pfdefault) => initAdminUserEdit(avatar, pfdefault), auth: true, allowedRoles: ['admin'] },
-    '#admin-setting': { template: AdminSetting, init: (avatar) => initAdminSetting(avatar), auth: true, allowedRoles: ['admin'] },
+    '#student-schedule': { template: SharedSchedulePage, init: (avatar) => initSchedule('student', avatar), auth: true, allowedRoles: ['student'] },
+    '#student-setting': { template: SharedSettingPage, init: (avatar) => initSetting('student', avatar), auth: true, allowedRoles: ['student'] },
+
+    '#admin-user-edit': { template: SharedUserPage, init: (avatar, pfdefault) => initUser('admin', avatar, pfdefault), auth: true, allowedRoles: ['admin'] },
+    '#admin-setting': { template: SharedSettingPage, init: (avatar) => initSetting('admin', avatar), auth: true, allowedRoles: ['admin'] },
     '#admin-dashboard': { template: AdminDashBoard, init: (avatar) => initAdminDashBoard(avatar), auth: true, allowedRoles: ['admin'] },
-    '#admin-schedule': { template: AdminSchedule, init: (avatar) => initAdminSchedule(avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
-    '#admin-approve': { template: AdminApprove, init: (avatar) => initAdminApprove(avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-schedule': { template: SharedSchedulePage, init: (avatar) => initSchedule('admin', avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
+    '#admin-approve': { template: SharedApprovePage, init: (avatar) => initApprove('admin', avatar), auth: true, allowedRoles: ['admin', 'teacher'] },
     '#admin-logs': { template: AdminLogs, init: (avatar) => initAdminLogs(avatar), auth: true, allowedRoles: ['admin'] },
-    '#admin-activity': { template: AdminActivity, init: (avatar) => initAdminActivity(avatar), auth: true, allowedRoles: ['admin'] },
+    '#admin-activity': { template: SharedActivityPage, init: (avatar) => initActivity('admin', avatar), auth: true, allowedRoles: ['admin'] },
 
     '#teacher-dashboard': { template: teacherDashBoard, init: (avatar) => initTeacherDashBoard(avatar), auth: true, allowedRoles: ['teacher'] },
-    '#teacher-user': { template: teacherUser, init: (avatar, pfdefault) => initTeacherUser(avatar, pfdefault), auth: true, allowedRoles: ['teacher'] },
-    '#teacher-setting': { template: teacherSetting, init: (avatar) => initTeacherSetting(avatar), auth: true, allowedRoles: ['teacher'] },
-    '#teacher-schedule': { template: teacherSchedule, init: (avatar) => initTeacherSchedule(avatar), auth: true, allowedRoles: ['teacher'] },
-
-    '#teacher-approve': { template: teacherApprove, init: (avatar) => initTeacherApprove(avatar), auth: true, allowedRoles: ['teacher'] },
-    '#teacher-activity': { template: teacherActivity, init: (avatar) => initTeacherActivity(avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-user': { template: SharedUserPage, init: (avatar, pfdefault) => initUser('teacher', avatar, pfdefault), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-setting': { template: SharedSettingPage, init: (avatar) => initSetting('teacher', avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-schedule': { template: SharedSchedulePage, init: (avatar) => initSchedule('teacher', avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-approve': { template: SharedApprovePage, init: (avatar) => initApprove('teacher', avatar), auth: true, allowedRoles: ['teacher'] },
+    '#teacher-activity': { template: SharedActivityPage, init: (avatar) => initActivity('teacher', avatar), auth: true, allowedRoles: ['teacher'] },
 
     '#leader-dashboard': { template: LeaderDashBoard, init: (avatar) => initLeaderDashBoard(avatar), auth: true, allowedRoles: ['leader'] },
-    '#leader-user': { template: LeaderUser, init: (avatar, pfdefault) => initLeaderUser(avatar, pfdefault), auth: true, allowedRoles: ['leader'] },
-    '#leader-setting': { template: LeaderSetting, init: (avatar) => initLeaderSetting(avatar), auth: true, allowedRoles: ['leader'] },
-    '#leader-schedule': { template: LeaderSchedule, init: (avatar) => initLeaderSchedule(avatar), auth: true, allowedRoles: ['leader'] },
-
-    '#leader-approve': { template: LeaderApprove, init: (avatar) => initLeaderApprove(avatar), auth: true, allowedRoles: ['leader'] },
-    '#leader-activity': { template: LeaderActivity, init: (avatar) => initLeaderActivity(avatar), auth: true, allowedRoles: ['leader'] },
-    '#leader-attendance': { template: LeaderAttendance, init: (avatar) => initLeaderAttendance(avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-user': { template: SharedUserPage, init: (avatar, pfdefault) => initUser('leader', avatar, pfdefault), auth: true, allowedRoles: ['leader'] },
+    '#leader-setting': { template: SharedSettingPage, init: (avatar) => initSetting('leader', avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-schedule': { template: SharedSchedulePage, init: (avatar) => initSchedule('leader', avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-approve': { template: SharedApprovePage, init: (avatar) => initApprove('leader', avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-activity': { template: SharedActivityPage, init: (avatar) => initActivity('leader', avatar), auth: true, allowedRoles: ['leader'] },
+    '#leader-attendance': { template: SharedAttendancePage, init: (avatar) => initAttendance('leader', avatar), auth: true, allowedRoles: ['leader'] },
 
     // Error Routes
     '#404': { template: NotFoundPage, init: null, auth: false },

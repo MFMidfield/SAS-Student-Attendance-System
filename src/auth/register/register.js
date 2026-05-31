@@ -32,6 +32,7 @@ export function initRegister() {
             { id: 'lastname', name: 'Lastname' },
             { id: 'class_id', name: 'Class Room' },
             { id: 'stu_id', name: 'Student ID' },
+            { id: 'roll_no', name: 'Roll Number' },
             { id: 'password', name: 'Password' },
             { id: 'confirm-password', name: 'Confirm Password' }
         ];
@@ -82,6 +83,7 @@ export function initRegister() {
         const lname = document.getElementById('lastname').value
         const class_id = document.getElementById('class_id').value
         const stu_id = document.getElementById('stu_id').value
+        const roll_no = parseInt(document.getElementById('roll_no').value.trim(), 10) || 0
         const password = document.getElementById('password').value
         const confirmPassword = document.getElementById('confirm-password').value
 
@@ -121,7 +123,8 @@ export function initRegister() {
                     lastname: lname,
                     class_id: class_id,
                     stu_id: stu_id,
-                    role: 'student'
+                    role: 'student',
+                    roll_no: roll_no
                 }
             }
         })
